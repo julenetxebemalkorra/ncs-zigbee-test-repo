@@ -38,22 +38,44 @@
  */
 #define TEMPLATE_INIT_BASIC_POWER_SOURCE    ZB_ZCL_BASIC_POWER_SOURCE_DC_SOURCE
 
-/* LED indicating that device successfully joined Zigbee network. */
-#define ZIGBEE_NETWORK_STATE_LED               DK_LED1
-
-/* LED used for device identification. */
-#define IDENTIFY_LED                     DK_LED2
-
 /* Button used to enter the Identify mode. */
 #define IDENTIFY_MODE_BUTTON             1
 
-/* Button to start Factory Reset */
-#define FACTORY_RESET_BUTTON                1
 
+/* Define variable to work with GPIO and uart in async mode */
+#define UART_BUF_SIZE		16
+#define UART_TX_TIMEOUT_MS	100
+#define UART_RX_TIMEOUT_MS	100
 
+K_SEM_DEFINE(tx_done, 1, 1);
+K_SEM_DEFINE(rx_disabled, 0, 1);
+
+#define UART_TX_BUF_SIZE  		256
+#define UART_RX_MSG_QUEUE_SIZE	8
+
+struct uart_msg_queue_item {
+	uint8_t bytes[UART_BUF_SIZE];
+	uint32_t length;
+};
+
+// UART TX fifo
+RING_BUF_DECLARE(app_tx_fifo, UART_TX_BUF_SIZE);
+volatile int bytes_claimed;
+
+// UART RX primary buffers
+uint8_t uart_double_buffer[2][UART_BUF_SIZE];
+uint8_t *uart_buf_next = uart_double_buffer[1];
+
+// UART RX message queue
+K_MSGQ_DEFINE(uart_rx_msgq, sizeof(struct uart_msg_queue_item), UART_RX_MSG_QUEUE_SIZE, 4);
+
+/* Get the device pointer of the UART hardware */
+static const struct device *dev_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));;
+	
+LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
+
+// boolean flag for detecting modbus request received from gateway
 bool bModbusRequestReceived = false;
-
-LOG_MODULE_REGISTER(app, LOG_LEVEL_INF);
 
 /* Main application customizable context.
  * Stores all settings and static values.
