@@ -145,64 +145,94 @@ static void start_identifying(zb_bufid_t bufid)
 				APP_TEMPLATE_ENDPOINT);
 
 			if (zb_err_code == RET_OK) {
-				LOG_INF("Enter identify mode");
+				printk("Enter identify mode");
 			} else if (zb_err_code == RET_INVALID_STATE) {
-				LOG_WRN("RET_INVALID_STATE - Cannot enter identify mode");
+				printk("RET_INVALID_STATE - Cannot enter identify mode");
 			} else {
 				ZB_ERROR_CHECK(zb_err_code);
 			}
 		} else {
-			LOG_INF("Cancel identify mode");
+			printk("Cancel identify mode");
 			zb_bdb_finding_binding_target_cancel();
 		}
 	} else {
-		LOG_WRN("Device not in a network - cannot enter identify mode");
+		printk("Device not in a network - cannot enter identify mode");
 	}
 }
 
-/**@brief Callback for button events.
- *
- * @param[in]   button_state  Bitmask containing buttons state.
- * @param[in]   has_changed   Bitmask containing buttons
- *                            that have changed their state.
- */
-static void button_changed(uint32_t button_state, uint32_t has_changed)
+static int uart_tx_get_from_queue(void)
 {
-	if (IDENTIFY_MODE_BUTTON & has_changed) {
-		if (IDENTIFY_MODE_BUTTON & button_state) {
-			/* Button changed its state to pressed */
-		} else {
-			/* Button changed its state to released */
-			if (was_factory_reset_done()) {
-				/* The long press was for Factory Reset */
-				LOG_DBG("After Factory Reset - ignore button release");
-			} else   {
-				/* Button released before Factory Reset */
+	uint8_t *data_ptr;
+	// Try to claim any available bytes in the FIFO
+	bytes_claimed = ring_buf_get_claim(&app_tx_fifo, &data_ptr, UART_TX_BUF_SIZE);
 
-				/* Start identification mode */
-				ZB_SCHEDULE_APP_CALLBACK(start_identifying, 0);
-			}
+	if(bytes_claimed > 0) {
+		// Start a UART transmission based on the number of available bytes
+		uart_tx(dev_uart, data_ptr, bytes_claimed, SYS_FOREVER_MS);
+	}
+	return bytes_claimed;
+}
+
+// Function to send UART data, by writing it to a ring buffer (FIFO) in the application
+// WARNING: This function is not thread safe! If you want to call this function from multiple threads a semaphore should be used
+/*
+static int app_uart_send(const uint8_t * data_ptr, uint32_t data_len)
+{
+	while(1) {
+		// Try to move the data into the TX ring buffer
+		uint32_t written_to_buf = ring_buf_put(&app_tx_fifo, data_ptr, data_len);
+		data_ptr += written_to_buf;
+		data_len -= written_to_buf;
+		
+		// In case the UART TX is idle, start transmission
+		if(k_sem_take(&tx_done, K_NO_WAIT) == 0) {
+			uart_tx_get_from_queue();
+		}	
+		else{
+			printk("\n UART TX error\n");
 		}
-	}
+		
+		// In case all the data was written, exit the loop
+		if(data_len == 0) break;
 
-	check_factory_reset_button(button_state, has_changed);
+		// In case some data is still to be written, sleep for some time and run the loop one more time
+		k_msleep(10);
+		data_ptr += written_to_buf;
+	}
+		return 0;
 }
 
-/**@brief Function for initializing LEDs and Buttons. */
-static void configure_gpio(void)
-{
-	int err;
+*/
 
-	err = dk_buttons_init(button_changed);
-	if (err) {
-		LOG_ERR("Cannot init buttons (err: %d)", err);
-	}
+static int app_uart_send(const uint8_t *data_ptr, uint32_t data_len) {
+    // Try to move the data into the TX ring buffer
+	uint32_t written_to_buf = ring_buf_put(&app_tx_fifo, data_ptr, data_len);
+    data_ptr += written_to_buf;
+    data_len -= written_to_buf;
 
-	err = dk_leds_init();
-	if (err) {
-		LOG_ERR("Cannot init LEDs (err: %d)", err);
-	}
+    // If the TX buffer was previously empty, initiate transmission
+    if (written_to_buf > 0 && k_sem_take(&tx_done, K_NO_WAIT) == 0) {
+        uart_tx_get_from_queue();
+    }
+
+    // Loop until all data is written to the TX buffer
+    while (data_len > 0) {
+        uint32_t written = ring_buf_put(&app_tx_fifo, data_ptr, data_len);
+        data_len -= written;
+        data_ptr += written;
+
+        // Check if the TX FIFO was previously empty and initiate transmission
+        if (written > 0 && k_sem_take(&tx_done, K_NO_WAIT) == 0) {
+            uart_tx_get_from_queue();
+        }
+    }
+
+    return 0;
 }
+
+
+
+
 
 /**@brief Callback function for handling ZCL commands.
  *
@@ -213,7 +243,7 @@ static void zcl_device_cb(zb_bufid_t bufid)
 {
 	zb_zcl_device_callback_param_t  *device_cb_param = ZB_BUF_GET_PARAM(bufid, zb_zcl_device_callback_param_t);
 
-	LOG_INF("Received ZCL command %s where device cb id %hd", __func__, device_cb_param->device_cb_id);
+	//printk("Received ZCL command %s where device cb id %hd", __func__, device_cb_param->device_cb_id);
 }
 
 
@@ -249,17 +279,21 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
  */
 
-    //zb_uint8_t aps_payload_size = 0;
-    //zb_uint8_t *aps_payload_ptr = zb_aps_get_aps_payload(bufid, &aps_payload_size); // Get APS payload
+    zb_uint8_t aps_payload_size = 0;
+    zb_uint8_t *aps_payload_ptr = zb_aps_get_aps_payload(bufid, &aps_payload_size); // Get APS payload
 	//zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
     
     if (bufid)
 	{
-		LOG_INF("Profileid 0x%04x ", ind->profileid);
-    	LOG_INF("Clusterid 0x%04x ", ind->clusterid);
-    	LOG_INF("Source Endpoint %d ", ind->src_endpoint);
-    	LOG_INF("Destination Endpoint %d ", ind->dst_endpoint);
-    	LOG_INF("APS counter %d \n", ind->aps_counter);
+		//printk("ind Profileid 0x%04x ", ind->profileid);
+    	//printk("ind Clusterid 0x%04x ", ind->clusterid);
+    	//printk("ind Source Endpoint %d ", ind->src_endpoint);
+    	//printk("ind Destination Endpoint %d ", ind->dst_endpoint);
+    	//printk("ind APS counter %d \n", ind->aps_counter);
+
+
+		//printk("aps_payload_ptr %hhn ", aps_payload_ptr);
+
 		//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
 		//{
 		if( (ind->clusterid == 0x0104) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 10 ) )
@@ -272,17 +306,40 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 			sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
 			if ((sizeOfPayload > 0) && (sizeOfPayload < 255))
 			{
-				LOG_INF("Size of payload is %d bytes \n", sizeOfPayload);
+				//printk("Size of payload is %d bytes \n", sizeOfPayload);
 				for (uint8_t i = 0; i < sizeOfPayload; i++)
 				{
-					LOG_INF("0x%02x - ", pointerToBeginOfBuffer[i]);
+					//printk("0x%02x - ", pointerToBeginOfBuffer[i]);
 				}
 			}
 			//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
 			if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0x11))
 			{
 				bModbusRequestReceived = true;
-				LOG_INF("bModbusRequestReceived \n");
+				//printk("bModbusRequestReceived this is the answer send via UART \n");
+
+				uint8_t modbusArray[8];
+
+				for (uint8_t i = 0; i < sizeOfPayload; i++)
+				{
+					modbusArray[i] = pointerToBeginOfBuffer[i];
+					//printk("0x%02x - ", modbusArray[i]);
+				}
+
+				//printk("Size of payload is %d bytes \n", sizeof(modbusArray));
+
+				app_uart_send(modbusArray, sizeof(modbusArray));
+				
+				//printk("app_uart_send finished \n");
+/*
+				for (uint8_t i = 0; i < sizeOfPayload; i++)
+				{
+					modbusArray[i] = 0x4A;
+					////printk("0x%02x - ", modbusArray[i]);
+				}
+
+				app_uart_send(modbusArray, sizeof(modbusArray));
+*/
 			}
 		}
 	}
@@ -317,8 +374,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
  	break;
  	}
 	}
-	/* Update network status LED. */
-	zigbee_led_status_update(bufid, ZIGBEE_NETWORK_STATE_LED);
 
 	/* No application-specific behavior is required.
 	 * Call default signal handler.
@@ -333,6 +388,65 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	}
 }
 
+
+void app_uart_async_callback(const struct device *uart_dev,
+							 struct uart_event *evt, void *user_data)
+{
+	static struct uart_msg_queue_item new_message;
+
+	switch (evt->type) {
+		case UART_TX_DONE:
+			// Free up the written bytes in the TX FIFO
+			ring_buf_get_finish(&app_tx_fifo, bytes_claimed);
+
+			// If there is more data in the TX fifo, start the transmission
+			if(uart_tx_get_from_queue() == 0) {
+				// Or release the semaphore if the TX fifo is empty
+				k_sem_give(&tx_done);
+			}
+			break;
+		
+		case UART_RX_RDY:
+			memcpy(new_message.bytes, evt->data.rx.buf + evt->data.rx.offset, evt->data.rx.len);
+			new_message.length = evt->data.rx.len;
+			if(k_msgq_put(&uart_rx_msgq, &new_message, K_NO_WAIT) != 0){
+				//printk("Error: Uart RX message queue full!\n");
+			}
+			break;
+		
+		case UART_RX_BUF_REQUEST:
+			uart_rx_buf_rsp(dev_uart, uart_buf_next, UART_BUF_SIZE);
+			break;
+
+		case UART_RX_BUF_RELEASED:
+			uart_buf_next = evt->data.rx_buf.buf;
+			break;
+
+		case UART_RX_DISABLED:
+			k_sem_give(&rx_disabled);
+			break;
+		
+		default:
+			break;
+	}
+}
+
+
+static void app_uart_init(void)
+{
+
+	// Verify that the UART device is ready 
+	if (!device_is_ready(dev_uart)){
+		//printk("UART device not ready\r\n");
+		return 1 ;
+	}
+ 
+	uart_callback_set(dev_uart, app_uart_async_callback, NULL);
+	uart_rx_enable(dev_uart, uart_double_buffer[0], UART_BUF_SIZE, UART_RX_TIMEOUT_MS);
+}
+
+
+
 int main(void)
 {
 	bool bConnected = false;
@@ -346,77 +460,95 @@ int main(void)
     zb_ieee_addr_t ieee_addr;
 	int blink_status = 0;
 
-	LOG_INF("Starting Zigbee application template example");
+	//printk("Starting Zigbee application template and UART Async example");
 
 	/* Initialize */
-	configure_gpio();
-	register_factory_reset_button(FACTORY_RESET_BUTTON);
+	app_uart_init();
+	
+	/*
+	const uint8_t test_string[] = "Hello world through the UART async driver\r\n";
+	uint8_t modbusArray[8];
+
+	//printk("Size of payload is %d bytes \n", strlen(test_string));
+
+	for (uint8_t i = 0; i < strlen(test_string); i++)
+	{
+		//printk("0x%02x - ", test_string[i]);
+	}
+
+	app_uart_send(test_string, strlen(test_string));
+
+	//printk("first array sent \n");
+
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		modbusArray[i] = 0x4A;
+		//printk("0x%02x - ", modbusArray[i]);
+	}
+	
+	app_uart_send(modbusArray, sizeof(modbusArray));
+
+*/
+	struct uart_msg_queue_item incoming_message;
 
 	/* Register device context (endpoints). */
 	ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
 
 	app_clusters_attr_init();
 
-	/* Register handlers to identify notifications */
-	ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(APP_TEMPLATE_ENDPOINT, identify_cb);
-
 	/* Start Zigbee default thread */
 	zigbee_enable();
 
-	LOG_INF("Zigbee application template started");
+	//printk("Zigbee application template started");
 
 	
 	while(1)
 	{		
 		k_sleep(K_MSEC(500));
 
-		dk_set_led(ZIGBEE_NETWORK_STATE_LED, (blink_status) % 2);
-		dk_set_led(IDENTIFY_LED, (++blink_status) % 2);
-
-
 		if(zb_zdo_joined() && infit_info_flag == 0)
 		{
 			infit_info_flag = 1;
 			bConnected = true;
-			LOG_INF("Zigbee application joined the network: bellow some info:");
+			//printk("Zigbee application joined the network: bellow some info: \n");
 
 			zb_get_long_address(zb_long_address);
 			// Log Long Address
-			LOG_INF("zigbee long addr: ");
+			//printk("zigbee long addr: ");
 			for (int i = 7; i >= 0; i--) {
-			    printk("%02x", zb_long_address[i]);
+			    //printk("%02x", zb_long_address[i]);
 			}
-			printk("\n");
+			//printk("\n");
 
 			zb_shrot_addr = zb_get_short_address();
-			LOG_INF("zigbee shrot addr:  0x%x", zb_shrot_addr);
+			//printk("zigbee shrot addr:  0x%x", zb_shrot_addr);
 
 			zb_get_extended_pan_id(zb_ext_pan_id);	
 			// Log Extended PAN ID
-			LOG_INF("zigbee extended pan id: ");
+			//printk("zigbee extended pan id: ");
 			for (int i = 7; i >= 0; i--) {
-			    printk("%02x", zb_ext_pan_id[i]);
+			    //printk("%02x", zb_ext_pan_id[i]);
 			}
-			printk("\n");
+			//printk("\n");
 
 			switch(zb_get_network_role())
 			{
 			case 0:
-				LOG_INF("zigbee role coordinator");
+				//printk("zigbee role coordinator");
 				break;
 			case 1:
-				LOG_INF("zigbee role router");
+				//printk("zigbee role router");
 				break;
 			case 2:
-				LOG_INF("zigbee role end device");
+				//printk("zigbee role end device");
 				break;
 			default:
-				LOG_INF("Zigbee role NOT found");
+				//printk("Zigbee role NOT found");
 				break;
 			}
 			
 		zb_channel = zb_get_current_channel();	
-		LOG_INF("zigbee channel: %d", zb_channel);
+		//printk("zigbee channel: %d", zb_channel);
 
 		}
 
@@ -450,13 +582,21 @@ int main(void)
 					    				 outputPayload,
 						    			 9);
 	            bModbusRequestReceived = false;
-				LOG_INF("RESPONDIDA9");
+				//printk("RESPONDIDA9");
 				if (bufid) {
 		            zb_buf_free(bufid);
 	            }
 			}
 		}
-
+		
+		// This function will not return until a new message is ready
+		k_msgq_get(&uart_rx_msgq, &incoming_message, K_FOREVER);
+		// Process the message here.
+		static uint8_t string_buffer[UART_BUF_SIZE + 1];
+		memcpy(string_buffer, incoming_message.bytes, incoming_message.length);
+		string_buffer[incoming_message.length] = 0;
+		printk("RX %i: %s\n", incoming_message.length, string_buffer);
+		
 	}
 
 	return 0;
