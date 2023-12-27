@@ -124,37 +124,7 @@ static void app_clusters_attr_init(void)
 		ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE;
 }
 
-/**@brief Function to toggle the identify LED
- *
- * @param  bufid  Unused parameter, required by ZBOSS scheduler API.
- */
-static void toggle_identify_led(zb_bufid_t bufid)
-{
-	static int blink_status;
 
-	dk_set_led(IDENTIFY_LED, (++blink_status) % 2);
-	ZB_SCHEDULE_APP_ALARM(toggle_identify_led, bufid, ZB_MILLISECONDS_TO_BEACON_INTERVAL(100));
-}
-
-/**@brief Function to handle identify notification events on the first endpoint.
- *
- * @param  bufid  Unused parameter, required by ZBOSS scheduler API.
- */
-static void identify_cb(zb_bufid_t bufid)
-{
-	zb_ret_t zb_err_code;
-
-	if (bufid) {
-		/* Schedule a self-scheduling function that will toggle the LED */
-		ZB_SCHEDULE_APP_CALLBACK(toggle_identify_led, bufid);
-	} else {
-		/* Cancel the toggling function alarm and turn off LED */
-		zb_err_code = ZB_SCHEDULE_APP_ALARM_CANCEL(toggle_identify_led, ZB_ALARM_ANY_PARAM);
-		ZVUNUSED(zb_err_code);
-
-		dk_set_led(IDENTIFY_LED, 0);
-	}
-}
 
 /**@brief Starts identifying the device.
  *
