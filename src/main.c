@@ -520,6 +520,15 @@ int main(void)
         {
 			if ( bModbusRequestReceived )
 			{
+
+				// This function will not return until a new message is ready
+				k_msgq_get(&uart_rx_msgq, &incoming_message, K_FOREVER);
+				// Process the message here.
+				static zb_uint8_t string_buffer[UART_BUF_SIZE + 1];
+				memcpy(string_buffer, incoming_message.bytes, incoming_message.length);
+				string_buffer[incoming_message.length] = 0;
+				printk("RX %i: %s\n", incoming_message.length, string_buffer);
+
 			    zb_bufid_t bufid;
 			    zb_uint8_t outputPayload[9] = {0xC2, 0x04, 0x04, 0x00, 0x1E, 0x00, 0x00, 0x68, 0x8E};
 			    zb_addr_u dst_addr;
@@ -543,7 +552,7 @@ int main(void)
 								    	 10,
 			    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
 				    					 ZB_FALSE,
-					    				 outputPayload,
+					    				 string_buffer,
 						    			 9);
 	            bModbusRequestReceived = false;
 				//printk("RESPONDIDA9");
@@ -552,14 +561,6 @@ int main(void)
 	            }
 			}
 		}
-		
-		// This function will not return until a new message is ready
-		k_msgq_get(&uart_rx_msgq, &incoming_message, K_FOREVER);
-		// Process the message here.
-		static uint8_t string_buffer[UART_BUF_SIZE + 1];
-		memcpy(string_buffer, incoming_message.bytes, incoming_message.length);
-		string_buffer[incoming_message.length] = 0;
-		printk("RX %i: %s\n", incoming_message.length, string_buffer);
 		
 	}
 
