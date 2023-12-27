@@ -10,14 +10,20 @@
  */
 
 #include <zephyr/kernel.h>
-#include <zephyr/logging/log.h>
-#include <dk_buttons_and_leds.h>
 
 #include <zboss_api.h>
 #include <zigbee/zigbee_error_handler.h>
 #include <zigbee/zigbee_app_utils.h>
 #include <zb_nrf_platform.h>
 #include "zb_range_extender.h"
+
+// UART async includes
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/sys/ring_buffer.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/uart.h>
+#include <string.h>
 
 
 /* Device endpoint, used to receive ZCL commands. */
