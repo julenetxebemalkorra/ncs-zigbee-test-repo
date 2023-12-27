@@ -29,10 +29,6 @@
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               10
 
-/* Function to set the Erase persistent storage
- *        depending on the erase pin */
-#define ERASE_PERSISTENT_CONFIG    ZB_TRUE
-
 /* Type of power sources available for the device.
  * For possible values see section 3.2.2.2.8 of ZCL specification.
  */
@@ -41,6 +37,7 @@
 /* Button used to enter the Identify mode. */
 #define IDENTIFY_MODE_BUTTON             1
 
+#define PRINT_ZIGBEE_INFO             	ZB_FALSE
 
 /* Define variable to work with GPIO and uart in async mode */
 #define UART_BUF_SIZE		16
@@ -328,18 +325,9 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
 				//printk("Size of payload is %d bytes \n", sizeof(modbusArray));
 
-				app_uart_send(modbusArray, sizeof(modbusArray));
-				
-				//printk("app_uart_send finished \n");
-/*
-				for (uint8_t i = 0; i < sizeOfPayload; i++)
-				{
-					modbusArray[i] = 0x4A;
-					////printk("0x%02x - ", modbusArray[i]);
-				}
+				app_uart_send(pointerToBeginOfBuffer, 8);
+				//app_uart_send(modbusArray, sizeof(modbusArray));
 
-				app_uart_send(modbusArray, sizeof(modbusArray));
-*/
 			}
 		}
 	}
@@ -455,40 +443,19 @@ int main(void)
 	zb_nwk_device_type_t zb_role;
 	zb_uint8_t zb_channel;
 	zb_uint16_t zb_shrot_addr;
-	int infit_info_flag = 0;
+	int infit_info_flag = PRINT_ZIGBEE_INFO;
 	zb_ret_t zb_err_code;
     zb_ieee_addr_t ieee_addr;
 	int blink_status = 0;
 
-	//printk("Starting Zigbee application template and UART Async example");
-
 	/* Initialize */
 	app_uart_init();
 	
-	/*
-	const uint8_t test_string[] = "Hello world through the UART async driver\r\n";
+	const uint8_t test_string[] = "Text example UART and Zigbee \r\n";
 	uint8_t modbusArray[8];
-
-	//printk("Size of payload is %d bytes \n", strlen(test_string));
-
-	for (uint8_t i = 0; i < strlen(test_string); i++)
-	{
-		//printk("0x%02x - ", test_string[i]);
-	}
 
 	app_uart_send(test_string, strlen(test_string));
 
-	//printk("first array sent \n");
-
-	for (uint8_t i = 0; i < 8; i++)
-	{
-		modbusArray[i] = 0x4A;
-		//printk("0x%02x - ", modbusArray[i]);
-	}
-	
-	app_uart_send(modbusArray, sizeof(modbusArray));
-
-*/
 	struct uart_msg_queue_item incoming_message;
 
 	/* Register device context (endpoints). */
@@ -499,9 +466,6 @@ int main(void)
 	/* Start Zigbee default thread */
 	zigbee_enable();
 
-	//printk("Zigbee application template started");
-
-	
 	while(1)
 	{		
 		k_sleep(K_MSEC(500));
@@ -510,45 +474,45 @@ int main(void)
 		{
 			infit_info_flag = 1;
 			bConnected = true;
-			//printk("Zigbee application joined the network: bellow some info: \n");
+			printk("Zigbee application joined the network: bellow some info: \n");
 
 			zb_get_long_address(zb_long_address);
 			// Log Long Address
-			//printk("zigbee long addr: ");
+			printk("zigbee long addr: ");
 			for (int i = 7; i >= 0; i--) {
-			    //printk("%02x", zb_long_address[i]);
+			    printk("%02x", zb_long_address[i]);
 			}
-			//printk("\n");
+			printk("\n");
 
 			zb_shrot_addr = zb_get_short_address();
-			//printk("zigbee shrot addr:  0x%x", zb_shrot_addr);
+			printk("zigbee shrot addr:  0x%x\n", zb_shrot_addr);
 
 			zb_get_extended_pan_id(zb_ext_pan_id);	
 			// Log Extended PAN ID
-			//printk("zigbee extended pan id: ");
+			printk("zigbee extended pan id: ");
 			for (int i = 7; i >= 0; i--) {
-			    //printk("%02x", zb_ext_pan_id[i]);
+			    printk("%02x", zb_ext_pan_id[i]);
 			}
-			//printk("\n");
+			printk("\n");
 
 			switch(zb_get_network_role())
 			{
 			case 0:
-				//printk("zigbee role coordinator");
+				printk("zigbee role coordinator\n");
 				break;
 			case 1:
-				//printk("zigbee role router");
+				printk("zigbee role router\n");
 				break;
 			case 2:
-				//printk("zigbee role end device");
+				printk("zigbee role end device\n");
 				break;
 			default:
-				//printk("Zigbee role NOT found");
+				printk("Zigbee role NOT found \n");
 				break;
 			}
 			
 		zb_channel = zb_get_current_channel();	
-		//printk("zigbee channel: %d", zb_channel);
+		printk("zigbee channel: %d \n", zb_channel);
 
 		}
 
