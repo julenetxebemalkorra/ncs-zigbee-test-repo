@@ -484,7 +484,7 @@ static void app_uart_init(void)
 
 	// Verify that the UART device is ready 
 	if (!device_is_ready(dev_uart)){
-		//printk("UART device not ready\r\n");
+		printk("UART device not ready\r\n");
 		return 1 ;
 	}
  
@@ -492,6 +492,21 @@ static void app_uart_init(void)
 	uart_rx_enable(dev_uart, uart_double_buffer[0], UART_BUF_SIZE, UART_RX_TIMEOUT_MS);
 }
 
+
+// Function for initializing the TIMER1 peripheral using the nrfx driver
+static void gpio_init(void)
+{
+	int ret;
+
+	if (!device_is_ready(led.port)) {
+		return 1;
+	}
+
+	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+	if (ret < 0) {
+		return 1;
+	}
+}
 
 
 int main(void)
@@ -507,22 +522,13 @@ int main(void)
     zb_ieee_addr_t ieee_addr;
 	int blink_status = 0;
 
-	int ret;
-
-	if (!device_is_ready(led.port)) {
-		return;
-	}
-
-	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
-	if (ret < 0) {
-		return;
-	}
-
 	/* Initialize */
 	app_uart_init();
 
 	// Initialize TIMER1
 	timer1_init();
+
+	gpio_init();
 	
 	// Setup TIMER1 to generate callbacks every second
 	timer1_repeated_timer_start(1000000);
@@ -558,7 +564,7 @@ int main(void)
 
 	while(1)
 	{		
-		ret = gpio_pin_toggle_dt(&led);
+		int ret = gpio_pin_toggle_dt(&led);
 		if (ret < 0) {
 			return;
 		}
