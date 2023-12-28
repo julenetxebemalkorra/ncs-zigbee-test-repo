@@ -82,14 +82,14 @@ K_MSGQ_DEFINE(uart_rx_msgq, sizeof(struct uart_msg_queue_item), UART_RX_MSG_QUEU
 /* Get the device pointer of the UART hardware */
 static const struct device *dev_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));;
 	
-// Get a reference to the TIMER1 instance
-static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
-
 /*
  * A build error on this line means your board is unsupported.
  * See the sample documentation for information on how to fix this.
  */
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+
+// Get a reference to the TIMER1 instance
+static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
 LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 
@@ -142,8 +142,6 @@ static void app_clusters_attr_init(void)
 	dev_ctx.identify_attr.identify_time =
 		ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE;
 }
-
-
 
 /**@brief Starts identifying the device.
  *
@@ -248,9 +246,6 @@ static int app_uart_send(const uint8_t *data_ptr, uint32_t data_len) {
 
     return 0;
 }
-
-
-
 
 
 /**@brief Callback function for handling ZCL commands.
@@ -474,6 +469,15 @@ static void timer1_init(void)
 	irq_enable(TIMER1_IRQn);
 }
 
+// Function for scheduling repeated callbacks from TIMER1
+static void timer1_repeated_timer_start(uint32_t timeout_us)
+{
+	nrfx_timer_enable(&my_timer);
+
+	nrfx_timer_extended_compare(&my_timer, NRF_TIMER_CC_CHANNEL0, timeout_us, 
+                                NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
+}
+
 
 static void app_uart_init(void)
 {
@@ -519,6 +523,9 @@ int main(void)
 
 	// Initialize TIMER1
 	timer1_init();
+	
+	// Setup TIMER1 to generate callbacks every second
+	timer1_repeated_timer_start(1000000);
 
 	zb_set_nvram_erase_at_start(ZB_TRUE);
 
