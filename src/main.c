@@ -50,6 +50,12 @@ K_SEM_DEFINE(rx_disabled, 0, 1);
 #define UART_TX_BUF_SIZE  		256
 #define UART_RX_MSG_QUEUE_SIZE	8
 
+#define ZB_ZGP_DEFAULT_SHARED_SECURITY_KEY_TYPE ZB_ZGP_SEC_KEY_TYPE_NWK
+#define ZB_ZGP_DEFAULT_SECURITY_LEVEL ZB_ZGP_SEC_LEVEL_FULL_WITH_ENC
+#define ZB_STANDARD_TC_KEY { 0x81, 0x42, < rest of key > };
+#define ZB_DISTRIBUTED_GLOBAL_KEY { 0x81, 0x42, , < rest of key > };
+#define ZB_TOUCHLINK_PRECONFIGURED_KEY { 0x81, 0x42, < rest of key > };
+
 struct uart_msg_queue_item {
 	uint8_t bytes[UART_BUF_SIZE];
 	uint32_t length;
@@ -450,7 +456,9 @@ int main(void)
 
 	/* Initialize */
 	app_uart_init();
-	
+
+	zb_set_nvram_erase_at_start(ZB_TRUE);
+
 	const uint8_t test_string[] = "Text example UART and Zigbee \r\n";
 	uint8_t modbusArray[8];
 
@@ -470,6 +478,8 @@ int main(void)
 
     // 3. Call the function with this pointer
 	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
+
+	zb_bdb_set_legacy_device_support(ZB_TRUE);
 
 	app_clusters_attr_init();
 
