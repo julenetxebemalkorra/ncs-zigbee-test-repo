@@ -37,7 +37,7 @@
 /* Button used to enter the Identify mode. */
 #define IDENTIFY_MODE_BUTTON             1
 
-#define PRINT_ZIGBEE_INFO             	ZB_FALSE
+#define PRINT_ZIGBEE_INFO             	ZB_TRUE
 
 /* Define variable to work with GPIO and uart in async mode */
 #define UART_BUF_SIZE		16
@@ -404,7 +404,7 @@ void app_uart_async_callback(const struct device *uart_dev,
 			memcpy(new_message.bytes, evt->data.rx.buf + evt->data.rx.offset, evt->data.rx.len);
 			new_message.length = evt->data.rx.len;
 			if(k_msgq_put(&uart_rx_msgq, &new_message, K_NO_WAIT) != 0){
-				//printk("Error: Uart RX message queue full!\n");
+				printk("Error: Uart RX message queue full!\n");
 			}
 			break;
 		
