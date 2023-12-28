@@ -43,6 +43,9 @@
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
 
+/* The devicetree node identifier for the "led0" alias. */
+#define LED0_NODE DT_ALIAS(led0)
+
 /* Define variable to work with GPIO and uart in async mode */
 #define UART_BUF_SIZE		16
 #define UART_TX_TIMEOUT_MS	100
@@ -81,6 +84,12 @@ static const struct device *dev_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));;
 	
 // Get a reference to the TIMER1 instance
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
+
+/*
+ * A build error on this line means your board is unsupported.
+ * See the sample documentation for information on how to fix this.
+ */
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
 LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 
@@ -494,6 +503,17 @@ int main(void)
     zb_ieee_addr_t ieee_addr;
 	int blink_status = 0;
 
+	int ret;
+
+	if (!device_is_ready(led.port)) {
+		return;
+	}
+
+	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+	if (ret < 0) {
+		return;
+	}
+
 	/* Initialize */
 	app_uart_init();
 
@@ -531,7 +551,11 @@ int main(void)
 
 	while(1)
 	{		
-		k_sleep(K_MSEC(500));
+		ret = gpio_pin_toggle_dt(&led);
+		if (ret < 0) {
+			return;
+		}
+		k_msleep(SLEEP_TIME_MS);
 
 		if(zb_zdo_joined() && infit_info_flag == ZB_TRUE)
 		{
