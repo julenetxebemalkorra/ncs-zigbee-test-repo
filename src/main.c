@@ -461,6 +461,16 @@ int main(void)
 	/* Register device context (endpoints). */
 	ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
 
+		// 1. Define a distributed key (assuming key size of 16 bytes, you might need to adjust based on documentation)
+    zb_uint8_t distributed_key[16] = {0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 
+                                     0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00};
+
+    // 2. Create a pointer to the key
+    zb_uint8_t* key_ptr = distributed_key;
+
+    // 3. Call the function with this pointer
+	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
+
 	app_clusters_attr_init();
 
 	/* Start Zigbee default thread */
@@ -470,9 +480,9 @@ int main(void)
 	{		
 		k_sleep(K_MSEC(500));
 
-		if(zb_zdo_joined() && infit_info_flag == 0)
+		if(zb_zdo_joined() && infit_info_flag == ZB_TRUE)
 		{
-			infit_info_flag = 1;
+			infit_info_flag = ZB_FALSE;
 			bConnected = true;
 			printk("Zigbee application joined the network: bellow some info: \n");
 
