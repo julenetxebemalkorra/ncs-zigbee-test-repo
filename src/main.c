@@ -25,6 +25,7 @@
 #include <zephyr/drivers/uart.h>
 #include <string.h>
 
+#include <nrfx_timer.h>
 
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               10
@@ -38,6 +39,9 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 #define PRINT_ZIGBEE_INFO             	ZB_TRUE
+
+/* 1000 msec = 1 sec */
+#define SLEEP_TIME_MS   1000
 
 /* Define variable to work with GPIO and uart in async mode */
 #define UART_BUF_SIZE		16
@@ -75,6 +79,9 @@ K_MSGQ_DEFINE(uart_rx_msgq, sizeof(struct uart_msg_queue_item), UART_RX_MSG_QUEU
 /* Get the device pointer of the UART hardware */
 static const struct device *dev_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));;
 	
+// Get a reference to the TIMER1 instance
+static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
+
 LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 
 // boolean flag for detecting modbus request received from gateway
@@ -425,6 +432,39 @@ void app_uart_async_callback(const struct device *uart_dev,
 	}
 }
 
+// Interrupt handler for the timer
+// NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
+//		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
+void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
+{
+	static int counter = 0;
+	switch(event_type) {
+		case NRF_TIMER_EVENT_COMPARE0:
+			// Do your work here
+			printk("Timer 1 callback. Counter = %d\n", counter++);
+			break;
+		
+		default:
+			break;
+	}
+}
+
+// Function for initializing the TIMER1 peripheral using the nrfx driver
+static void timer1_init(void)
+{
+	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG;
+	timer_config.bit_width = NRF_TIMER_BIT_WIDTH_32;
+	timer_config.frequency = NRF_TIMER_FREQ_1MHz;
+
+	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
+	if (err != NRFX_SUCCESS) {
+		printk("Error initializing timer: %x\n", err);
+	}
+
+	IRQ_DIRECT_CONNECT(TIMER1_IRQn, 0, nrfx_timer_1_irq_handler, 0);
+	irq_enable(TIMER1_IRQn);
+}
+
 
 static void app_uart_init(void)
 {
@@ -456,6 +496,9 @@ int main(void)
 
 	/* Initialize */
 	app_uart_init();
+
+	// Initialize TIMER1
+	timer1_init();
 
 	zb_set_nvram_erase_at_start(ZB_TRUE);
 
