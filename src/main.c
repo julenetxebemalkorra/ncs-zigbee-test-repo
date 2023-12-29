@@ -67,9 +67,7 @@ LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 
 // boolean flag for detecting modbus request received from gateway
 bool bModbusRequestReceived = false;
-
-static uint8_t test_buf_tx[] = "Hello world from the app_uart driver!!\r\n";
-
+bool bConnected = false;
 
 /* Main application customizable context.
  * Stores all settings and static values.
@@ -248,7 +246,6 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
 				app_uart_send(pointerToBeginOfBuffer, 8, K_NO_WAIT);
 				//app_uart_send(modbusArray, sizeof(modbusArray));
-
 			}
 		}
 	}
@@ -307,9 +304,11 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
 			// Do your work here
-			printk("Timer 1 callback. Counter = %d\n", counter++);
+			int ret = gpio_pin_toggle_dt(&led);
+			if (ret < 0) {
+				return;
+			}		
 			break;
-		
 		default:
 			break;
 	}
@@ -341,8 +340,6 @@ static void timer1_repeated_timer_start(uint32_t timeout_us)
 }
 
 
-
-
 // Function for initializing the TIMER1 peripheral using the nrfx driver
 static void gpio_init(void)
 {
@@ -365,7 +362,43 @@ static void on_app_uart_event(struct app_uart_evt_t *evt)
 		// NOTE: The UART data buffers are only guaranteed to be retained until this function ends
 		//       If the data can not be processed immediately, they should be copied to a different buffer
 		case APP_UART_EVT_RX:
-			printk("RX (%i bytes): %.*s\n", evt->data.rx.length, evt->data.rx.length, evt->data.rx.bytes); 
+			//printk("RX (%i bytes): %.*s\n", evt->data.rx.length, evt->data.rx.length, evt->data.rx.bytes); 
+
+				if ( bModbusRequestReceived )
+				{
+
+				    zb_bufid_t bufid;
+				    zb_uint8_t outputPayload[9] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
+				    zb_addr_u dst_addr;
+				    bufid = zb_buf_get_out();
+				    dst_addr.addr_short = 0x0000;
+			        /*zb_aps_send_user_payload(bufid, 
+					    					 dst_addr,
+						    				 0xc105,
+							    			 0X0011,
+								    		 232,
+									    	 232,
+				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+					    					 ZB_FALSE,
+						    				 outputPayload,
+							    			 9); */
+					zb_aps_send_user_payload(bufid, 
+					    					 dst_addr,
+						    				 0x0104,
+							    			 0x0104,
+								    		 1,
+									    	 10,
+				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+					    					 ZB_FALSE,
+						    				 outputPayload,
+							    			 9);
+	    	        bModbusRequestReceived = false;
+					//printk("RESPONDIDA9");
+					if (bufid) {
+			            zb_buf_free(bufid);
+	    	        }
+			}
+		
 			break;
 
 		// A UART error ocurred, such as a break or frame error condition
@@ -395,7 +428,6 @@ static void uart_init(void)
 
 int main(void)
 {
-	bool bConnected = false;
 	zb_ieee_addr_t zb_long_address;
 	zb_ext_pan_id_t zb_ext_pan_id;
 	zb_nwk_device_type_t zb_role;
@@ -446,16 +478,15 @@ int main(void)
 
 	while(1)
 	{		
-		int ret = gpio_pin_toggle_dt(&led);
-		if (ret < 0) {
-			return;
-		}
-		k_msleep(SLEEP_TIME_MS);
 
 		if(zb_zdo_joined() && infit_info_flag == ZB_TRUE)
 		{
 			infit_info_flag = ZB_FALSE;
 			bConnected = true;
+
+			const uint8_t ZBjoinedPayload[] = "ZB joined nw \r\n";
+			app_uart_send(ZBjoinedPayload, strlen(ZBjoinedPayload), K_NO_WAIT); 
+
 			printk("Zigbee application joined the network: bellow some info: \n");
 
 			zb_get_long_address(zb_long_address);
@@ -498,44 +529,6 @@ int main(void)
 
 		}
 
-        if ( bConnected )
-        {
-			if ( bModbusRequestReceived )
-			{
-
-			    zb_bufid_t bufid;
-			    zb_uint8_t outputPayload[9] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
-			    zb_addr_u dst_addr;
-			    bufid = zb_buf_get_out();
-			    dst_addr.addr_short = 0x0000;
-		        /*zb_aps_send_user_payload(bufid, 
-				    					 dst_addr,
-					    				 0xc105,
-						    			 0X0011,
-							    		 232,
-								    	 232,
-			    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-				    					 ZB_FALSE,
-					    				 outputPayload,
-						    			 9); */
-				zb_aps_send_user_payload(bufid, 
-				    					 dst_addr,
-					    				 0x0104,
-						    			 0x0104,
-							    		 1,
-								    	 10,
-			    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-				    					 ZB_FALSE,
-					    				 outputPayload,
-						    			 9);
-	            bModbusRequestReceived = false;
-				//printk("RESPONDIDA9");
-				if (bufid) {
-		            zb_buf_free(bufid);
-	            }
-			}
-		}
-		
 	}
 
 	return 0;
