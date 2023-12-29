@@ -1,0 +1,57 @@
+#
+# Copyright (c) 2022 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+menuconfig APP_UART
+	bool "Simplified UART async driver"
+	depends on SERIAL
+	select RING_BUFFER
+	select UART_ASYNC_API
+	help
+		Enable simplified UART async driver
+		
+if APP_UART
+
+config APP_UART_RX_TIMEOUT_US
+	int "RX timeout"
+	default 100000
+	help
+	  Set the period of inactivity after which any data in the RX buffers will be forwarded to the application. 
+	  A smaller value will typically lead to more overhead on the processing side, but will ensure quicker response to incoming UART data. 
+	  Once the current UART buffer fills up the data will be forwarded to the application regardless of the timeout value. 
+
+config APP_UART_TX_BUF_SIZE
+	int "TX buffer size"
+	default 256
+	help
+	  Size of the TX buffer. Set this to 0 to disable TX buffering.
+		
+config APP_UART_RX_BUF_SIZE
+	int "RX buffer size"
+	default 256
+	help
+	  Size of the RX buffer. The actual UART DMA buffer will be at most half the size of the RX buffer. 
+
+config APP_UART_EVT_QUEUE_SIZE
+	int "Event Queue size"
+	default 32
+	help
+	  Size of the event queue, used to store events such as RX data received or error messages. 
+	  When using a large RX buffer or a fast RX timeout the event queue might be filled by many small RX messages, and in this case a larger event queue might be necessary. 
+	  If the event queue overflows an event will be forwarded to the application. 
+
+config APP_UART_EVT_THREAD_STACK_SIZE
+	int "Event thread stack size"
+	default 1024
+	help
+	  Stack size of the event handler thread, used to run the application event handler. 
+
+config APP_UART_EVT_THREAD_PRIORITY
+	int "Event thread priority"
+	default 5
+	help
+	  The priority of the event handler thread
+	  
+endif # APP_UART
