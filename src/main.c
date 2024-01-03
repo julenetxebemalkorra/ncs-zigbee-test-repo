@@ -46,38 +46,20 @@
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
 
-/* Define variable to work with GPIO and uart in async mode */
-#define UART_BUF_SIZE		16
-#define UART_TX_TIMEOUT_MS	100
-#define UART_RX_TIMEOUT_MS	100
+#define MSG_SIZE 32
 
-K_SEM_DEFINE(tx_done, 1, 1);
-K_SEM_DEFINE(rx_disabled, 0, 1);
+#define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 21 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
-#define UART_TX_BUF_SIZE  		256
-#define UART_RX_MSG_QUEUE_SIZE	8
+#define MODBUS_MAX_ADU_LENGTH              255 //253 bytes + CRC (2 bytes) = 255
+
+#define RS485_RX_BUFFER_SIZE   MODBUS_MAX_ADU_LENGTH // Maximum size of RTU Modbus frame (plus CRC)
+
 
 #define ZB_ZGP_DEFAULT_SHARED_SECURITY_KEY_TYPE ZB_ZGP_SEC_KEY_TYPE_NWK
 #define ZB_ZGP_DEFAULT_SECURITY_LEVEL ZB_ZGP_SEC_LEVEL_FULL_WITH_ENC
 #define ZB_STANDARD_TC_KEY { 0x81, 0x42, < rest of key > };
 #define ZB_DISTRIBUTED_GLOBAL_KEY { 0x81, 0x42, , < rest of key > };
 #define ZB_TOUCHLINK_PRECONFIGURED_KEY { 0x81, 0x42, < rest of key > };
-
-struct uart_msg_queue_item {
-	uint8_t bytes[UART_BUF_SIZE];
-	uint32_t length;
-};
-
-// UART TX fifo
-RING_BUF_DECLARE(app_tx_fifo, UART_TX_BUF_SIZE);
-volatile int bytes_claimed;
-
-// UART RX primary buffers
-uint8_t uart_double_buffer[2][UART_BUF_SIZE];
-uint8_t *uart_buf_next = uart_double_buffer[1];
-
-// UART RX message queue
-K_MSGQ_DEFINE(uart_rx_msgq, sizeof(struct uart_msg_queue_item), UART_RX_MSG_QUEUE_SIZE, 4);
 
 /* Get the device pointer of the UART hardware */
 static const struct device *dev_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));;
@@ -90,6 +72,18 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
 // Get a reference to the TIMER1 instance
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
+
+/* receive buffer used in UART ISR callback */
+static char rx_buf[MSG_SIZE];
+static int rx_buf_pos;
+
+static char rs485_rx_buffer[RS485_RX_BUFFER_SIZE];
+
+static volatile bool b_rs485_receiving_frame;
+static volatile uint16_t rs485_ticks_since_last_byte;
+static uint16_t rs485_ticks_to_consider_frame_completed;
+static volatile bool b_rs485_overflow;
+static volatile uint16_t rs485_rx_buffer_index;
 
 LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 
@@ -143,6 +137,24 @@ static void app_clusters_attr_init(void)
 		ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE;
 }
 
+/*----------------------------------------------------------------------------*/
+/* Function: rs485_driver_init()                                              */
+/*                                                                            */
+/* This function initializes the local variables of the rs485 module          */
+/*                                                                            */
+/* Parameters: None                                                           */
+/* Returns: None                                                              */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+void rs485_init(void)
+{ 
+    b_rs485_receiving_frame = false;
+    rs485_ticks_since_last_byte = 0;
+    rs485_ticks_to_consider_frame_completed = DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED;
+	b_rs485_overflow = false;
+	rs485_rx_buffer_index=0;
+}
+
 /**@brief Starts identifying the device.
  *
  * @param  bufid  Unused parameter, required by ZBOSS scheduler API.
@@ -177,75 +189,6 @@ static void start_identifying(zb_bufid_t bufid)
 	}
 }
 
-static int uart_tx_get_from_queue(void)
-{
-	uint8_t *data_ptr;
-	// Try to claim any available bytes in the FIFO
-	bytes_claimed = ring_buf_get_claim(&app_tx_fifo, &data_ptr, UART_TX_BUF_SIZE);
-
-	if(bytes_claimed > 0) {
-		// Start a UART transmission based on the number of available bytes
-		uart_tx(dev_uart, data_ptr, bytes_claimed, SYS_FOREVER_MS);
-	}
-	return bytes_claimed;
-}
-
-// Function to send UART data, by writing it to a ring buffer (FIFO) in the application
-// WARNING: This function is not thread safe! If you want to call this function from multiple threads a semaphore should be used
-/*
-static int app_uart_send(const uint8_t * data_ptr, uint32_t data_len)
-{
-	while(1) {
-		// Try to move the data into the TX ring buffer
-		uint32_t written_to_buf = ring_buf_put(&app_tx_fifo, data_ptr, data_len);
-		data_ptr += written_to_buf;
-		data_len -= written_to_buf;
-		
-		// In case the UART TX is idle, start transmission
-		if(k_sem_take(&tx_done, K_NO_WAIT) == 0) {
-			uart_tx_get_from_queue();
-		}	
-		else{
-			printk("\n UART TX error\n");
-		}
-		
-		// In case all the data was written, exit the loop
-		if(data_len == 0) break;
-
-		// In case some data is still to be written, sleep for some time and run the loop one more time
-		k_msleep(10);
-		data_ptr += written_to_buf;
-	}
-		return 0;
-}
-
-*/
-
-static int app_uart_send(const uint8_t *data_ptr, uint32_t data_len) {
-    // Try to move the data into the TX ring buffer
-	uint32_t written_to_buf = ring_buf_put(&app_tx_fifo, data_ptr, data_len);
-    data_ptr += written_to_buf;
-    data_len -= written_to_buf;
-
-    // If the TX buffer was previously empty, initiate transmission
-    if (written_to_buf > 0 && k_sem_take(&tx_done, K_NO_WAIT) == 0) {
-        uart_tx_get_from_queue();
-    }
-
-    // Loop until all data is written to the TX buffer
-    while (data_len > 0) {
-        uint32_t written = ring_buf_put(&app_tx_fifo, data_ptr, data_len);
-        data_len -= written;
-        data_ptr += written;
-
-        // Check if the TX FIFO was previously empty and initiate transmission
-        if (written > 0 && k_sem_take(&tx_done, K_NO_WAIT) == 0) {
-            uart_tx_get_from_queue();
-        }
-    }
-
-    return 0;
-}
 
 
 /**@brief Callback function for handling ZCL commands.
@@ -342,7 +285,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
 				//printk("Size of payload is %d bytes \n", sizeof(modbusArray));
 
-				app_uart_send(pointerToBeginOfBuffer, 8);
+				//app_uart_send(pointerToBeginOfBuffer, 8);
 				//app_uart_send(modbusArray, sizeof(modbusArray));
 
 			}
@@ -393,49 +336,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	}
 }
 
-
-void app_uart_async_callback(const struct device *uart_dev,
-							 struct uart_event *evt, void *user_data)
-{
-	static struct uart_msg_queue_item new_message;
-
-	switch (evt->type) {
-		case UART_TX_DONE:
-			// Free up the written bytes in the TX FIFO
-			ring_buf_get_finish(&app_tx_fifo, bytes_claimed);
-
-			// If there is more data in the TX fifo, start the transmission
-			if(uart_tx_get_from_queue() == 0) {
-				// Or release the semaphore if the TX fifo is empty
-				k_sem_give(&tx_done);
-			}
-			break;
-		
-		case UART_RX_RDY:
-			memcpy(new_message.bytes, evt->data.rx.buf + evt->data.rx.offset, evt->data.rx.len);
-			new_message.length = evt->data.rx.len;
-			if(k_msgq_put(&uart_rx_msgq, &new_message, K_NO_WAIT) != 0){
-				printk("Error: Uart RX message queue full!\n");
-			}
-			break;
-		
-		case UART_RX_BUF_REQUEST:
-			uart_rx_buf_rsp(dev_uart, uart_buf_next, UART_BUF_SIZE);
-			break;
-
-		case UART_RX_BUF_RELEASED:
-			uart_buf_next = evt->data.rx_buf.buf;
-			break;
-
-		case UART_RX_DISABLED:
-			k_sem_give(&rx_disabled);
-			break;
-		
-		default:
-			break;
-	}
-}
-
 // Interrupt handler for the timer
 // NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
@@ -445,7 +345,19 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
 			// Do your work here
-			printk("Timer 1 callback. Counter = %d\n", counter++);
+			//printk("Timer 1 callback. Counter = %d\n", counter++);
+			get_uart(rx_buf);
+
+			if( b_rs485_receiving_frame )
+    		{
+    		    if( rs485_ticks_since_last_byte > rs485_ticks_to_consider_frame_completed )
+    		    {
+    		        b_rs485_receiving_frame = false; 
+					printk("modbus frame received\n");     
+					print_uart(rs485_rx_buffer);
+					rs485_rx_buffer_index=0;             
+    		    }
+    		} 
 			break;
 		
 		default:
@@ -478,18 +390,74 @@ static void timer1_repeated_timer_start(uint32_t timeout_us)
                                 NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
 }
 
+/*
+ * Print a null-terminated string character by character to the UART interface
+ */
+void print_uart(char *buf)
+{
+	int msg_len = strlen(buf);
+
+	for (int i = 0; i < msg_len; i++) {
+		uart_poll_out(dev_uart, buf[i]);
+	}
+}
+
+/*
+ * Print a null-terminated string character by character to the UART interface
+ */
+void get_uart(char *buf)
+{
+	int msg_len = strlen(buf);
+	int ret;
+
+	ret = uart_poll_in(dev_uart, buf);
+
+	if(!ret) 
+	{
+		printk("char arrived\n");
+		if( b_rs485_receiving_frame )
+    	{
+			if( !b_rs485_overflow )
+    	    {
+    	        if( rs485_rx_buffer_index >= RS485_RX_BUFFER_SIZE )
+    	        {
+    	            b_rs485_overflow = true;
+					printk("b_rs485_overflow \n");
+    	        }
+    	        else
+    	        {                       
+					printk("char arrived %c index: %d \n",*buf, rs485_rx_buffer_index);             
+    	            rs485_rx_buffer[rs485_rx_buffer_index] = *buf;                            
+    	            rs485_rx_buffer_index++;
+    	        }
+    	    }
+			b_rs485_receiving_frame = true;
+			rs485_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+		}
+		else
+		{
+			printk("char arrived %c index: %d \n",*buf, rs485_rx_buffer_index);             
+    	    b_rs485_receiving_frame = true;
+    	    b_rs485_overflow = false;
+    	    rs485_rx_buffer[0] = *buf;
+    	    rs485_rx_buffer_index = 1;
+			rs485_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+		}
+	}
+	else
+	{
+			rs485_ticks_since_last_byte++;
+	}
+}
 
 static void app_uart_init(void)
 {
-
-	// Verify that the UART device is ready 
-	if (!device_is_ready(dev_uart)){
-		printk("UART device not ready\r\n");
-		return 1 ;
+	if (!device_is_ready(dev_uart)) {
+		printk("UART device not found!");
+		return 0;
 	}
- 
-	uart_callback_set(dev_uart, app_uart_async_callback, NULL);
-	uart_rx_enable(dev_uart, uart_double_buffer[0], UART_BUF_SIZE, UART_RX_TIMEOUT_MS);
+	
+	uart_rx_enable(dev_uart, rs485_rx_buffer, MSG_SIZE, SYS_FOREVER_US );
 }
 
 
@@ -521,26 +489,24 @@ int main(void)
 	zb_ret_t zb_err_code;
     zb_ieee_addr_t ieee_addr;
 	int blink_status = 0;
+	
+	char tx_buf[MSG_SIZE];
+
 
 	/* Initialize */
 	app_uart_init();
 
 	// Initialize TIMER1
 	timer1_init();
+	
+	rs485_init();
 
 	gpio_init();
 	
 	// Setup TIMER1 to generate callbacks every second
-	timer1_repeated_timer_start(1000000);
+	timer1_repeated_timer_start(100000);
 
 	zb_set_nvram_erase_at_start(ZB_TRUE);
-
-	const uint8_t test_string[] = "Text example UART and Zigbee \r\n";
-	uint8_t modbusArray[8];
-
-	app_uart_send(test_string, strlen(test_string));
-
-	struct uart_msg_queue_item incoming_message;
 
 	/* Register device context (endpoints). */
 	ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
@@ -621,14 +587,6 @@ int main(void)
 			if ( bModbusRequestReceived )
 			{
 
-				// This function will not return until a new message is ready
-				k_msgq_get(&uart_rx_msgq, &incoming_message, K_FOREVER);
-				// Process the message here.
-				static zb_uint8_t string_buffer[UART_BUF_SIZE + 1];
-				memcpy(string_buffer, incoming_message.bytes, incoming_message.length);
-				string_buffer[incoming_message.length] = 0;
-				printk("RX %i: %s\n", incoming_message.length, string_buffer);
-
 			    zb_bufid_t bufid;
 			    zb_uint8_t outputPayload[9] = {0xC2, 0x04, 0x04, 0x00, 0x1E, 0x00, 0x00, 0x68, 0x8E};
 			    zb_addr_u dst_addr;
@@ -652,7 +610,7 @@ int main(void)
 								    	 10,
 			    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
 				    					 ZB_FALSE,
-					    				 string_buffer,
+					    				 rs485_rx_buffer,
 						    			 9);
 	            bModbusRequestReceived = false;
 				//printk("RESPONDIDA9");
