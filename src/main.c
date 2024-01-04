@@ -309,6 +309,14 @@ void send_zigbee_modbus_answer(void)
 				    zb_addr_u dst_addr;
 				    bufid = zb_buf_get_out();
 				    dst_addr.addr_short = 0x0000;
+/*
+					printk("Size of payload is %d bytes \n", UART_rx_buffer_index);
+
+					for (uint8_t i = 0; i < (UART_rx_buffer_index +2); i++)
+					{
+						printk("%c- ", UART_tx_buffer[i]);
+					}
+*/
 			        /*zb_aps_send_user_payload(bufid, 
 					    					 dst_addr,
 						    				 0xc105,
@@ -327,8 +335,8 @@ void send_zigbee_modbus_answer(void)
 									    	 1,
 				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
 					    					 ZB_FALSE,
-						    				 outputPayload,
-							    			 9);
+						    				 UART_rx_buffer,
+							    			 (UART_rx_buffer_index));
 	    	        bModbusRequestReceived = false;
 					//printk("RESPONDIDA9");
 					if (bufid) {
@@ -357,9 +365,6 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
     			        b_UART_receiving_frame = false; 
 						UART_ticks_since_last_byte = false;
 						bModbusRequestReady = true;
-						//printk("modbus frame received from uart:\n"); 
-						send_uart(UART_rx_buffer);
-						UART_rx_buffer_index=0;  
     			    }
     			}
 			}
@@ -447,7 +452,7 @@ void get_uart(char *buf)
 	}
 	else
 	{
-			UART_ticks_since_last_byte++;
+		UART_ticks_since_last_byte++;
 	}
 }
 
@@ -585,6 +590,7 @@ int main(void)
 		{
 			send_zigbee_modbus_answer();
 			bModbusRequestReady = false;
+			UART_rx_buffer_index = 0;
 		}
 	}
 	return 0;
