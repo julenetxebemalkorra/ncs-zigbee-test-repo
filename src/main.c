@@ -51,6 +51,8 @@
 #define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 21 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
+#define UART_TX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
+
 
 #define ZB_ZGP_DEFAULT_SHARED_SECURITY_KEY_TYPE ZB_ZGP_SEC_KEY_TYPE_NWK
 #define ZB_ZGP_DEFAULT_SECURITY_LEVEL ZB_ZGP_SEC_LEVEL_FULL_WITH_ENC
@@ -75,6 +77,9 @@ static char rx_buf[MSG_SIZE];
 static int rx_buf_pos;
 
 static char UART_rx_buffer[UART_RX_BUFFER_SIZE];
+
+static char UART_tx_buffer[UART_TX_BUFFER_SIZE];
+
 
 static volatile bool b_UART_receiving_frame;
 static volatile uint16_t UART_ticks_since_last_byte;
@@ -196,7 +201,6 @@ static void start_identifying(zb_bufid_t bufid)
 static void zcl_device_cb(zb_bufid_t bufid)
 {
 	zb_zcl_device_callback_param_t  *device_cb_param = ZB_BUF_GET_PARAM(bufid, zb_zcl_device_callback_param_t);
-
 	//printk("Received ZCL command %s where device cb id %hd", __func__, device_cb_param->device_cb_id);
 }
 
@@ -210,32 +214,8 @@ static void zcl_device_cb(zb_bufid_t bufid)
 zb_uint8_t data_indication(zb_bufid_t bufid)
 {
 
- zb_uint8_t *ptr;
- zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
-
-
-/* commnets by JULEN, test this example with real set up
- if (ind->profileid == 0x0104 )
- {
- ptr = ZB_APS_HDR_CUT(bufid);
- 
- TRACE_MSG(TRACE_APS3, "apsde_data_indication: packet %p len %hd status 0x%hx from %d",
- (FMT__P_D_D_D, bufid, zb_buf_len(bufid), zb_buf_get_status(bufid), ind->src_addr));
- 
- for (zb_ushort_t i = 0 ; i < zb_buf_len(bufid) ; ++i)
- {
- TRACE_MSG(TRACE_APS3, "%x %c", (FMT__D_C, (int)ptr[i], ptr[i]));
- }
- zb_buf_free(bufid);
- return ZB_TRUE;
- }
- return ZB_FALSE;
-
- */
-
-    zb_uint8_t aps_payload_size = 0;
-    zb_uint8_t *aps_payload_ptr = zb_aps_get_aps_payload(bufid, &aps_payload_size); // Get APS payload
-	//zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
+ 	zb_uint8_t *ptr;
+ 	zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
     
     if (bufid)
 	{
@@ -245,11 +225,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
     	//printk("ind Destination Endpoint %d ", ind->dst_endpoint);
     	//printk("ind APS counter %d \n", ind->aps_counter);
 
-
-		//printk("aps_payload_ptr %hhn ", aps_payload_ptr);
-
 		//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
-		//{
 		if( (ind->clusterid == 0x0104) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
 		{
 			zb_uint8_t *pointerToBeginOfBuffer;
@@ -265,28 +241,22 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 				{
 					//printk("0x%02x - ", pointerToBeginOfBuffer[i]);
 				}
-			}
-			//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
-			if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0x11))
-			{
-				bModbusRequestReceived = true;
-				printk("bModbusRequestReceived this is the answer send via UART \n");
-
-				uint8_t modbusArray[8];
-
-				for (uint8_t i = 0; i < sizeOfPayload; i++)
+							//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
+				if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0x11))
 				{
-					modbusArray[i] = pointerToBeginOfBuffer[i];
-					printk("0x%02x - ", modbusArray[i]);
+					bModbusRequestReceived = true;
+					//printk("bModbusRequestReceived this is the answer send via UART \n");
+
+					for (uint8_t i = 0; i < sizeOfPayload; i++)
+					{
+						UART_tx_buffer[i] = pointerToBeginOfBuffer[i];
+						send_uart(pointerToBeginOfBuffer[i]);
+						//printk("%c- ", UART_tx_buffer[i]);
+					}
+
 				}
-
-				//printk("Size of payload is %d bytes \n", sizeof(modbusArray));
-				//print_uart(pointerToBeginOfBuffer);
-
-				//app_uart_send(pointerToBeginOfBuffer, 8);
-				//app_uart_send(modbusArray, sizeof(modbusArray));
-
 			}
+
 		}
 	}
 
@@ -391,7 +361,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 						UART_ticks_since_last_byte = false;
 						bModbusRequestReady = true;
 						//printk("modbus frame received from uart:\n"); 
-						print_uart(UART_rx_buffer);
+						send_uart(UART_rx_buffer);
 						UART_rx_buffer_index=0;  
     			    }
     			}
@@ -431,13 +401,9 @@ static void timer1_repeated_timer_start(uint32_t timeout_us)
 /*
  * Print a null-terminated string character by character to the UART interface
  */
-void print_uart(char *buf)
+void send_uart(uint8_t out_uint8) 
 {
-	int msg_len = strlen(buf);
-
-	for (int i = 0; i < msg_len; i++) {
-		uart_poll_out(dev_uart, buf[i]);
-	}
+	uart_poll_out(dev_uart, (unsigned char)out_uint8);
 }
 
 /*
@@ -623,9 +589,6 @@ int main(void)
 			send_zigbee_modbus_answer();
 			bModbusRequestReady = false;
 		}
-		
 	}
-
-
 	return 0;
 }
