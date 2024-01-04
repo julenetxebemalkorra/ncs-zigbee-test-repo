@@ -28,7 +28,7 @@
 #include <nrfx_timer.h>
 
 /* Device endpoint, used to receive ZCL commands. */
-#define APP_TEMPLATE_ENDPOINT               10
+#define APP_TEMPLATE_ENDPOINT               1
 
 /* Type of power sources available for the device.
  * For possible values see section 3.2.2.2.8 of ZCL specification.
@@ -50,10 +50,7 @@
 
 #define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 21 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
-#define MODBUS_MAX_ADU_LENGTH              255 //253 bytes + CRC (2 bytes) = 255
-
-#define RS485_RX_BUFFER_SIZE   MODBUS_MAX_ADU_LENGTH // Maximum size of RTU Modbus frame (plus CRC)
-
+#define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
 
 #define ZB_ZGP_DEFAULT_SHARED_SECURITY_KEY_TYPE ZB_ZGP_SEC_KEY_TYPE_NWK
 #define ZB_ZGP_DEFAULT_SECURITY_LEVEL ZB_ZGP_SEC_LEVEL_FULL_WITH_ENC
@@ -77,13 +74,13 @@ static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 static char rx_buf[MSG_SIZE];
 static int rx_buf_pos;
 
-static char rs485_rx_buffer[RS485_RX_BUFFER_SIZE];
+static char UART_rx_buffer[UART_RX_BUFFER_SIZE];
 
-static volatile bool b_rs485_receiving_frame;
-static volatile uint16_t rs485_ticks_since_last_byte;
-static uint16_t rs485_ticks_to_consider_frame_completed;
-static volatile bool b_rs485_overflow;
-static volatile uint16_t rs485_rx_buffer_index;
+static volatile bool b_UART_receiving_frame;
+static volatile uint16_t UART_ticks_since_last_byte;
+static uint16_t UART_ticks_to_consider_frame_completed;
+static volatile bool b_UART_overflow;
+static volatile uint16_t UART_rx_buffer_index;
 
 LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 
@@ -140,21 +137,21 @@ static void app_clusters_attr_init(void)
 }
 
 /*----------------------------------------------------------------------------*/
-/* Function: rs485_driver_init()                                              */
+/* Function: UART_driver_init()                                              */
 /*                                                                            */
-/* This function initializes the local variables of the rs485 module          */
+/* This function initializes the local variables of the UART module          */
 /*                                                                            */
 /* Parameters: None                                                           */
 /* Returns: None                                                              */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
-void rs485_init(void)
+void UART_init(void)
 { 
-    b_rs485_receiving_frame = false;
-    rs485_ticks_since_last_byte = 0;
-    rs485_ticks_to_consider_frame_completed = DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED;
-	b_rs485_overflow = false;
-	rs485_rx_buffer_index=0;
+    b_UART_receiving_frame = false;
+    UART_ticks_since_last_byte = 0;
+    UART_ticks_to_consider_frame_completed = DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED;
+	b_UART_overflow = false;
+	UART_rx_buffer_index=0;
 }
 
 /**@brief Starts identifying the device.
@@ -253,7 +250,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
 		//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
 		//{
-		if( (ind->clusterid == 0x0104) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 10 ) )
+		if( (ind->clusterid == 0x0104) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
 		{
 			zb_uint8_t *pointerToBeginOfBuffer;
 			zb_uint8_t *pointerToEndOfBuffer;
@@ -360,7 +357,7 @@ void send_zigbee_modbus_answer(void)
 						    				 0x0104,
 							    			 0x0104,
 								    		 1,
-									    	 10,
+									    	 1,
 				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
 					    					 ZB_FALSE,
 						    				 outputPayload,
@@ -386,16 +383,16 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 			{
 				get_uart(rx_buf);
 
-				if( b_rs485_receiving_frame )
+				if( b_UART_receiving_frame )
     			{
-    			    if( rs485_ticks_since_last_byte > rs485_ticks_to_consider_frame_completed )
+    			    if( UART_ticks_since_last_byte > UART_ticks_to_consider_frame_completed )
     			    {
-    			        b_rs485_receiving_frame = false; 
-						rs485_ticks_since_last_byte = false;
+    			        b_UART_receiving_frame = false; 
+						UART_ticks_since_last_byte = false;
 						bModbusRequestReady = true;
 						//printk("modbus frame received from uart:\n"); 
-						print_uart(rs485_rx_buffer);
-						rs485_rx_buffer_index=0;  
+						print_uart(UART_rx_buffer);
+						UART_rx_buffer_index=0;  
     			    }
     			}
 			}
@@ -456,38 +453,38 @@ void get_uart(char *buf)
 	if(!ret) 
 	{
 		//printk("char arrived\n");
-		if( b_rs485_receiving_frame )
+		if( b_UART_receiving_frame )
     	{
-			if( !b_rs485_overflow )
+			if( !b_UART_overflow )
     	    {
-    	        if( rs485_rx_buffer_index >= RS485_RX_BUFFER_SIZE )
+    	        if( UART_rx_buffer_index >= UART_RX_BUFFER_SIZE )
     	        {
-    	            b_rs485_overflow = true;
-					printk("b_rs485_overflow \n");
+    	            b_UART_overflow = true;
+					printk("b_UART_overflow \n");
     	        }
     	        else
     	        {                       
-					//printk("char arrived %c index: %d \n",*buf, rs485_rx_buffer_index);             
-    	            rs485_rx_buffer[rs485_rx_buffer_index] = *buf;                            
-    	            rs485_rx_buffer_index++;
+					//printk("char arrived %c index: %d \n",*buf, UART_rx_buffer_index);             
+    	            UART_rx_buffer[UART_rx_buffer_index] = *buf;                            
+    	            UART_rx_buffer_index++;
     	        }
     	    }
-			b_rs485_receiving_frame = true;
-			rs485_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+			b_UART_receiving_frame = true;
+			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
 		}
 		else
 		{
-			//printk("char arrived %c index: %d \n",*buf, rs485_rx_buffer_index);             
-    	    b_rs485_receiving_frame = true;
-    	    b_rs485_overflow = false;
-    	    rs485_rx_buffer[0] = *buf;
-    	    rs485_rx_buffer_index = 1;
-			rs485_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+			//printk("char arrived %c index: %d \n",*buf, UART_rx_buffer_index);             
+    	    b_UART_receiving_frame = true;
+    	    b_UART_overflow = false;
+    	    UART_rx_buffer[0] = *buf;
+    	    UART_rx_buffer_index = 1;
+			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
 		}
 	}
 	else
 	{
-			rs485_ticks_since_last_byte++;
+			UART_ticks_since_last_byte++;
 	}
 }
 
@@ -498,7 +495,7 @@ static void app_uart_init(void)
 		return 0;
 	}
 	
-	uart_rx_enable(dev_uart, rs485_rx_buffer, MSG_SIZE, SYS_FOREVER_US );
+	uart_rx_enable(dev_uart, UART_rx_buffer, MSG_SIZE, SYS_FOREVER_US );
 }
 
 
@@ -532,14 +529,13 @@ int main(void)
 	
 	char tx_buf[MSG_SIZE];
 
-
 	/* Initialize */
 	app_uart_init();
 
 	// Initialize TIMER1
 	timer1_init();
 	
-	rs485_init();
+	UART_init();
 
 	gpio_init();
 	
@@ -629,6 +625,7 @@ int main(void)
 		}
 		
 	}
+
 
 	return 0;
 }
