@@ -89,6 +89,8 @@ LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 
 // boolean flag for detecting modbus request received from gateway
 bool bModbusRequestReceived = false;
+bool bModbusRequestReady = false;
+bool bConnected = false;
 
 /* Main application customizable context.
  * Stores all settings and static values.
@@ -189,8 +191,6 @@ static void start_identifying(zb_bufid_t bufid)
 	}
 }
 
-
-
 /**@brief Callback function for handling ZCL commands.
  *
  * @param[in]   bufid   Reference to Zigbee stack buffer
@@ -273,17 +273,18 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 			if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0x11))
 			{
 				bModbusRequestReceived = true;
-				//printk("bModbusRequestReceived this is the answer send via UART \n");
+				printk("bModbusRequestReceived this is the answer send via UART \n");
 
 				uint8_t modbusArray[8];
 
 				for (uint8_t i = 0; i < sizeOfPayload; i++)
 				{
 					modbusArray[i] = pointerToBeginOfBuffer[i];
-					//printk("0x%02x - ", modbusArray[i]);
+					printk("0x%02x - ", modbusArray[i]);
 				}
 
 				//printk("Size of payload is %d bytes \n", sizeof(modbusArray));
+				//print_uart(pointerToBeginOfBuffer);
 
 				//app_uart_send(pointerToBeginOfBuffer, 8);
 				//app_uart_send(modbusArray, sizeof(modbusArray));
@@ -336,6 +337,41 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	}
 }
 
+void send_zigbee_modbus_answer(void)
+{
+
+					zb_bufid_t bufid;
+				    zb_uint8_t outputPayload[9] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
+				    zb_addr_u dst_addr;
+				    bufid = zb_buf_get_out();
+				    dst_addr.addr_short = 0x0000;
+			        /*zb_aps_send_user_payload(bufid, 
+					    					 dst_addr,
+						    				 0xc105,
+							    			 0X0011,
+								    		 232,
+									    	 232,
+				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+					    					 ZB_FALSE,
+						    				 outputPayload,
+							    			 9); */
+					zb_aps_send_user_payload(bufid, 
+					    					 dst_addr,
+						    				 0x0104,
+							    			 0x0104,
+								    		 1,
+									    	 10,
+				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+					    					 ZB_FALSE,
+						    				 outputPayload,
+							    			 9);
+	    	        bModbusRequestReceived = false;
+					//printk("RESPONDIDA9");
+					if (bufid) {
+			            zb_buf_free(bufid);
+	    	        }
+}
+
 // Interrupt handler for the timer
 // NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
@@ -346,18 +382,23 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 		case NRF_TIMER_EVENT_COMPARE0:
 			// Do your work here
 			//printk("Timer 1 callback. Counter = %d\n", counter++);
-			get_uart(rx_buf);
+			if (bModbusRequestReceived)
+			{
+				get_uart(rx_buf);
 
-			if( b_rs485_receiving_frame )
-    		{
-    		    if( rs485_ticks_since_last_byte > rs485_ticks_to_consider_frame_completed )
-    		    {
-    		        b_rs485_receiving_frame = false; 
-					printk("modbus frame received\n");     
-					print_uart(rs485_rx_buffer);
-					rs485_rx_buffer_index=0;             
-    		    }
-    		} 
+				if( b_rs485_receiving_frame )
+    			{
+    			    if( rs485_ticks_since_last_byte > rs485_ticks_to_consider_frame_completed )
+    			    {
+    			        b_rs485_receiving_frame = false; 
+						rs485_ticks_since_last_byte = false;
+						bModbusRequestReady = true;
+						//printk("modbus frame received from uart:\n"); 
+						print_uart(rs485_rx_buffer);
+						rs485_rx_buffer_index=0;  
+    			    }
+    			}
+			}
 			break;
 		
 		default:
@@ -414,7 +455,7 @@ void get_uart(char *buf)
 
 	if(!ret) 
 	{
-		printk("char arrived\n");
+		//printk("char arrived\n");
 		if( b_rs485_receiving_frame )
     	{
 			if( !b_rs485_overflow )
@@ -426,7 +467,7 @@ void get_uart(char *buf)
     	        }
     	        else
     	        {                       
-					printk("char arrived %c index: %d \n",*buf, rs485_rx_buffer_index);             
+					//printk("char arrived %c index: %d \n",*buf, rs485_rx_buffer_index);             
     	            rs485_rx_buffer[rs485_rx_buffer_index] = *buf;                            
     	            rs485_rx_buffer_index++;
     	        }
@@ -436,7 +477,7 @@ void get_uart(char *buf)
 		}
 		else
 		{
-			printk("char arrived %c index: %d \n",*buf, rs485_rx_buffer_index);             
+			//printk("char arrived %c index: %d \n",*buf, rs485_rx_buffer_index);             
     	    b_rs485_receiving_frame = true;
     	    b_rs485_overflow = false;
     	    rs485_rx_buffer[0] = *buf;
@@ -479,7 +520,6 @@ static void gpio_init(void)
 
 int main(void)
 {
-	bool bConnected = false;
 	zb_ieee_addr_t zb_long_address;
 	zb_ext_pan_id_t zb_ext_pan_id;
 	zb_nwk_device_type_t zb_role;
@@ -582,42 +622,10 @@ int main(void)
 
 		}
 
-        if ( bConnected )
-        {
-			if ( bModbusRequestReceived )
-			{
-
-			    zb_bufid_t bufid;
-			    zb_uint8_t outputPayload[9] = {0xC2, 0x04, 0x04, 0x00, 0x1E, 0x00, 0x00, 0x68, 0x8E};
-			    zb_addr_u dst_addr;
-			    bufid = zb_buf_get_out();
-			    dst_addr.addr_short = 0x0000;
-		        /*zb_aps_send_user_payload(bufid, 
-				    					 dst_addr,
-					    				 0xc105,
-						    			 0X0011,
-							    		 232,
-								    	 232,
-			    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-				    					 ZB_FALSE,
-					    				 outputPayload,
-						    			 9); */
-				zb_aps_send_user_payload(bufid, 
-				    					 dst_addr,
-					    				 0x0104,
-						    			 0x0104,
-							    		 1,
-								    	 10,
-			    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-				    					 ZB_FALSE,
-					    				 rs485_rx_buffer,
-						    			 9);
-	            bModbusRequestReceived = false;
-				//printk("RESPONDIDA9");
-				if (bufid) {
-		            zb_buf_free(bufid);
-	            }
-			}
+		if(bModbusRequestReady)
+		{
+			send_zigbee_modbus_answer();
+			bModbusRequestReady = false;
 		}
 		
 	}
