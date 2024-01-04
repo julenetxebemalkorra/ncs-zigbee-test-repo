@@ -38,7 +38,7 @@
 /* Button used to enter the Identify mode. */
 #define IDENTIFY_MODE_BUTTON             1
 
-#define PRINT_ZIGBEE_INFO             	ZB_TRUE
+#define PRINT_ZIGBEE_INFO             	ZB_FALSE
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
@@ -52,7 +52,6 @@
 
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
 #define UART_TX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
-
 
 #define ZB_ZGP_DEFAULT_SHARED_SECURITY_KEY_TYPE ZB_ZGP_SEC_KEY_TYPE_NWK
 #define ZB_ZGP_DEFAULT_SECURITY_LEVEL ZB_ZGP_SEC_LEVEL_FULL_WITH_ENC
@@ -77,9 +76,7 @@ static char rx_buf[MSG_SIZE];
 static int rx_buf_pos;
 
 static char UART_rx_buffer[UART_RX_BUFFER_SIZE];
-
 static char UART_tx_buffer[UART_TX_BUFFER_SIZE];
-
 
 static volatile bool b_UART_receiving_frame;
 static volatile uint16_t UART_ticks_since_last_byte;
@@ -178,18 +175,18 @@ static void start_identifying(zb_bufid_t bufid)
 				APP_TEMPLATE_ENDPOINT);
 
 			if (zb_err_code == RET_OK) {
-				printk("Enter identify mode");
+				//printk("Enter identify mode");
 			} else if (zb_err_code == RET_INVALID_STATE) {
-				printk("RET_INVALID_STATE - Cannot enter identify mode");
+				//printk("RET_INVALID_STATE - Cannot enter identify mode");
 			} else {
 				ZB_ERROR_CHECK(zb_err_code);
 			}
 		} else {
-			printk("Cancel identify mode");
+			//printk("Cancel identify mode");
 			zb_bdb_finding_binding_target_cancel();
 		}
 	} else {
-		printk("Device not in a network - cannot enter identify mode");
+		//printk("Device not in a network - cannot enter identify mode");
 	}
 }
 
