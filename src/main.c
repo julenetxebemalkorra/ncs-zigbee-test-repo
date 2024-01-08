@@ -38,7 +38,7 @@
 /* Button used to enter the Identify mode. */
 #define IDENTIFY_MODE_BUTTON             1
 
-#define PRINT_ZIGBEE_INFO             	ZB_FALSE
+#define PRINT_ZIGBEE_INFO             	ZB_TRUE
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
@@ -52,6 +52,7 @@
 
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
 #define UART_TX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
+#define MODBUS_MIN_RX_LENGTH             8
 
 #define ZB_ZGP_DEFAULT_SHARED_SECURITY_KEY_TYPE ZB_ZGP_SEC_KEY_TYPE_NWK
 #define ZB_ZGP_DEFAULT_SECURITY_LEVEL ZB_ZGP_SEC_LEVEL_FULL_WITH_ENC
@@ -71,18 +72,20 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 // Get a reference to the TIMER1 instance
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
-/* receive buffer used in UART ISR callback */
-static char rx_buf[MSG_SIZE];
+static char rx_buf[UART_RX_BUFFER_SIZE];
 static int rx_buf_pos;
 
-static char UART_rx_buffer[UART_RX_BUFFER_SIZE];
-static char UART_tx_buffer[UART_TX_BUFFER_SIZE];
+static volatile char UART_rx_buffer[UART_RX_BUFFER_SIZE];
+static volatile char UART_tx_buffer[UART_TX_BUFFER_SIZE];
 
 static volatile bool b_UART_receiving_frame;
 static volatile uint16_t UART_ticks_since_last_byte;
 static uint16_t UART_ticks_to_consider_frame_completed;
 static volatile bool b_UART_overflow;
 static volatile uint16_t UART_rx_buffer_index;
+static volatile uint16_t UART_rx_buffer_index_max;
+static volatile int counter = 0;
+
 
 LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 
@@ -154,6 +157,7 @@ void UART_init(void)
     UART_ticks_to_consider_frame_completed = DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED;
 	b_UART_overflow = false;
 	UART_rx_buffer_index=0;
+	UART_rx_buffer_index_max=0;
 }
 
 /**@brief Starts identifying the device.
@@ -231,22 +235,22 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 			pointerToBeginOfBuffer = zb_buf_begin(bufid);
 			pointerToEndOfBuffer = zb_buf_end(bufid);
 			sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
-			if ((sizeOfPayload > 0) && (sizeOfPayload < 255))
+
+			if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
 			{
-				//printk("Size of payload is %d bytes \n", sizeOfPayload);
+				printk("Size of payload is %d bytes \n", sizeOfPayload);
 				for (uint8_t i = 0; i < sizeOfPayload; i++)
 				{
 					//printk("0x%02x - ", pointerToBeginOfBuffer[i]);
 				}
-							//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
-				if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0x11))
+				//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
+				if ((sizeOfPayload == MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0x11))
 				{
 					bModbusRequestReceived = true;
-					//printk("bModbusRequestReceived this is the answer send via UART \n");
+					printk("bModbusRequestReceived via zigbee and send via UART \n");
 
 					for (uint8_t i = 0; i < sizeOfPayload; i++)
 					{
-						UART_tx_buffer[i] = pointerToBeginOfBuffer[i];
 						send_uart(pointerToBeginOfBuffer[i]);
 						//printk("%c- ", UART_tx_buffer[i]);
 					}
@@ -309,14 +313,14 @@ void send_zigbee_modbus_answer(void)
 				    zb_addr_u dst_addr;
 				    bufid = zb_buf_get_out();
 				    dst_addr.addr_short = 0x0000;
-/*
-					printk("Size of payload is %d bytes \n", UART_rx_buffer_index);
 
-					for (uint8_t i = 0; i < (UART_rx_buffer_index +2); i++)
+					printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
+
+					for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
 					{
-						printk("%c- ", UART_tx_buffer[i]);
+						printk("%c- ", UART_rx_buffer[i]);
 					}
-*/
+
 			        /*zb_aps_send_user_payload(bufid, 
 					    					 dst_addr,
 						    				 0xc105,
@@ -336,8 +340,9 @@ void send_zigbee_modbus_answer(void)
 				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
 					    					 ZB_FALSE,
 						    				 UART_rx_buffer,
-							    			 (UART_rx_buffer_index));
+							    			 (UART_rx_buffer_index_max));
 	    	        bModbusRequestReceived = false;
+					counter = 0;
 					//printk("RESPONDIDA9");
 					if (bufid) {
 			            zb_buf_free(bufid);
@@ -349,24 +354,33 @@ void send_zigbee_modbus_answer(void)
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
 void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
-	static int counter = 0;
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
 			// Do your work here
-			//printk("Timer 1 callback. Counter = %d\n", counter++);
+			//if (!bModbusRequestReceived) printk("Timer 1 callback. Counter = %d bModbusRequestReceived %d\n", counter, bModbusRequestReceived);
 			if (bModbusRequestReceived)
 			{
+				//printk("Timer 1 callback. Counter = %d bModbusRequestReceived %d\n", counter, bModbusRequestReceived);
+
 				get_uart(rx_buf);
+
+				counter++;
 
 				if( b_UART_receiving_frame )
     			{
     			    if( UART_ticks_since_last_byte > UART_ticks_to_consider_frame_completed )
     			    {
     			        b_UART_receiving_frame = false; 
-						UART_ticks_since_last_byte = false;
+						UART_ticks_since_last_byte = 0;
 						bModbusRequestReady = true;
+						counter = 0;
     			    }
     			}
+			}
+			if ((bModbusRequestReceived == true) && (counter > 100))
+			{
+				bModbusRequestReceived = false;
+				counter = 0;
 			}
 			break;
 		
@@ -413,13 +427,13 @@ void send_uart(uint8_t out_uint8)
  */
 void get_uart(char *buf)
 {
-	int msg_len = strlen(buf);
 	int ret;
 
-	ret = uart_poll_in(dev_uart, buf);
+	ret = uart_poll_in(dev_uart, &buf);
 
-	if(!ret) 
+	if(ret == 0) 
 	{
+		printk("char arrived %c \n", buf);     
 		//printk("char arrived\n");
 		if( b_UART_receiving_frame )
     	{
@@ -432,8 +446,9 @@ void get_uart(char *buf)
     	        }
     	        else
     	        {                       
-					//printk("char arrived %c index: %d \n",*buf, UART_rx_buffer_index);             
-    	            UART_rx_buffer[UART_rx_buffer_index] = *buf;                            
+    	            UART_rx_buffer[UART_rx_buffer_index] = buf;     
+					printk("char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
+					UART_rx_buffer_index_max = UART_rx_buffer_index;        
     	            UART_rx_buffer_index++;
     	        }
     	    }
@@ -442,17 +457,35 @@ void get_uart(char *buf)
 		}
 		else
 		{
-			//printk("char arrived %c index: %d \n",*buf, UART_rx_buffer_index);             
     	    b_UART_receiving_frame = true;
     	    b_UART_overflow = false;
-    	    UART_rx_buffer[0] = *buf;
+    	    UART_rx_buffer[0] = buf;
+			printk("char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
     	    UART_rx_buffer_index = 1;
+			UART_rx_buffer_index_max = UART_rx_buffer_index;        
 			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
 		}
+	}
+	else if (ret == -1)
+	{
+		//printk("uart_poll_in No character available. \n");
+		UART_ticks_since_last_byte++;
+
+	}
+	else if (ret == -ENOSYS)
+	{
+		printk("uart_poll_in ENOSYS UART polling operation not implemented \n");
+
+	}
+		else if (ret == -EBUSY)
+	{
+		printk("uart_poll_in -EBUSY Async reception was enabled.\n");
+
 	}
 	else
 	{
 		UART_ticks_since_last_byte++;
+		printk("uart_poll_in Unknown error. \n");
 	}
 }
 
