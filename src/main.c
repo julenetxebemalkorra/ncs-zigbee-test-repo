@@ -53,6 +53,7 @@
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
 #define UART_TX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
 #define MODBUS_MIN_RX_LENGTH             8
+#define MAX_PAYLOAD_SIZE 				 82 // Maximum payload size that can be sent at once
 
 #define ZB_ZGP_DEFAULT_SHARED_SECURITY_KEY_TYPE ZB_ZGP_SEC_KEY_TYPE_NWK
 #define ZB_ZGP_DEFAULT_SECURITY_LEVEL ZB_ZGP_SEC_LEVEL_FULL_WITH_ENC
@@ -85,6 +86,7 @@ static volatile bool b_UART_overflow;
 static volatile uint16_t UART_rx_buffer_index;
 static volatile uint16_t UART_rx_buffer_index_max;
 static volatile int counter = 0;
+static volatile size_t offset = 0;
 
 
 LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
@@ -308,45 +310,58 @@ void zboss_signal_handler(zb_bufid_t bufid)
 void send_zigbee_modbus_answer(void)
 {
 
-					zb_bufid_t bufid;
-				    zb_uint8_t outputPayload[9] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
-				    zb_addr_u dst_addr;
-				    bufid = zb_buf_get_out();
-				    dst_addr.addr_short = 0x0000;
+	zb_bufid_t bufid;
+	//zb_uint8_t outputPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
+	zb_uint8_t outputPayload[MAX_PAYLOAD_SIZE];
+	zb_addr_u dst_addr;
+	bufid = zb_buf_get_out();
+	dst_addr.addr_short = 0x0000;
+	size_t remaining_length = UART_rx_buffer_index_max;
 
-					printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
+	for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
+	{
+		printk("%c- ", UART_rx_buffer[i]);
+	}
 
-					for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
-					{
-						printk("%c- ", UART_rx_buffer[i]);
-					}
+	while(remaining_length > 0) 
+	{
+    	size_t chunk_size = MIN(remaining_length, MAX_PAYLOAD_SIZE);
 
-			        /*zb_aps_send_user_payload(bufid, 
-					    					 dst_addr,
-						    				 0xc105,
-							    			 0X0011,
-								    		 232,
-									    	 232,
-				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-					    					 ZB_FALSE,
-						    				 outputPayload,
-							    			 9); */
-					zb_aps_send_user_payload(bufid, 
-					    					 dst_addr,
-						    				 0x0104,
-							    			 0x0104,
-								    		 1,
-									    	 1,
-				    						 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-					    					 ZB_FALSE,
-						    				 UART_rx_buffer,
-							    			 (UART_rx_buffer_index_max));
-	    	        bModbusRequestReceived = false;
-					counter = 0;
-					//printk("RESPONDIDA9");
-					if (bufid) {
-			            zb_buf_free(bufid);
-	    	        }
+		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
+
+		printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
+
+		/*zb_aps_send_user_payload(bufid, 
+		    					 dst_addr,
+			    				 0xc105,
+				    			 0X0011,
+					    		 232,
+						    	 232,
+								 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+		    					 ZB_FALSE,
+			    				 outputPayload,
+				    			 9); */
+		zb_aps_send_user_payload(bufid, 
+		    					 dst_addr,
+			    				 0x0104,
+				    			 0x0104,
+					    		 1,
+						    	 1,
+								 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+		    					 ZB_FALSE,
+			    				 outputPayload,
+				    			 chunk_size);
+		bModbusRequestReceived = false;
+		counter =
+		// Update offset and remaining length for the next chunk
+    	offset += chunk_size;
+    	remaining_length -= chunk_size;
+		//printk("RESPONDIDA9");
+		if (bufid) 
+		{
+		    zb_buf_free(bufid);
+		}
+	}
 }
 
 // Interrupt handler for the timer
@@ -624,6 +639,7 @@ int main(void)
 			send_zigbee_modbus_answer();
 			bModbusRequestReady = false;
 			UART_rx_buffer_index = 0;
+			offset=0;
 		}
 	}
 	return 0;
