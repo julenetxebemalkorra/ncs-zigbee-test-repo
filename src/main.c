@@ -88,6 +88,8 @@ static volatile uint16_t UART_rx_buffer_index_max;
 static volatile int counter = 0;
 static volatile size_t offset = 0;
 
+static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
+
 /*  This macro normally must be used after including <zephyr/logging/log.h> to
  * complete the initialization of the module. 
  
@@ -263,7 +265,6 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 					{
 						send_uart(pointerToBeginOfBuffer[i]);
 					}
-
 				}
 			}
 
@@ -456,6 +457,8 @@ void send_zigbee_modbus_answer(void)
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
 void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
+	/* temp array for get_uart function*/
+	char rx_buf[UART_RX_BUFFER_SIZE];
 
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
@@ -464,7 +467,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 			{
 				//printk("Timer 1 callback. Counter = %d bModbusRequestReceived %d\n", counter, bModbusRequestReceived);
 
-				get_uart();
+				get_uart(rx_buf);
 
 				counter++;
 
@@ -529,20 +532,19 @@ void send_uart(uint8_t out_uint8)
 }
 
 /*
- * Print a null-terminated string character by character to the UART interface
+ * Get a null-terminated string character by character to the UART interface
  */
-void get_uart()
+void get_uart(char *rx_buf)
 {
 	int ret;
-	/* temp array for get_uart function*/
-	char rx_buf[UART_RX_BUFFER_SIZE];
 
+	/*is a non-blocking function and returns a character or -1 when no valid data is available. */
 	ret = uart_poll_in(dev_uart, &rx_buf);
 
+	/*manage received char*/
 	if(ret == 0) 
 	{
 		printk("UART char arrived %c \n", rx_buf);     
-		//printk("char arrived\n");
 		if( b_UART_receiving_frame )
     	{
 			if( !b_UART_overflow )
@@ -597,6 +599,7 @@ void get_uart()
 	}
 }
 
+// Function for initializing the UART peripheral
 static void app_uart_init(void)
 {
 	if (!device_is_ready(dev_uart)) {
@@ -623,8 +626,10 @@ static void gpio_init(void)
 	}
 }
 
+// Function for initializing the Zigbee configuration
 void zigbee_configuration()
 {
+	/* disable NVRAM erasing on every application startup*/
 	zb_set_nvram_erase_at_start(ZB_TRUE);
 
 	/* Register device context (endpoints). */
@@ -640,11 +645,14 @@ void zigbee_configuration()
     // 3. Call the function with this pointer
 	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
 
+	//TRUE to disable trust center, legacy support for 
 	zb_bdb_set_legacy_device_support(ZB_TRUE);
-
+	
+	//Call Function for initializing all clusters attributes
 	app_clusters_attr_init();
 }
 
+// Function for giagnostic purposes. toogle the diagnostic led every second to be sure HW is OK and app is running
 void diagnostic_toogle_pin()
 {
 	int ret = gpio_pin_toggle_dt(&led);
@@ -654,6 +662,7 @@ void diagnostic_toogle_pin()
 	k_msleep(SLEEP_TIME_MS);
 }
 
+// Function for giagnostic purposes. Print zigbee info when the device joins a network
 void diagnostic_zigbee_info()
 {
 	zb_ieee_addr_t zb_long_address;
@@ -661,13 +670,12 @@ void diagnostic_zigbee_info()
 	zb_nwk_device_type_t zb_role;
 	zb_uint8_t zb_channel;
 	zb_uint16_t zb_shrot_addr;
-	int infit_info_flag = PRINT_ZIGBEE_INFO;
 	zb_ret_t zb_err_code;
     zb_ieee_addr_t ieee_addr;
 
-	if(zb_zdo_joined() && infit_info_flag == ZB_TRUE)
+	if(zb_zdo_joined() && b_infit_info_flag == ZB_TRUE)
 	{
-		infit_info_flag = ZB_FALSE;
+		b_infit_info_flag = ZB_FALSE;
 		b_Zigbe_Connected = true;
 		printk("Zigbee application joined the network: bellow some info: \n");
 		zb_get_long_address(zb_long_address);
@@ -726,11 +734,11 @@ int main(void)
 
 	while(1)
 	{		
-
+		// run diagnostic functions
 		diagnostic_toogle_pin();
-
 		diagnostic_zigbee_info();
 
+		// when modbus answer is ready send the answer
 		if(b_Modbus_Ready_to_send)
 		{
 			send_zigbee_modbus_answer();
