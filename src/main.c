@@ -240,7 +240,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
 			if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
 			{
-				printk("Size of payload is %d bytes \n", sizeOfPayload);
+				printk("Size of received payload is %d bytes \n", sizeOfPayload);
 				for (uint8_t i = 0; i < sizeOfPayload; i++)
 				{
 					//printk("0x%02x - ", pointerToBeginOfBuffer[i]);
@@ -307,29 +307,23 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	}
 }
 
-void send_zigbee_modbus_answer(void)
+
+void send_user_payload(zb_uint8_t *outputPayload,size_t chunk_size)
 {
+		zb_bufid_t bufid;
+		bufid = zb_buf_get_out();
+		zb_addr_u dst_addr;
+		dst_addr.addr_short = 0x0000;
+		
+		printk("send_user_payload");
 
-	zb_bufid_t bufid;
-	//zb_uint8_t outputPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
-	zb_uint8_t outputPayload[MAX_PAYLOAD_SIZE];
-	zb_addr_u dst_addr;
-	bufid = zb_buf_get_out();
-	dst_addr.addr_short = 0x0000;
-	size_t remaining_length = UART_rx_buffer_index_max;
+		for (uint8_t i = 0; i <= chunk_size; i++)
+		{
+			printk("%c- ", outputPayload[i]);
+		}
 
-	for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
-	{
-		printk("%c- ", UART_rx_buffer[i]);
-	}
+	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 
-	while(remaining_length > 0) 
-	{
-    	size_t chunk_size = MIN(remaining_length, MAX_PAYLOAD_SIZE);
-
-		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
-
-		printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
 
 		/*zb_aps_send_user_payload(bufid, 
 		    					 dst_addr,
@@ -351,17 +345,75 @@ void send_zigbee_modbus_answer(void)
 		    					 ZB_FALSE,
 			    				 outputPayload,
 				    			 chunk_size);
+
+	if (bufid) 
+	{
+	    zb_buf_free(bufid);
+	}
+
+	k_msleep(SLEEP_TIME_MS);
+
+}
+
+void send_zigbee_modbus_answer(void)
+{
+
+	//zb_uint8_t outputPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
+	zb_uint8_t outputPayload[MAX_PAYLOAD_SIZE];
+/*
+	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
+
+	for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
+	{
+		printk("%c- ", UART_rx_buffer[i]);
+	}
+
+	printk("UART_rx_buffer \n ");
+*/
+	for (uint8_t i = 0; i <= (UART_rx_buffer_index_max * 20); i = i+5)
+	{
+		UART_rx_buffer[i] = UART_rx_buffer[0];
+		UART_rx_buffer[i+1] = UART_rx_buffer[1];
+		UART_rx_buffer[i+2] = UART_rx_buffer[2];
+		UART_rx_buffer[i+3] = UART_rx_buffer[3];
+		UART_rx_buffer[i+4] = UART_rx_buffer[4];
+	}
+
+	UART_rx_buffer_index_max = (UART_rx_buffer_index_max * 20);
+/*
+	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
+
+	for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
+	{
+		printk("%c- ", UART_rx_buffer[i]);
+	}
+*/
+	size_t remaining_length = UART_rx_buffer_index_max;
+
+	while(remaining_length > 0) 
+	{
+    	size_t chunk_size = MIN(remaining_length, MAX_PAYLOAD_SIZE);
+
+		printk("chunk_size %d bytes \n", chunk_size);
+		printk("remaining_length %d bytes \n", remaining_length);
+
+		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
+/**
+		for (uint8_t i = 0; i < chunk_size; i++)
+		{
+		printk("%c- ", outputPayload[i]);
+		}
+*/
+		send_user_payload(&outputPayload, chunk_size);
+
 		bModbusRequestReceived = false;
-		counter =
+		counter = 0;
 		// Update offset and remaining length for the next chunk
     	offset += chunk_size;
     	remaining_length -= chunk_size;
 		//printk("RESPONDIDA9");
-		if (bufid) 
-		{
-		    zb_buf_free(bufid);
-		}
 	}
+
 }
 
 // Interrupt handler for the timer
@@ -448,7 +500,7 @@ void get_uart(char *buf)
 
 	if(ret == 0) 
 	{
-		printk("char arrived %c \n", buf);     
+		printk("UART char arrived %c \n", buf);     
 		//printk("char arrived\n");
 		if( b_UART_receiving_frame )
     	{
@@ -462,7 +514,7 @@ void get_uart(char *buf)
     	        else
     	        {                       
     	            UART_rx_buffer[UART_rx_buffer_index] = buf;     
-					printk("char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
+					printk("UART char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
 					UART_rx_buffer_index_max = UART_rx_buffer_index;        
     	            UART_rx_buffer_index++;
     	        }
@@ -475,7 +527,7 @@ void get_uart(char *buf)
     	    b_UART_receiving_frame = true;
     	    b_UART_overflow = false;
     	    UART_rx_buffer[0] = buf;
-			printk("char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
+			printk("UART char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
     	    UART_rx_buffer_index = 1;
 			UART_rx_buffer_index_max = UART_rx_buffer_index;        
 			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
