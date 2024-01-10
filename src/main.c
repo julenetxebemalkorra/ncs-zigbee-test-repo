@@ -52,6 +52,7 @@
 
 /* Default tick to consider a modbus frame completed*/
 #define UART_TIMEOUT 100 // wait 10 seconds for uart answer
+#define UART_RETRY_TIME 3 // rety time to get uart answer
 
 /*UART Modbus and zigbee buffer size definitions*/
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
@@ -88,7 +89,8 @@ static uint16_t UART_ticks_to_consider_frame_completed;
 static volatile bool b_UART_overflow;
 static volatile uint16_t UART_rx_buffer_index;
 static volatile uint16_t UART_rx_buffer_index_max;
-static volatile int uart_answer_timeout_counter = 0;
+static volatile int uart_answer_timeout_counter;
+static volatile int uart_read_retry_counter;
 static volatile size_t offset = 0;
 
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
@@ -171,8 +173,10 @@ void UART_conf_init(void)
     UART_ticks_since_last_byte = 0;
     UART_ticks_to_consider_frame_completed = DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED;
 	b_UART_overflow = false;
-	UART_rx_buffer_index=0;
-	UART_rx_buffer_index_max=0;
+	UART_rx_buffer_index = 0;
+	UART_rx_buffer_index_max = 0;
+	uart_answer_timeout_counter = 0;
+	uart_read_retry_counter = 0;
 }
 
 /**@brief Starts identifying the device.
@@ -253,18 +257,25 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
 			if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
 			{
-				printk("Size of received payload is %d bytes \n", sizeOfPayload);
-				for (uint8_t i = 0; i < sizeOfPayload; i++)
+				if(PRINT_ZIGBEE_INFO)
 				{
-					//printk("0x%02x - ", pointerToBeginOfBuffer[i]);
+					printk("\nSize of received payload is %d bytes \n", sizeOfPayload);
+					for (uint8_t i = 0; i < sizeOfPayload; i++)
+					{
+						printk("0x%02x - ", pointerToBeginOfBuffer[i]);
+					}
+						printk("\n Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
+						printk("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+
 				}
+
 				//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
 				if ((sizeOfPayload == MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0x11))
 				{
 					b_Modbus_Request_Received_via_Zigbee = true;
 					printk("bModbusRequestReceived via zigbee and send via UART \n");
 
-					for (uint8_t i = 0; i < sizeOfPayload; i++)
+					for (uint8_t i = 3; i < sizeOfPayload; i++)
 					{
 						send_uart(pointerToBeginOfBuffer[i]);
 					}
@@ -334,14 +345,14 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 		/*destination address: for the first test the network coordinator will be the destination */
 		zb_addr_u dst_addr;
 		dst_addr.addr_short = 0x0000;
-		
+		/*
 		printk("send_user_payload");
 
 		for (uint8_t i = 0; i <= chunk_size; i++)
 		{
 			printk("%c- ", outputPayload[i]);
 		}
-
+*/
 	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 
 
@@ -405,7 +416,7 @@ void send_zigbee_modbus_answer(void)
 	}
 
 	printk("UART_rx_buffer \n ");
-*/
+
     // Manipulating the received buffer before processing this is to test big data packages
 	for (uint8_t i = 0; i <= (UART_rx_buffer_index_max * 20); i = i+5)
 	{
@@ -417,6 +428,8 @@ void send_zigbee_modbus_answer(void)
 	}
 
 	UART_rx_buffer_index_max = (UART_rx_buffer_index_max * 20);
+
+	*/
 /*
 	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
 
@@ -447,6 +460,7 @@ void send_zigbee_modbus_answer(void)
         // Reset flags and uart_answer_timeout_counters for the next chunk
 		b_Modbus_Request_Received_via_Zigbee = false;
 		uart_answer_timeout_counter = 0;
+		uart_read_retry_counter = 0;
 
 		// Update offset and remaining length for the next chunk
     	offset += chunk_size;
@@ -493,27 +507,60 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
     				}
 					else if (uart_answer_timeout_counter > UART_TIMEOUT)
 					{
+						if (uart_read_retry_counter <= UART_RETRY_TIME)
+						{
+							b_UART_receiving_frame = false; 
+							UART_ticks_since_last_byte = 0;
+							b_Modbus_Ready_to_send = false;
+							uart_answer_timeout_counter = 0;
+							uart_read_retry_counter++;
+							printk("uart_read_retry_counter %d ", uart_read_retry_counter);
+						}
+						else
+						{
+							// uart response not received in UART_TIMEOUT period. what to do?
+							b_Modbus_Request_Received_via_Zigbee = false;
+							b_UART_receiving_frame = false; 
+							UART_ticks_since_last_byte = 0;
+							b_Modbus_Ready_to_send = false;
+							uart_answer_timeout_counter = 0;
+							uart_read_retry_counter = 0;
+							printk("uart_read_retry_counter %d ", uart_read_retry_counter);
+							// Call this function where you want to clear the buffer, like in your error or timeout handling code
+							clear_rx_buffer(rx_buf, sizeof(rx_buf));
+							clear_rx_buffer(UART_rx_buffer, sizeof(UART_rx_buffer));
+						}
+					}
+				}
+				else if(ret = 0)
+				{
+					uart_answer_timeout_counter = 0;
+				}
+				else
+				{
+					if (uart_read_retry_counter <= UART_RETRY_TIME)
+					{
+						b_UART_receiving_frame = false; 
+						UART_ticks_since_last_byte = 0;
+						b_Modbus_Ready_to_send = false;
+						uart_answer_timeout_counter = 0;
+						uart_read_retry_counter++;
+						printk("uart_read_retry_counter %d ", uart_read_retry_counter);
+					}
+					else
+					{
 						// uart response not received in UART_TIMEOUT period. what to do?
 						b_Modbus_Request_Received_via_Zigbee = false;
 						b_UART_receiving_frame = false; 
 						UART_ticks_since_last_byte = 0;
 						b_Modbus_Ready_to_send = false;
 						uart_answer_timeout_counter = 0;
+						uart_read_retry_counter = 0;
+						printk("uart_read_retry_counter %d ", uart_read_retry_counter);
 						// Call this function where you want to clear the buffer, like in your error or timeout handling code
 						clear_rx_buffer(rx_buf, sizeof(rx_buf));
-					}
-				}
-				else if(ret = 0)
-				{
-						uart_answer_timeout_counter = 0;
-				}
-				else
-				{
-					// get_uart error stop receiving uart; what should i do?
-					b_Modbus_Request_Received_via_Zigbee = 0;
-					// Call this function where you want to clear the buffer, like in your error or timeout handling code
-					clear_rx_buffer(rx_buf, sizeof(rx_buf));
-					clear_rx_buffer(UART_rx_buffer, sizeof(UART_rx_buffer));	
+						clear_rx_buffer(UART_rx_buffer, sizeof(UART_rx_buffer));
+					}	
 				}
 			}
 			else 
@@ -523,7 +570,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 					// Call this function where you want to clear the buffer, like in your error or timeout handling code
 					clear_rx_buffer(rx_buf, sizeof(rx_buf));	
 					clear_rx_buffer(UART_rx_buffer, sizeof(UART_rx_buffer));	
-					printk("clear_rx_buffer ");
+					//printk("clear_rx_buffer ");
 				}
 			}
 			break;
