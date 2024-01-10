@@ -50,6 +50,9 @@
 /* Default tick to consider a modbus frame completed*/
 #define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 21 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
+/* Default tick to consider a modbus frame completed*/
+#define UART_TIMEOUT 100 // wait 10 seconds for uart answer
+
 /*UART Modbus and zigbee buffer size definitions*/
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
 #define MODBUS_MIN_RX_LENGTH             8   // if the messagge has 8 bytes we consider it a modbus frame
@@ -85,7 +88,7 @@ static uint16_t UART_ticks_to_consider_frame_completed;
 static volatile bool b_UART_overflow;
 static volatile uint16_t UART_rx_buffer_index;
 static volatile uint16_t UART_rx_buffer_index_max;
-static volatile int counter = 0;
+static volatile int uart_answer_timeout_counter = 0;
 static volatile size_t offset = 0;
 
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
@@ -441,15 +444,20 @@ void send_zigbee_modbus_answer(void)
 */
 		send_user_payload(&outputPayload, chunk_size);
 
-        // Reset flags and counters for the next chunk
+        // Reset flags and uart_answer_timeout_counters for the next chunk
 		b_Modbus_Request_Received_via_Zigbee = false;
-		counter = 0;
+		uart_answer_timeout_counter = 0;
 
 		// Update offset and remaining length for the next chunk
     	offset += chunk_size;
     	remaining_length -= chunk_size;
 	}
 
+}
+
+void clear_rx_buffer(char* buf, size_t size) {
+    // Set all elements of the buffer to zero
+    memset(buf, NULL, size);
 }
 
 // Interrupt handler for the timer
@@ -459,36 +467,66 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
 	/* temp array for get_uart function*/
 	char rx_buf[UART_RX_BUFFER_SIZE];
+	int ret;
 
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
-			//if (!bModbusRequestReceived) printk("Timer 1 callback. Counter = %d bModbusRequestReceived %d\n", counter, bModbusRequestReceived);
+			//if (!bModbusRequestReceived) printk("Timer 1 callback. uart_answer_timeout_counter = %d bModbusRequestReceived %d\n", uart_answer_timeout_counter, bModbusRequestReceived);
 			if (b_Modbus_Request_Received_via_Zigbee)
 			{
-				//printk("Timer 1 callback. Counter = %d bModbusRequestReceived %d\n", counter, bModbusRequestReceived);
+				//printk("Timer 1 callback. uart_answer_timeout_counter = %d bModbusRequestReceived %d\n", uart_answer_timeout_counter, bModbusRequestReceived);
+				ret = get_uart(rx_buf);
+				if (ret = -1)
+				{
+					UART_ticks_since_last_byte++;
+					uart_answer_timeout_counter++;
 
-				get_uart(rx_buf);
-
-				counter++;
-
-				if( b_UART_receiving_frame )
-    			{
-    			    if( UART_ticks_since_last_byte > UART_ticks_to_consider_frame_completed )
-    			    {
-    			        b_UART_receiving_frame = false; 
+					if( b_UART_receiving_frame )
+    				{
+    				    if( UART_ticks_since_last_byte > UART_ticks_to_consider_frame_completed )
+    				    {
+    				        b_UART_receiving_frame = false; 
+							UART_ticks_since_last_byte = 0;
+							b_Modbus_Ready_to_send = true;
+							uart_answer_timeout_counter = 0;
+    				    }
+    				}
+					else if (uart_answer_timeout_counter > UART_TIMEOUT)
+					{
+						// uart response not received in UART_TIMEOUT period. what to do?
+						b_Modbus_Request_Received_via_Zigbee = false;
+						b_UART_receiving_frame = false; 
 						UART_ticks_since_last_byte = 0;
-						b_Modbus_Ready_to_send = true;
-						counter = 0;
-    			    }
-    			}
+						b_Modbus_Ready_to_send = false;
+						uart_answer_timeout_counter = 0;
+						// Call this function where you want to clear the buffer, like in your error or timeout handling code
+						clear_rx_buffer(rx_buf, sizeof(rx_buf));
+					}
+				}
+				else if(ret = 0)
+				{
+						uart_answer_timeout_counter = 0;
+				}
+				else
+				{
+					// get_uart error stop receiving uart; what should i do?
+					b_Modbus_Request_Received_via_Zigbee = 0;
+					// Call this function where you want to clear the buffer, like in your error or timeout handling code
+					clear_rx_buffer(rx_buf, sizeof(rx_buf));
+					clear_rx_buffer(UART_rx_buffer, sizeof(UART_rx_buffer));	
+				}
 			}
-			if ((b_Modbus_Request_Received_via_Zigbee == true) && (counter > 100))
+			else 
 			{
-				b_Modbus_Request_Received_via_Zigbee = false;
-				counter = 0;
+				if (!uart_poll_in(dev_uart, &rx_buf))
+				{
+					// Call this function where you want to clear the buffer, like in your error or timeout handling code
+					clear_rx_buffer(rx_buf, sizeof(rx_buf));	
+					clear_rx_buffer(UART_rx_buffer, sizeof(UART_rx_buffer));	
+					printk("clear_rx_buffer ");
+				}
 			}
 			break;
-		
 		default:
 			break;
 	}
@@ -528,13 +566,19 @@ static void timer1_init(void)
  */
 void send_uart(uint8_t out_uint8) 
 {
+/*
+Write a character to the device for output.
+This routine checks if the transmitter is full. When the transmitter is not full, it writes a character to the data register. 
+It waits and blocks the calling thread, otherwise. This function is a blocking call.
+To send a character when hardware flow control is enabled, the handshake signal CTS must be asserted.
+*/
 	uart_poll_out(dev_uart, (unsigned char)out_uint8);
 }
 
 /*
  * Get a null-terminated string character by character to the UART interface
  */
-void get_uart(char *rx_buf)
+int get_uart(char *rx_buf)
 {
 	int ret;
 
@@ -553,6 +597,7 @@ void get_uart(char *rx_buf)
     	        {
     	            b_UART_overflow = true;
 					printk("b_UART_overflow \n");
+					return b_UART_overflow;
     	        }
     	        else
     	        {                       
@@ -562,8 +607,8 @@ void get_uart(char *rx_buf)
     	            UART_rx_buffer_index++;
     	        }
     	    }
-			b_UART_receiving_frame = true;
 			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+			return ret;
 		}
 		else
 		{
@@ -574,28 +619,28 @@ void get_uart(char *rx_buf)
     	    UART_rx_buffer_index = 1;
 			UART_rx_buffer_index_max = UART_rx_buffer_index;        
 			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+			return ret;
 		}
 	}
 	else if (ret == -1)
 	{
 		//printk("uart_poll_in No character available. \n");
-		UART_ticks_since_last_byte++;
-
+		return ret;
 	}
 	else if (ret == -ENOSYS)
 	{
 		printk("uart_poll_in ENOSYS UART polling operation not implemented \n");
-
+		return ret;
 	}
 		else if (ret == -EBUSY)
 	{
 		printk("uart_poll_in -EBUSY Async reception was enabled.\n");
-
+		return ret;
 	}
 	else
 	{
-		UART_ticks_since_last_byte++;
 		printk("uart_poll_in Unknown error. \n");
+		return -2;
 	}
 }
 
