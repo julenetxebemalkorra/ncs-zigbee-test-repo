@@ -207,16 +207,16 @@ static void start_identifying(zb_bufid_t bufid)
 			if (zb_err_code == RET_OK) {
 				//printk("Enter identify mode");
 			} else if (zb_err_code == RET_INVALID_STATE) {
-				//printk("RET_INVALID_STATE - Cannot enter identify mode");
+				printk("RET_INVALID_STATE - Cannot enter identify mode");
 			} else {
 				ZB_ERROR_CHECK(zb_err_code);
 			}
 		} else {
-			//printk("Cancel identify mode");
+			printk("Cancel identify mode");
 			zb_bdb_finding_binding_target_cancel();
 		}
 	} else {
-		//printk("Device not in a network - cannot enter identify mode");
+		printk("Device not in a network - cannot enter identify mode");
 	}
 }
 
@@ -275,7 +275,6 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
     					printk("ind Source Endpoint %d \n", ind->src_endpoint);
     					printk("ind Destination Endpoint %d \n", ind->dst_endpoint);
     					printk("ind APS counter %d \n", ind->aps_counter);
-
 				}
 
 				//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
@@ -344,6 +343,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
 		break;
 		case ZB_BDB_SIGNAL_STEERING:
 			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_STEERING\n");
+			start_identifying(bufid);
 		break;
 		case ZB_BDB_SIGNAL_FORMATION:
 			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FORMATION\n");
@@ -509,6 +509,9 @@ void send_zigbee_modbus_answer(void)
 
 	printk("UART_rx_buffer \n ");
 
+	
+	*/
+
     // Manipulating the received buffer before processing this is to test big data packages
 	for (uint8_t i = 0; i <= (UART_rx_buffer_index_max * 20); i = i+5)
 	{
@@ -521,7 +524,6 @@ void send_zigbee_modbus_answer(void)
 
 	UART_rx_buffer_index_max = (UART_rx_buffer_index_max * 20);
 
-	*/
 /*
 	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
 
@@ -694,7 +696,7 @@ static void timer1_init(void)
 
 	// Setup TIMER1 to generate callbacks every second 1000000
 	// Setup TIMER1 to generate callbacks every 100ms 100000
-	timer1_repeated_timer_start(100000);
+	timer1_repeated_timer_start(100);
 }
 
 /*
