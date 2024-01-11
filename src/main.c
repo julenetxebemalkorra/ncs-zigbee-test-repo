@@ -266,8 +266,8 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 					{
 						printk("0x%02x - ", pointerToBeginOfBuffer[i]);
 					}
-						printk("\n Frame control field: %d - \n", pointerToBeginOfBuffer[0]);
-						printk("\n Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
+						printk("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
+						printk("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
 						printk("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
 
 						printk("ind Profileid 0x%04x \n", ind->profileid);
@@ -320,16 +320,93 @@ void zboss_signal_handler(zb_bufid_t bufid)
  	if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
  	{
 
-	switch (sig) {
-	case ZB_ZDO_SIGNAL_DEFAULT_START:
-	 	//LOG_INF( "JULEN Device STARTED OK");
- 		zb_af_set_data_indication(data_indication);
- 	break;
- 	default:
- 		//LOG_INF( "JULEN Unknown signal");
-		zb_af_set_data_indication(data_indication);
- 	break;
- 	}
+		switch (sig) {
+		case ZB_ZDO_SIGNAL_DEFAULT_START:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEFAULT_START\n");
+ 		break;
+		case ZB_ZDO_SIGNAL_SKIP_STARTUP:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP\n");
+		break;
+		case ZB_ZDO_SIGNAL_DEVICE_ANNCE:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEVICE_ANNCE\n");
+		break;
+		case ZB_ZDO_SIGNAL_LEAVE:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_LEAVE\n");
+		break;
+		case ZB_ZDO_SIGNAL_ERROR:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_ERROR\n");
+		break;
+		case ZB_BDB_SIGNAL_DEVICE_FIRST_START:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START\n");
+		break;
+		case ZB_BDB_SIGNAL_DEVICE_REBOOT:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_DEVICE_REBOOT\n");
+		break;
+		case ZB_BDB_SIGNAL_STEERING:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_STEERING\n");
+		break;
+		case ZB_BDB_SIGNAL_FORMATION:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FORMATION\n");
+		break;
+		case ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED\n");
+		break;
+		case ZB_BDB_SIGNAL_FINDING_AND_BINDING_INITIATOR_FINISHED:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_INITIATOR_FINISHED\n");
+		break;
+		case ZB_NWK_SIGNAL_DEVICE_ASSOCIATED:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_NWK_SIGNAL_DEVICE_ASSOCIATED\n");
+		break;
+		case ZB_ZDO_SIGNAL_LEAVE_INDICATION:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_LEAVE_INDICATION\n");
+		break;
+		case ZB_BDB_SIGNAL_WWAH_REJOIN_STARTED:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_WWAH_REJOIN_STARTED\n");
+		break;
+		case ZB_ZGP_SIGNAL_COMMISSIONING:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZGP_SIGNAL_COMMISSIONING\n");
+		break;
+		case ZB_COMMON_SIGNAL_CAN_SLEEP:
+			//printk( "JULEN ZB_COMMON_SIGNAL_CAN_SLEEP\n");
+		break;
+		case ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY\n");
+		break;
+		case ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT\n");
+		break;
+		case ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED\n");
+		break;
+		case ZB_ZDO_SIGNAL_DEVICE_UPDATE:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEVICE_UPDATE\n");
+		break;
+		case ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED\n");
+		break;
+		case ZB_NLME_STATUS_INDICATION:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_NLME_STATUS_INDICATION\n");
+		break;
+		case ZB_TCSWAP_DB_BACKUP_REQUIRED_SIGNAL:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_TCSWAP_DB_BACKUP_REQUIRED_SIGNAL\n");
+		break;
+		case ZB_BDB_SIGNAL_TC_REJOIN_DONE:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_TC_REJOIN_DONE\n");
+		break;
+		case ZB_BDB_SIGNAL_STEERING_CANCELLED:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_STEERING_CANCELLED\n");
+		break;
+		case ZB_BDB_SIGNAL_FORMATION_CANCELLED:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FORMATION_CANCELLED\n");
+		break;
+		case ZB_SIGNAL_READY_TO_SHUT:
+			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_SIGNAL_READY_TO_SHUT\n");
+		break;
+ 		default:
+			//printk( "JULEN Unknown signal\n");
+			zb_af_set_data_indication(data_indication);
+ 		break;
+ 		}
 	}
 
 	/* No application-specific behavior is required.
