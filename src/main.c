@@ -93,6 +93,13 @@ static volatile int uart_answer_timeout_counter;
 static volatile int uart_read_retry_counter;
 static volatile size_t offset = 0;
 
+/* Zigbee messagge info*/
+static volatile uint16_t ZB_profileid;
+static volatile uint16_t ZB_clusterid;
+static volatile uint16_t ZB_src_endpoint;
+static volatile uint16_t ZB_dst_endpoint;
+static volatile uint16_t ZB_aps_counter;
+
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
 
 /*  This macro normally must be used after including <zephyr/logging/log.h> to
@@ -239,14 +246,9 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
     
     if (bufid)
 	{
-		//printk("ind Profileid 0x%04x ", ind->profileid);
-    	//printk("ind Clusterid 0x%04x ", ind->clusterid);
-    	//printk("ind Source Endpoint %d ", ind->src_endpoint);
-    	//printk("ind Destination Endpoint %d ", ind->dst_endpoint);
-    	//printk("ind APS counter %d \n", ind->aps_counter);
 
 		//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
-		if( (ind->clusterid == 0x0104) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
+		if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
 		{
 			zb_uint8_t *pointerToBeginOfBuffer;
 			zb_uint8_t *pointerToEndOfBuffer;
@@ -264,8 +266,15 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 					{
 						printk("0x%02x - ", pointerToBeginOfBuffer[i]);
 					}
+						printk("\n Frame control field: %d - \n", pointerToBeginOfBuffer[0]);
 						printk("\n Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
 						printk("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+
+						printk("ind Profileid 0x%04x \n", ind->profileid);
+    					printk("ind Clusterid 0x%04x \n", ind->clusterid);
+    					printk("ind Source Endpoint %d \n", ind->src_endpoint);
+    					printk("ind Destination Endpoint %d \n", ind->dst_endpoint);
+    					printk("ind APS counter %d \n", ind->aps_counter);
 
 				}
 
@@ -274,6 +283,13 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 				{
 					b_Modbus_Request_Received_via_Zigbee = true;
 					printk("bModbusRequestReceived via zigbee and send via UART \n");
+
+					// safe zigbee source endpoint info to send the asnwer
+					ZB_profileid = ind->profileid;
+    				ZB_clusterid = ind->clusterid;
+    				ZB_src_endpoint = ind->src_endpoint;
+    				ZB_dst_endpoint = ind->dst_endpoint;
+    				ZB_aps_counter = ind->aps_counter;
 
 					for (uint8_t i = 3; i < sizeOfPayload; i++)
 					{
@@ -355,7 +371,6 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 */
 	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 
-
 		/*zb_aps_send_user_payload(bufid, 
 		    					 dst_addr,
 			    				 0xc105,
@@ -368,10 +383,10 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 				    			 9); */
 		zb_aps_send_user_payload(bufid, 
 		    					 dst_addr,
-			    				 0x0104,
-				    			 0x0104,
-					    		 1,
-						    	 1,
+			    				 ZB_profileid,
+				    			 ZB_clusterid,
+					    		 ZB_src_endpoint,
+						    	 ZB_dst_endpoint,
 								 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
 		    					 ZB_FALSE,
 			    				 outputPayload,
@@ -444,9 +459,6 @@ void send_zigbee_modbus_answer(void)
 	while(remaining_length > 0) 
 	{
     	size_t chunk_size = MIN(remaining_length, MAX_ZIGBEE_PAYLOAD_SIZE);
-
-		printk("chunk_size %d bytes \n", chunk_size);
-		printk("remaining_length %d bytes \n", remaining_length);
 
 		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
 /**
@@ -635,7 +647,6 @@ int get_uart(char *rx_buf)
 	/*manage received char*/
 	if(ret == 0) 
 	{
-		printk("UART char arrived %c \n", rx_buf);     
 		if( b_UART_receiving_frame )
     	{
 			if( !b_UART_overflow )
@@ -754,6 +765,31 @@ void diagnostic_toogle_pin()
 	k_msleep(SLEEP_TIME_MS);
 }
 
+// Function to join the Zigbee network
+void get_endpoint_descriptor(zb_uint8_t endpoint) 
+{
+	
+	// After successful joining, get the endpoint descriptor for a specific endpoint ID
+    zb_af_endpoint_desc_t *endpoint_desc = zb_af_get_endpoint_desc(endpoint);
+
+    // Check if the endpoint descriptor is found
+    if (endpoint_desc != NULL) {
+        // Successfully obtained the endpoint descriptor
+        // Access endpoint descriptor fields as needed
+        zb_uint8_t profile_id = endpoint_desc->simple_desc->app_profile_id;
+        zb_uint16_t device_id = endpoint_desc->simple_desc->app_device_id;
+		zb_uint16_t device_version = endpoint_desc->simple_desc->app_device_version;
+		
+		printk("Profileid 0x%04x \n", profile_id);
+    	printk("Clusterid 0x%04x \n", device_id);
+		printk("device_version 0x%04x \n", device_version);
+
+    } else 
+	{
+    	printk("endpoint descriptor not available\n");
+    }
+}
+
 // Function for giagnostic purposes. Print zigbee info when the device joins a network
 void diagnostic_zigbee_info()
 {
@@ -804,6 +840,9 @@ void diagnostic_zigbee_info()
 		
 	zb_channel = zb_get_current_channel();	
 	printk("zigbee channel: %d \n", zb_channel);
+
+	get_endpoint_descriptor(1);
+
 	}
 }
 
