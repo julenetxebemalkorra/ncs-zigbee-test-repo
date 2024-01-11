@@ -51,7 +51,7 @@
 #define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 21 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
 /* Default tick to consider a modbus frame completed*/
-#define UART_TIMEOUT 100 // wait 10 seconds for uart answer
+#define UART_TIMEOUT 100000 // wait 10 seconds for uart answer
 #define UART_RETRY_TIME 3 // rety time to get uart answer
 
 /*UART Modbus and zigbee buffer size definitions*/
