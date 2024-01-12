@@ -28,7 +28,7 @@
 #include <nrfx_timer.h>
 
 /* Device endpoint, used to receive ZCL commands. */
-#define APP_TEMPLATE_ENDPOINT               1
+#define APP_TEMPLATE_ENDPOINT               232
 
 /* Type of power sources available for the device.
  * For possible values see section 3.2.2.2.8 of ZCL specification.
@@ -51,8 +51,8 @@
 #define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 21 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
 /* Default tick to consider a modbus frame completed*/
-#define UART_TIMEOUT 100000 // wait 10 seconds for uart answer
-#define UART_RETRY_TIME 3 // rety time to get uart answer
+#define UART_TIMEOUT 10000000 // wait 10 seconds for uart answer
+#define UART_RETRY_TIME 1000000 // rety time to get uart answer
 
 /*UART Modbus and zigbee buffer size definitions*/
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
@@ -255,58 +255,61 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
     
     if (bufid)
 	{
-
-		//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
-		if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
+		if(!b_Modbus_Request_Received_via_Zigbee)
 		{
-			zb_uint8_t *pointerToBeginOfBuffer;
-			zb_uint8_t *pointerToEndOfBuffer;
-			zb_int32_t sizeOfPayload;
-			pointerToBeginOfBuffer = zb_buf_begin(bufid);
-			pointerToEndOfBuffer = zb_buf_end(bufid);
-			sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
-
-			if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
+			//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
+			if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
 			{
-				if(PRINT_ZIGBEE_INFO)
-				{
-					printk("\nSize of received payload is %d bytes \n", sizeOfPayload);
-					for (uint8_t i = 0; i < sizeOfPayload; i++)
-					{
-						printk("0x%02x - ", pointerToBeginOfBuffer[i]);
-					}
-						printk("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
-						printk("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
-						printk("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+				zb_uint8_t *pointerToBeginOfBuffer;
+				zb_uint8_t *pointerToEndOfBuffer;
+				zb_int32_t sizeOfPayload;
+				pointerToBeginOfBuffer = zb_buf_begin(bufid);
+				pointerToEndOfBuffer = zb_buf_end(bufid);
+				sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
 
-						printk("ind Profileid 0x%04x \n", ind->profileid);
-    					printk("ind Clusterid 0x%04x \n", ind->clusterid);
-    					printk("ind Source Endpoint %d \n", ind->src_endpoint);
-    					printk("ind Destination Endpoint %d \n", ind->dst_endpoint);
-    					printk("ind APS counter %d \n", ind->aps_counter);
+				if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
+				{
+					if(PRINT_ZIGBEE_INFO)
+					{
+						printk("\nSize of received payload is %d bytes \n", sizeOfPayload);
+						for (uint8_t i = 0; i < sizeOfPayload; i++)
+						{
+							printk("0x%02x - ", pointerToBeginOfBuffer[i]);
+						}
+							printk("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
+							printk("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
+							printk("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+
+							printk("ind Profileid 0x%04x \n", ind->profileid);
+    						printk("ind Clusterid 0x%04x \n", ind->clusterid);
+    						printk("ind Source Endpoint %d \n", ind->src_endpoint);
+    						printk("ind Destination Endpoint %d \n", ind->dst_endpoint);
+    						printk("ind APS counter %d \n", ind->aps_counter);
+					}
+
+					//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
+					if ((sizeOfPayload >= MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0xC2))
+					{
+						b_Modbus_Request_Received_via_Zigbee = true;
+						printk("bModbusRequestReceived via zigbee and send via UART \n");
+
+						// safe zigbee source endpoint info to send the asnwer
+						ZB_profileid = ind->profileid;
+    					ZB_clusterid = ind->clusterid;
+    					ZB_src_endpoint = ind->src_endpoint;
+    					ZB_dst_endpoint = ind->dst_endpoint;
+    					ZB_aps_counter = ind->aps_counter;
+
+						for (uint8_t i = 0; i < sizeOfPayload; i++)
+						{
+							send_uart0(pointerToBeginOfBuffer[i]);
+						}
+					}
 				}
 
-				//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
-				if ((sizeOfPayload == MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0x11))
-				{
-					b_Modbus_Request_Received_via_Zigbee = true;
-					printk("bModbusRequestReceived via zigbee and send via UART \n");
-
-					// safe zigbee source endpoint info to send the asnwer
-					ZB_profileid = ind->profileid;
-    				ZB_clusterid = ind->clusterid;
-    				ZB_src_endpoint = ind->src_endpoint;
-    				ZB_dst_endpoint = ind->dst_endpoint;
-    				ZB_aps_counter = ind->aps_counter;
-
-					for (uint8_t i = 3; i < sizeOfPayload; i++)
-					{
-						send_uart(pointerToBeginOfBuffer[i]);
-					}
-				}
 			}
-
 		}
+		
 	}
 
     if (bufid)
@@ -847,6 +850,10 @@ void zigbee_configuration()
     // 3. Call the function with this pointer
 	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
 
+	zb_ext_pan_id_t ext_pan_id[8] = {0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};	
+
+	zb_set_extended_pan_id(ext_pan_id);
+
 	//TRUE to disable trust center, legacy support for 
 	zb_bdb_set_legacy_device_support(ZB_TRUE);
 	
@@ -940,7 +947,7 @@ void diagnostic_zigbee_info()
 	zb_channel = zb_get_current_channel();	
 	printk("zigbee channel: %d \n", zb_channel);
 
-	get_endpoint_descriptor(1);
+	get_endpoint_descriptor(232);
 
 	}
 }
