@@ -93,6 +93,15 @@ static volatile int uart_answer_timeout_counter;
 static volatile int uart_read_retry_counter;
 static volatile size_t offset = 0;
 
+  // Create a UART configuration structure
+static struct uart_config uart_cfg = {
+        .baudrate = 19200,                    // Set baudrate to 9600 bps
+        .parity = UART_CFG_PARITY_NONE,      // No parity
+        .stop_bits = UART_CFG_STOP_BITS_1,   // 1 stop bit
+        .data_bits = UART_CFG_DATA_BITS_8,   // 8 data bits
+        .flow_ctrl = UART_CFG_FLOW_CTRL_NONE // No flow control
+ };
+
 /* Zigbee messagge info*/
 static volatile uint16_t ZB_profileid;
 static volatile uint16_t ZB_clusterid;
@@ -438,14 +447,14 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 		/*destination address: for the first test the network coordinator will be the destination */
 		zb_addr_u dst_addr;
 		dst_addr.addr_short = 0x0000;
-		/*
-		printk("send_user_payload");
+		
+		printk("send_user_payload: chunk_size %d\n", chunk_size);
 
 		for (uint8_t i = 0; i <= chunk_size; i++)
 		{
 			printk("%c- ", outputPayload[i]);
 		}
-*/
+
 	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 
 		/*zb_aps_send_user_payload(bufid, 
@@ -510,7 +519,7 @@ void send_zigbee_modbus_answer(void)
 	printk("UART_rx_buffer \n ");
 
 	
-	*/
+
 
     // Manipulating the received buffer before processing this is to test big data packages
 	for (uint8_t i = 0; i <= (UART_rx_buffer_index_max * 20); i = i+5)
@@ -524,7 +533,7 @@ void send_zigbee_modbus_answer(void)
 
 	UART_rx_buffer_index_max = (UART_rx_buffer_index_max * 20);
 
-/*
+
 	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
 
 	for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
@@ -790,6 +799,17 @@ static void app_uart_init(void)
 	}
 	
 	uart_rx_enable(dev_uart, UART_rx_buffer, UART_RX_BUFFER_SIZE, SYS_FOREVER_US );
+
+    // Call uart_configure to apply the configuration
+    int result = uart_configure(dev_uart, &uart_cfg);
+
+    // Check the result
+    if (result == 0) {
+        printf("UART configuration successful!\n");
+    } else {
+        printf("UART configuration failed with error code: %d\n", result);
+    }
+
 }
 
 
