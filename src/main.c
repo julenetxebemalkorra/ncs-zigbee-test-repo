@@ -39,7 +39,8 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 /* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO             	ZB_TRUE
+#define PRINT_ZIGBEE_INFO             	ZB_FALSE
+#define PRINT_UART_INFO             	ZB_FALSE
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
@@ -290,7 +291,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 				if ((sizeOfPayload == MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0x11))
 				{
 					b_Modbus_Request_Received_via_Zigbee = true;
-					printk("bModbusRequestReceived via zigbee and send via UART \n");
+					if(PRINT_ZIGBEE_INFO) printk("bModbusRequestReceived via zigbee and send via UART \n");
 
 					// safe zigbee source endpoint info to send the asnwer
 					ZB_profileid = ind->profileid;
@@ -448,12 +449,16 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 		zb_addr_u dst_addr;
 		dst_addr.addr_short = 0x0000;
 		
-		printk("send_user_payload: chunk_size %d\n", chunk_size);
-
-		for (uint8_t i = 0; i <= chunk_size; i++)
+		if(PRINT_ZIGBEE_INFO) 
 		{
-			printk("%c- ", outputPayload[i]);
+			printk("send_user_payload: chunk_size %d\n", chunk_size);
+
+			for (uint8_t i = 0; i <= chunk_size; i++)
+			{
+				printk("%c- ", outputPayload[i]);
+			}
 		}
+
 
 	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 
@@ -518,9 +523,6 @@ void send_zigbee_modbus_answer(void)
 
 	printk("UART_rx_buffer \n ");
 
-	
-
-
     // Manipulating the received buffer before processing this is to test big data packages
 	for (uint8_t i = 0; i <= (UART_rx_buffer_index_max * 20); i = i+5)
 	{
@@ -549,7 +551,7 @@ void send_zigbee_modbus_answer(void)
     	size_t chunk_size = MIN(remaining_length, MAX_ZIGBEE_PAYLOAD_SIZE);
 
 		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
-/**
+/*
 		for (uint8_t i = 0; i < chunk_size; i++)
 		{
 		printk("%c- ", outputPayload[i]);
@@ -614,7 +616,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 							b_Modbus_Ready_to_send = false;
 							uart_answer_timeout_counter = 0;
 							uart_read_retry_counter++;
-							printk("uart_read_retry_counter %d ", uart_read_retry_counter);
+							if(PRINT_UART_INFO) printk("uart_read_retry_counter %d ", uart_read_retry_counter);
 						}
 						else
 						{
@@ -625,7 +627,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 							b_Modbus_Ready_to_send = false;
 							uart_answer_timeout_counter = 0;
 							uart_read_retry_counter = 0;
-							printk("uart_read_retry_counter %d ", uart_read_retry_counter);
+							if(PRINT_UART_INFO) printk("uart_read_retry_counter %d ", uart_read_retry_counter);
 							// Call this function where you want to clear the buffer, like in your error or timeout handling code
 							clear_rx_buffer(rx_buf, sizeof(rx_buf));
 							clear_rx_buffer(UART_rx_buffer, sizeof(UART_rx_buffer));
@@ -645,7 +647,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 						b_Modbus_Ready_to_send = false;
 						uart_answer_timeout_counter = 0;
 						uart_read_retry_counter++;
-						printk("uart_read_retry_counter %d ", uart_read_retry_counter);
+						if(PRINT_UART_INFO) printk("uart_read_retry_counter %d ", uart_read_retry_counter);
 					}
 					else
 					{
@@ -656,7 +658,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 						b_Modbus_Ready_to_send = false;
 						uart_answer_timeout_counter = 0;
 						uart_read_retry_counter = 0;
-						printk("uart_read_retry_counter %d ", uart_read_retry_counter);
+						if(PRINT_UART_INFO) printk("uart_read_retry_counter %d ", uart_read_retry_counter);
 						// Call this function where you want to clear the buffer, like in your error or timeout handling code
 						clear_rx_buffer(rx_buf, sizeof(rx_buf));
 						clear_rx_buffer(UART_rx_buffer, sizeof(UART_rx_buffer));
@@ -742,13 +744,13 @@ int get_uart(char *rx_buf)
     	        if( UART_rx_buffer_index >= UART_RX_BUFFER_SIZE )
     	        {
     	            b_UART_overflow = true;
-					printk("b_UART_overflow \n");
+					if(PRINT_UART_INFO) printk("b_UART_overflow \n");
 					return b_UART_overflow;
     	        }
     	        else
     	        {                       
     	            UART_rx_buffer[UART_rx_buffer_index] = rx_buf;     
-					printk("UART char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
+					if(PRINT_UART_INFO) printk("UART char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
 					UART_rx_buffer_index_max = UART_rx_buffer_index;        
     	            UART_rx_buffer_index++;
     	        }
@@ -761,7 +763,7 @@ int get_uart(char *rx_buf)
     	    b_UART_receiving_frame = true;
     	    b_UART_overflow = false;
     	    UART_rx_buffer[0] = rx_buf;
-			printk("UART char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
+			if(PRINT_UART_INFO) printk("UART char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
     	    UART_rx_buffer_index = 1;
 			UART_rx_buffer_index_max = UART_rx_buffer_index;        
 			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
@@ -805,9 +807,9 @@ static void app_uart_init(void)
 
     // Check the result
     if (result == 0) {
-        printf("UART configuration successful!\n");
+        if(PRINT_UART_INFO) printf("UART configuration successful!\n");
     } else {
-        printf("UART configuration failed with error code: %d\n", result);
+        if(PRINT_UART_INFO) printf("UART configuration failed with error code: %d\n", result);
     }
 
 }
