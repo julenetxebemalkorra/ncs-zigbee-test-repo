@@ -95,7 +95,7 @@ static volatile size_t offset = 0;
 
   // Create a UART configuration structure
 static struct uart_config uart_cfg = {
-        .baudrate = 19200,                    // Set baudrate to 9600 bps
+        .baudrate = 115200,                    // Set baudrate to 9600 bps
         .parity = UART_CFG_PARITY_NONE,      // No parity
         .stop_bits = UART_CFG_STOP_BITS_1,   // 1 stop bit
         .data_bits = UART_CFG_DATA_BITS_8,   // 8 data bits
@@ -302,7 +302,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
 						for (uint8_t i = 0; i < sizeOfPayload; i++)
 						{
-							send_uart0(pointerToBeginOfBuffer[i]);
+							send_uart(pointerToBeginOfBuffer[i]);
 						}
 					}
 				}
@@ -694,9 +694,8 @@ static void timer1_repeated_timer_start(uint32_t timeout_us)
 // Function for initializing the TIMER1 peripheral using the nrfx driver
 static void timer1_init(void)
 {
-	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG;
+	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(NRF_TIMER_FREQ_1MHz);
 	timer_config.bit_width = NRF_TIMER_BIT_WIDTH_32;
-	timer_config.frequency = NRF_TIMER_FREQ_1MHz;
 
 	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
 	if (err != NRFX_SUCCESS) {
@@ -868,6 +867,16 @@ void diagnostic_toogle_pin()
 	if (ret < 0) {
 		return;
 	}
+/*
+	printk("Julen console uart1 prink\n");
+
+	zb_uint8_t outputCustomPayload_uart0[] = {0x55, 0x41, 0x52, 0x54, 0x5F, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
+
+		for (uint8_t i = 0; i < 11; i++)
+		{
+		send_uart(outputCustomPayload_uart0[i]);
+		}
+*/
 	k_msleep(SLEEP_TIME_MS);
 }
 
