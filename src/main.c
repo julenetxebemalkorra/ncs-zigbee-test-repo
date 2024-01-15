@@ -95,8 +95,8 @@ static volatile size_t offset = 0;
 
   // Create a UART configuration structure
 static struct uart_config uart_cfg = {
-        .baudrate = 115200,                    // Set baudrate to 9600 bps
-        .parity = UART_CFG_PARITY_NONE,      // No parity
+        .baudrate = 19200,                    // Set baudrate to 9600 bps
+        .parity = UART_CFG_PARITY_EVEN,      // No parity
         .stop_bits = UART_CFG_STOP_BITS_1,   // 1 stop bit
         .data_bits = UART_CFG_DATA_BITS_8,   // 8 data bits
         .flow_ctrl = UART_CFG_FLOW_CTRL_NONE // No flow control
@@ -255,8 +255,8 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
     
     if (bufid)
 	{
-		if(!b_Modbus_Request_Received_via_Zigbee)
-		{
+		//if(!b_Modbus_Request_Received_via_Zigbee)
+		//{
 			//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
 			if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
 			{
@@ -288,7 +288,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 					}
 
 					//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
-					if ((sizeOfPayload >= MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0xC2))
+					if ((sizeOfPayload >= MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0xC4))
 					{
 						b_Modbus_Request_Received_via_Zigbee = true;
 						printk("bModbusRequestReceived via zigbee and send via UART \n");
@@ -308,7 +308,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 				}
 
 			}
-		}
+		//}
 		
 	}
 
