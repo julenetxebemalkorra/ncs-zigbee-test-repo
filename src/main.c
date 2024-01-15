@@ -455,7 +455,7 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 
 		for (uint8_t i = 0; i <= chunk_size; i++)
 		{
-			printk("%c- ", outputPayload[i]);
+			printk("%02x- ", outputPayload[i]);
 		}
 
 	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
@@ -750,7 +750,7 @@ int get_uart(char *rx_buf)
     	        else
     	        {                       
     	            UART_rx_buffer[UART_rx_buffer_index] = rx_buf;     
-					printk("UART char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
+					printk("UART char arrived %02x index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
 					UART_rx_buffer_index_max = UART_rx_buffer_index;        
     	            UART_rx_buffer_index++;
     	        }
@@ -763,7 +763,7 @@ int get_uart(char *rx_buf)
     	    b_UART_receiving_frame = true;
     	    b_UART_overflow = false;
     	    UART_rx_buffer[0] = rx_buf;
-			printk("UART char arrived %c index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
+			printk("UART char arrived %02x index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
     	    UART_rx_buffer_index = 1;
 			UART_rx_buffer_index_max = UART_rx_buffer_index;        
 			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
