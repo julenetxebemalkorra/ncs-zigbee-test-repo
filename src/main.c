@@ -453,7 +453,7 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 		
 		printk("send_user_payload: chunk_size %d\n", chunk_size);
 
-		for (uint8_t i = 0; i <= chunk_size; i++)
+		for (uint8_t i = 0; i < chunk_size; i++)
 		{
 			printk("%02x- ", outputPayload[i]);
 		}
@@ -544,7 +544,7 @@ void send_zigbee_modbus_answer(void)
 		printk("%c- ", UART_rx_buffer[i]);
 	}
 */
-	size_t remaining_length = UART_rx_buffer_index_max;
+	size_t remaining_length = UART_rx_buffer_index_max +1;
 
     // Transmit the modified payload in chunks via Zigbee
 	while(remaining_length > 0) 
