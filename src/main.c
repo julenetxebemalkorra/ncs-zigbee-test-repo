@@ -93,6 +93,8 @@ static volatile int uart_answer_timeout_counter;
 static volatile int uart_read_retry_counter;
 static volatile size_t offset = 0;
 
+static volatile	zb_uint8_t *pointerToBeginOfBuffer;
+
   // Create a UART configuration structure
 static struct uart_config uart_cfg = {
         .baudrate = 19200,                    // Set baudrate to 9600 bps
@@ -260,7 +262,6 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 			//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
 			if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
 			{
-				zb_uint8_t *pointerToBeginOfBuffer;
 				zb_uint8_t *pointerToEndOfBuffer;
 				zb_int32_t sizeOfPayload;
 				pointerToBeginOfBuffer = zb_buf_begin(bufid);
