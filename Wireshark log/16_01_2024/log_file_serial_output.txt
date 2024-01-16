@@ -1,0 +1,2049 @@
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 6d index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 92
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 93
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 22 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 94
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 54 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 95
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 7c index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 96
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 97
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 2e index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 98
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 99
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 67 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 100
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived dd index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 101
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived eb index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 102
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 103
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 104
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 45 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 105
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 00 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 106
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived f7 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 107
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 16 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 108
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 24 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 109
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 3c index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 110
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived ab index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 111
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 112
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived cb index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 113
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived c1 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 114
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 89 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 115
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 98 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 116
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived c4 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 117
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived ff index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 118
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 119
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived ef index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 120
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived db index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 121
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 12 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 122
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 123
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 82 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 124
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived e5 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 125
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 85 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 126
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived d9 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 127
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 128
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived cb index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 129
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 130
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 29 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 131
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 132
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived d2 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 133
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 134
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 3b index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 135
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 7b index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 136
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived b9 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 137
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 01 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 138
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived cc index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 139
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 52 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 140
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 5c index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 141
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 142
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived e2 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 143
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 144
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 30 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 145
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived d2 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 146
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived fb index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 147
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived da index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 148
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 0f index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 149
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 59 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 150
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 79 index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x0b - 0x0f - 0x5b -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 151
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 16 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 00 index: 5
+UART char arrived 98 index: 6
+UART char arrived 01 index: 7
+UART char arrived 30 index: 8
+UART char arrived 00 index: 9
+UART char arrived 40 index: 10
+UART char arrived bd index: 11
+UART char arrived 8e index: 12
+send_user_payload: chunk_size 12
+c4- 03- 16- 0b- 2b- 00- 98- 01- 30- 00- 40- bd- 08-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 152
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 153
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 154
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 155
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 156
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 157
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 158
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 159
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 160
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 161
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 162
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 163
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 164
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 165
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 98-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 166
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 167
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 168
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 169
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 170
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 171
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 172
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 173
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 174
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 175
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 176
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 177
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 178
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 179
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 180
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 181
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 182
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 183
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 184
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 185
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 186
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 187
+bModbusRequestReceived via zigbee and send via UART
+UART char arrived c4 index: 0
+UART char arrived 03 index: 1
+UART char arrived 02 index: 2
+UART char arrived 0b index: 3
+UART char arrived 2b index: 4
+UART char arrived 33 index: 5
+UART char arrived 7a index: 6
+send_user_payload: chunk_size 6
+c4- 03- 02- 0b- 2b- 33- 00-
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 188
+bModbusRequestReceived via zigbee and send via UART
+
+Size of received payload is 8 bytes
+0xc4 - 0x03 - 0x75 - 0x30 - 0x00 - 0x01 - 0x8f - 0x5c -
+ Frame control field: 196
+Sequence number: 3 -
+Zigbee Command: 0x75 -
+ind Profileid 0xc105
+ind Clusterid 0x0011
+ind Source Endpoint 232
+ind Destination Endpoint 232
+ind APS counter 189
+bModbusRequestReceived via zigbee and send via UART

@@ -8,6 +8,7 @@
 *.swo
 *~
 *.bak
+*.zip
 
 build*/
 !doc/guides/build
