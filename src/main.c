@@ -301,12 +301,9 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 						}
 					}
 				}
-
 			}
 		//}
-		
 	}
-
     if (bufid)
     {
 		zb_buf_free(bufid); // JESUS: I don't know if this is needed, but I try, just in case.
@@ -485,17 +482,7 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 	    zb_buf_free(bufid);
 	}
 
-/*
-  Note: This code includes a one-second delay between Zigbee package transmissions for stability.
 
-  To adjust the delay time:
-  - Locate the 'sleep' function.
-  - Modify the argument value in 'sleep' for a different delay duration.
-  - Test the code after changing the delay to ensure proper functionality.
-  
-  Caution: Be mindful when altering the delay to prevent network congestion.
-*/
-	k_msleep(SLEEP_TIME_MS);
 
 }
 
@@ -509,6 +496,8 @@ void send_zigbee_modbus_answer(void)
 
 	//zb_uint8_t outputPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 	zb_uint8_t outputPayload[MAX_ZIGBEE_PAYLOAD_SIZE];
+
+	send_user_payload(&UART_rx_buffer, (UART_rx_buffer_index_max +1));
 /*
 	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
 
@@ -541,7 +530,7 @@ void send_zigbee_modbus_answer(void)
 	{
 		printk("%c- ", UART_rx_buffer[i]);
 	}
-*/
+
 	size_t remaining_length = UART_rx_buffer_index_max +1;
 
     // Transmit the modified payload in chunks via Zigbee
@@ -550,12 +539,12 @@ void send_zigbee_modbus_answer(void)
     	size_t chunk_size = MIN(remaining_length, MAX_ZIGBEE_PAYLOAD_SIZE);
 
 		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
-/**
+
 		for (uint8_t i = 0; i < chunk_size; i++)
 		{
 		printk("%c- ", outputPayload[i]);
 		}
-*/
+
 		send_user_payload(&outputPayload, chunk_size);
 
         // Reset flags for the next chunk
@@ -564,7 +553,23 @@ void send_zigbee_modbus_answer(void)
 		// Update offset and remaining length for the next chunk
     	offset += chunk_size;
     	remaining_length -= chunk_size;
-	}
+*/
+		/*
+	  	Note: This code includes a one-second delay between Zigbee package transmissions for stability.
+
+	  	To adjust the delay time:
+	  	- Locate the 'sleep' function.
+	  	- Modify the argument value in 'sleep' for a different delay duration.
+	  	- Test the code after changing the delay to ensure proper functionality.
+
+	  	Caution: Be mindful when altering the delay to prevent network congestion.
+	
+		if(remaining_length)
+		{
+			k_msleep(SLEEP_TIME_MS);
+		}
+			*/
+	//}
 
 }
 
@@ -622,7 +627,26 @@ static void timer1_init(void)
 
 	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
 	if (err != NRFX_SUCCESS) {
-		printk("Error initializing timer: %x\n", err);
+		if(err == NRFX_ERROR_INVALID_PARAM)
+		{
+			printk("Specified frequency is not supported by the TIMER instance.\n");
+		}
+		else if(err == NRFX_ERROR_ALREADY_INITIALIZED)
+		{
+			printk("The driver is already initialized..\n");
+		}
+		else if(err == NRFX_ERROR_INVALID_STATE )
+		{
+			printk("NRFX_ERROR_INVALID_STATE \n");
+		}
+		else
+		{
+			printk("Error initializing timer: %x\n", err);
+		}
+	}
+	else
+	{
+		printk("timer initialized correctly\n");
 	}
 
 	IRQ_DIRECT_CONNECT(TIMER1_IRQn, 0, nrfx_timer_1_irq_handler, 0);
@@ -630,6 +654,7 @@ static void timer1_init(void)
 
 	// Setup TIMER1 to generate callbacks every second 1000000
 	// Setup TIMER1 to generate callbacks every 100ms 100000
+	//timer1_repeated_timer_start(100);
 	timer1_repeated_timer_start(100);
 }
 
