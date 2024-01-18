@@ -43,13 +43,13 @@
 #define PRINT_UART_INFO             	ZB_FALSE
 
 /* 1000 msec = 1 sec */
-#define SLEEP_TIME_MS   1000
+#define SLEEP_TIME_MS   10000
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
 
 /* Default tick to consider a modbus frame completed*/
-#define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 100 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
+#define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 23 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
 /*UART Modbus and zigbee buffer size definitions*/
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
@@ -87,7 +87,16 @@ static volatile uint16_t UART_rx_buffer_index;
 static volatile uint16_t UART_rx_buffer_index_max;
 static volatile size_t offset = 0;
 
+static volatile uint32_t start;
+
+static volatile uint16_t uart_frame_received_count = 0;
+static volatile uint16_t uart_frame_send_count = 0;
+
+static volatile uint16_t zb_frame_received_count = 0;
+static volatile uint16_t zb_frame_send_count = 0;
+
 static volatile	zb_uint8_t *pointerToBeginOfBuffer;
+static volatile	zb_int32_t sizeOfPayload;
 
   // Create a UART configuration structure
 static struct uart_config uart_cfg = {
@@ -118,6 +127,7 @@ LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 bool b_Modbus_Request_Received_via_Zigbee = false;
 bool b_Modbus_Ready_to_send = false;
 bool b_Zigbe_Connected = false;
+bool b_send_modbus_via_UART = false;
 
 /* Main application customizable context.
  * Stores all settings and static values.
@@ -255,7 +265,6 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 			if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
 			{
 				zb_uint8_t *pointerToEndOfBuffer;
-				zb_int32_t sizeOfPayload;
 				pointerToBeginOfBuffer = zb_buf_begin(bufid);
 				pointerToEndOfBuffer = zb_buf_end(bufid);
 				sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
@@ -283,22 +292,30 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 					//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
 					if ((sizeOfPayload >= MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0xC4))
 					{
-						b_Modbus_Request_Received_via_Zigbee = true;
+
 						if(PRINT_ZIGBEE_INFO)
 						{
 							printk("bModbusRequestReceived via zigbee and send via UART \n");
 						}
+						zb_frame_received_count++;
 						// safe zigbee source endpoint info to send the asnwer
 						ZB_profileid = ind->profileid;
     					ZB_clusterid = ind->clusterid;
     					ZB_src_endpoint = ind->src_endpoint;
     					ZB_dst_endpoint = ind->dst_endpoint;
     					ZB_aps_counter = ind->aps_counter;
-
+/*
 						for (uint8_t i = 0; i < sizeOfPayload; i++)
 						{
-							send_uart(pointerToBeginOfBuffer[i]);
+							//send_uart(pointerToBeginOfBuffer[i]);
+							
 						}
+
+*/
+						b_send_modbus_via_UART = true;
+
+						uart_frame_send_count++;
+						b_Modbus_Request_Received_via_Zigbee = true;
 					}
 				}
 			}
@@ -573,11 +590,6 @@ void send_zigbee_modbus_answer(void)
 
 }
 
-void clear_rx_buffer(char* buf, size_t size) {
-    // Set all elements of the buffer to zero
-    memset(buf, NULL, size);
-}
-
 // Interrupt handler for the timer
 // NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
@@ -601,8 +613,42 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 						UART_ticks_since_last_byte = 0;
 						b_Modbus_Ready_to_send = true;
 						b_Modbus_Request_Received_via_Zigbee = false;
+						uart_frame_received_count++;
+						uint32_t timeout_in_ms;
+						timeout_in_ms = (k_uptime_get_32() - start);
+						printk("time to GET via uart modbus request %lu\n", timeout_in_ms);
     			    }
 				}
+			}
+			if(b_send_modbus_via_UART)
+			{	
+				start = k_uptime_get_32();
+
+				for (int i = 0; i < sizeOfPayload; i++) 
+				{
+					uart_poll_out(dev_uart, pointerToBeginOfBuffer[i]);
+				}
+				b_send_modbus_via_UART = false;
+				uint32_t timeout_in_ms;
+				timeout_in_ms = (k_uptime_get_32() - start);
+				printk("time to SEND via uart modbus request %lu\n", timeout_in_ms);
+			}
+
+					// when modbus answer is ready send the answer
+			if(b_Modbus_Ready_to_send)
+			{
+				uint32_t timeout_in_ms;
+				timeout_in_ms = (k_uptime_get_32() - start);
+				printk("time to b_Modbus_Ready_to_send %lu\n", timeout_in_ms);
+	
+				send_zigbee_modbus_answer();
+				b_Modbus_Ready_to_send = false;
+				UART_rx_buffer_index = 0;
+				offset=0;
+				zb_frame_send_count++;
+	
+				timeout_in_ms = (k_uptime_get_32() - start);
+				printk("time to SENT b_Modbus_Ready_to_send %lu\n", timeout_in_ms);
 			}
 			break;
 		default:
@@ -654,7 +700,6 @@ static void timer1_init(void)
 
 	// Setup TIMER1 to generate callbacks every second 1000000
 	// Setup TIMER1 to generate callbacks every 100ms 100000
-	//timer1_repeated_timer_start(100);
 	timer1_repeated_timer_start(100);
 }
 
@@ -695,36 +740,44 @@ void serial_cb(const struct device *dev, void *user_data)
 
 	if(ret == 1) 
 	{
-		if( b_UART_receiving_frame )
-    	{
-			if( !b_UART_overflow )
-    	    {
-    	        if( UART_rx_buffer_index >= UART_RX_BUFFER_SIZE )
-    	        {
-    	            b_UART_overflow = true;
-					printk("b_UART_overflow \n");
-					return b_UART_overflow;
-    	        }
-    	        else
-    	        {                       
-    	            UART_rx_buffer[UART_rx_buffer_index] = rx_buf;     
-					//printk("UART char arrived %02x index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
-					UART_rx_buffer_index_max = UART_rx_buffer_index;        
-    	            UART_rx_buffer_index++;
-    	        }
-    	    }
-			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+		if (b_Modbus_Request_Received_via_Zigbee)
+		{
+			printk("UART MODBUS response %02x \n", rx_buf);     
+			if( b_UART_receiving_frame )
+    		{
+				if( !b_UART_overflow )
+    		    {
+    		        if( UART_rx_buffer_index >= UART_RX_BUFFER_SIZE )
+    		        {
+    		            b_UART_overflow = true;
+						printk("b_UART_overflow \n");
+    		        }
+    		        else
+    		        {                       
+    		            UART_rx_buffer[UART_rx_buffer_index] = rx_buf;     
+						//printk("UART char arrived %02x index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
+						UART_rx_buffer_index_max = UART_rx_buffer_index;        
+    		            UART_rx_buffer_index++;
+    		        }
+    		    }
+				UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+			}
+			else
+			{
+    		    b_UART_receiving_frame = true;
+    		    b_UART_overflow = false;
+    		    UART_rx_buffer[0] = rx_buf;
+				//printk("UART char arrived %02x index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
+    		    UART_rx_buffer_index = 1;
+				UART_rx_buffer_index_max = UART_rx_buffer_index;        
+				UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+			}
 		}
 		else
 		{
-    	    b_UART_receiving_frame = true;
-    	    b_UART_overflow = false;
-    	    UART_rx_buffer[0] = rx_buf;
-			//printk("UART char arrived %02x index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
-    	    UART_rx_buffer_index = 1;
-			UART_rx_buffer_index_max = UART_rx_buffer_index;        
-			UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+			printk("UART char arrived but is not MODBUS %02x \n", rx_buf);     
 		}
+		
 	}
 	else if (ret == 0)
 	{
@@ -787,7 +840,7 @@ static void app_uart_init(void)
 }
 
 
-// Function for initializing the TIMER1 peripheral using the nrfx driver
+// Function for initializing the GPIO 
 static void gpio_init(void)
 {
 	int ret;
@@ -839,6 +892,11 @@ void diagnostic_toogle_pin()
 	if (ret < 0) {
 		return;
 	}
+
+	printf("uart_frame_received_count %d\n", uart_frame_received_count);
+	printf("uart_frame_send_count %d\n", uart_frame_send_count);
+	printf("zb_frame_received_count %d\n", zb_frame_received_count);
+	printf("zb_frame_send_count %d\n", zb_frame_send_count);
 
 	k_msleep(SLEEP_TIME_MS);
 }
@@ -946,15 +1004,6 @@ int main(void)
 		// run diagnostic functions
 		diagnostic_toogle_pin();
 		diagnostic_zigbee_info();
-
-		// when modbus answer is ready send the answer
-		if(b_Modbus_Ready_to_send)
-		{
-			send_zigbee_modbus_answer();
-			b_Modbus_Ready_to_send = false;
-			UART_rx_buffer_index = 0;
-			offset=0;
-		}
 	}
 
 	return 0;
