@@ -49,7 +49,7 @@
 #define LED0_NODE DT_ALIAS(led0)
 
 /* Default tick to consider a modbus frame completed*/
-#define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 23 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
+#define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 100 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
 /*UART Modbus and zigbee buffer size definitions*/
 #define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
@@ -738,11 +738,11 @@ void serial_cb(const struct device *dev, void *user_data)
 	int ret;
 	ret = uart_fifo_read(dev_uart, &rx_buf, 1);
 
-	if(ret == 1) 
+	if(ret >= 1) 
 	{
 		if (b_Modbus_Request_Received_via_Zigbee)
 		{
-			printk("UART MODBUS response %02x \n", rx_buf);     
+			printk("UART MODBUS response %02x, number of bytes %d \n", rx_buf, ret);     
 			if( b_UART_receiving_frame )
     		{
 				if( !b_UART_overflow )
