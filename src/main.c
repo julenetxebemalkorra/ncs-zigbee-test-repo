@@ -87,7 +87,6 @@ static uint16_t UART_ticks_to_consider_frame_completed;
 static volatile bool b_UART_overflow;
 static volatile uint16_t UART_rx_buffer_index;
 static volatile uint16_t UART_rx_buffer_index_max;
-static volatile size_t offset = 0;
 static volatile bool b_Modbus_Request_algorithm_finished = false;
 
 
@@ -322,8 +321,6 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
 						b_UART_send_Modbus_frame = true;
 						b_Modbus_Request_algorithm_finished = false;
-
-						uart_frame_send_count++;
 					}
 				}
 			}
@@ -479,32 +476,61 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 			printk("\n");
 		}
 
+		if(PRINT_ZIGBEE_INFO)
+		{
+				printk("ind Profileid 0x%04x \n", ZB_profileid);
+    			printk("ind Clusterid 0x%04x \n", ZB_clusterid);
+    			printk("ind Source Endpoint %d \n", ZB_src_endpoint);
+    			printk("ind Destination Endpoint %d \n", ZB_dst_endpoint);
+		}
+
+
 		if( (MODBUS_MIN_RX_LENGTH <= chunk_size) && (chunk_size <= MAX_ZIGBEE_PAYLOAD_SIZE) )
 		{
 	    	//zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 			if(bufid)
 			{
-			/*zb_aps_send_user_payload(bufid, 
-			    					 dst_addr,
-				    				 0xc105,
-					    			 0X0011,
-						    		 232,
-							    	 232,
-									 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-			    					 ZB_FALSE,
-				    				 outputPayload,
-					    			 9); */
-			zb_aps_send_user_payload(bufid, 
-			    					 dst_addr,
-				    				 ZB_profileid,
-					    			 ZB_clusterid,
-						    		 ZB_src_endpoint,
-							    	 ZB_dst_endpoint,
-									 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-			    					 ZB_FALSE,
-				    				 outputPayload,
-					    			 chunk_size); 
-			zb_frame_send_count++;
+				/*zb_aps_send_user_payload(bufid, 
+				    					 dst_addr,
+					    				 0xc105,
+						    			 0X0011,
+							    		 232,
+								    	 232,
+										 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+				    					 ZB_FALSE,
+					    				 outputPayload,
+						    			 9); */
+				zb_ret_t ret = zb_aps_send_user_payload(bufid, 
+				    					 dst_addr,
+					    				 ZB_profileid,
+						    			 ZB_clusterid,
+							    		 ZB_src_endpoint,
+								    	 ZB_dst_endpoint,
+										 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+				    					 ZB_FALSE,
+					    				 outputPayload,
+						    			 chunk_size); 
+				if(ret == RET_OK)
+				{
+					printk("RET_OK - if transmission was successful scheduled;\n");
+				}
+				else if(ret == RET_INVALID_PARAMETER_1)
+				{
+					printk("RET_INVALID_PARAMETER_1 - if the buffer is invalid\n");
+				}
+				else if(ret == RET_INVALID_PARAMETER_2)
+				{
+					printk("RET_INVALID_PARAMETER_2 - if the payload_ptr parameter is invalid;\n");
+				}
+				else if(ret == RET_INVALID_PARAMETER_3)
+				{
+					printk("RET_INVALID_PARAMETER_3 - if the payload_size parameter is too large;\n");
+				}
+				else
+				{
+					printk("Unkown error zb_aps_send_user_payload ;\n");
+				}
+				zb_frame_send_count++;
 			}
 			else
 			{
@@ -536,7 +562,7 @@ void send_zigbee_modbus_answer(void)
 	//zb_uint8_t outputPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 	//zb_uint8_t outputPayload[MAX_ZIGBEE_PAYLOAD_SIZE];
 
-	send_user_payload(&UART_rx_buffer, (UART_rx_buffer_index_max +1));
+	//send_user_payload(&UART_rx_buffer, (UART_rx_buffer_index_max +1));
 /*
 	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
 
@@ -657,6 +683,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 				}
 				b_UART_send_Modbus_frame = false;
 				b_UART_get_Modbus_frame = true;
+				uart_frame_send_count++;
 				uint32_t timeout_in_ms;
 				timeout_in_ms = (k_uptime_get_32() - start);
 				printk("time to SEND via uart modbus request %lu\n", timeout_in_ms);
@@ -664,15 +691,12 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 			// when modbus answer is ready send the answer
 			if(b_ZB_send_Modbus_frame)
 			{
+				b_ZB_send_Modbus_frame = false;
 				uint32_t timeout_in_ms;
 				timeout_in_ms = (k_uptime_get_32() - start);
 				printk("time to b_ZB_send_Modbus_frame %lu\n", timeout_in_ms);
 	
-				send_zigbee_modbus_answer();
-				b_ZB_send_Modbus_frame = false;
-				UART_rx_buffer_index = 0;
-				offset=0;
-	
+				send_user_payload(&UART_rx_buffer, (UART_rx_buffer_index_max +1));	
 				timeout_in_ms = (k_uptime_get_32() - start);
 				printk("time to SENT b_ZB_send_Modbus_frame %lu\n", timeout_in_ms);
 			}
@@ -1126,7 +1150,7 @@ int main(void)
 	while(1)
 	{		
 		// run diagnostic functions
-		diagnostic_toogle_pin();
+		//diagnostic_toogle_pin();
 		diagnostic_zigbee_info();
 	}
 
