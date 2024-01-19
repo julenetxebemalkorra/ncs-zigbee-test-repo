@@ -27,6 +27,8 @@
 
 #include <nrfx_timer.h>
 
+#include <zephyr/drivers/hwinfo.h>
+
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
 
@@ -982,6 +984,98 @@ void diagnostic_zigbee_info()
 	}
 }
 
+void get_restet_reason(void)
+{
+	uint32_t reset_cause;
+	int result = hwinfo_get_reset_cause(&reset_cause);
+    if (result == 0) 
+	{
+    // Success, reset_cause now contains the reset cause flags
+    // You can analyze the flags to determine the cause of the reset
+    // ...
+		printk("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nreset cause is:");
+
+		if (reset_cause & RESET_PIN)
+		{
+			printf("RESET_PIN\n"); // 0
+		}
+		else if (reset_cause & RESET_SOFTWARE)
+		{
+    		printf("RESET_SOFTWARE\n"); // 1
+		}
+		else if (reset_cause & RESET_BROWNOUT)
+		{
+			printf("RESET_BROWNOUT\n"); // 2
+		}
+		else if(reset_cause & RESET_POR)
+		{
+    		printf("RESET_POR\n"); // 3
+		}
+		else if(reset_cause & RESET_WATCHDOG)
+		{
+			printf("RESET_WATCHDOG\n"); // 4
+		}
+		else if(reset_cause & RESET_DEBUG)
+		{
+			printf("RESET_DEBUG\n"); // 5
+		}
+    	else if(reset_cause & RESET_SECURITY)
+		{
+			printf("RESET_SECURITY\n"); // 6
+		}
+		else if(reset_cause & RESET_LOW_POWER_WAKE)
+		{
+			printf("RESET_LOW_POWER_WAKE\n"); // 7
+		}
+		else if(reset_cause & RESET_CPU_LOCKUP)
+		{
+			printf("RESET_CPU_LOCKUP\n"); // 8
+		}
+		else if(reset_cause & RESET_PARITY)
+		{
+			printf("RESET_PARITY\n"); // 9
+		}
+		else if(reset_cause & RESET_PLL)
+		{
+			printf("RESET_PLL\n"); // 10
+		}
+		else if(reset_cause & RESET_CLOCK)
+		{
+			printf("RESET_CLOCK\n"); // 11
+		}
+		else if(reset_cause & RESET_HARDWARE)
+		{
+			printf("RESET_HARDWARE\n"); // 12
+		}
+		else if(reset_cause & RESET_USER)
+		{
+			printf("RESET_USER\n"); // 13
+		}
+		else if (reset_cause & RESET_TEMPERATURE)
+		{
+			printf("RESET_TEMPERATURE\n\n"); // 14
+		}
+		else
+		{
+			printk("\n\n reset cause is %d\n\n",reset_cause);
+		}
+    // Optionally, you can call hwinfo_clear_reset_cause to clear the hardware flags
+    // This is useful if you only want to consider the cause of the most recent reset
+    	hwinfo_clear_reset_cause();
+
+    } else if (result == -ENOSYS) 
+	{
+        // Handle the case where there is no implementation for the particular device
+        // ...
+		printk("\n\n there is no implementation for the particular device.\n\n");
+    } else 
+	{
+        // Handle other errors
+        // ...
+		printk("\n\n negative value on driver specific errors\n\n");
+    }
+}
+
 int main(void)
 {
 	/* Initialize UART*/
@@ -999,6 +1093,7 @@ int main(void)
 	/* Start Zigbee default thread */
 	zigbee_enable();
 
+	get_restet_reason();
 	while(1)
 	{		
 		// run diagnostic functions
