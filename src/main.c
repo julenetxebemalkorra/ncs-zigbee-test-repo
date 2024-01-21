@@ -66,6 +66,8 @@ Note: This part was added to wireshark encription issues
 #define ZB_DISTRIBUTED_GLOBAL_KEY { 0x81, 0x42, , < rest of key > };
 #define ZB_TOUCHLINK_PRECONFIGURED_KEY { 0x81, 0x42, < rest of key > };
 
+static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
+
 uint8_t tcu_transmitted_frames_counter = 0;
 	
 /*
@@ -551,6 +553,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
+            if(debug_led_ms_x10 < 10000) debug_led_ms_x10++;            
 			if( b_UART_receiving_frame )
             {
                 UART_ticks_since_last_byte++;
@@ -649,12 +652,11 @@ void zigbee_configuration()
 // Function for giagnostic purposes. toogle the diagnostic led every second to be sure HW is OK and app is running
 void diagnostic_toogle_pin()
 {
-	int ret = gpio_pin_toggle_dt(&led);
-	if (ret < 0) {
-		return;
-	}
-
-	k_msleep(SLEEP_TIME_MS);
+    if(debug_led_ms_x10 >= 10000)
+    {
+        debug_led_ms_x10 = 0;
+        gpio_pin_toggle_dt(&led);
+    }
 }
 
 // Function to join the Zigbee network
