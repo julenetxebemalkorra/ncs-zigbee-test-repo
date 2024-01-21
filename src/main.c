@@ -473,7 +473,7 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
   
   Caution: Be mindful when altering the delay to prevent network congestion.
 */
-	k_msleep(SLEEP_TIME_MS);
+	//k_msleep(SLEEP_TIME_MS);
 
 }
 
