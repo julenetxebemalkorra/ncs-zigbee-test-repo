@@ -27,6 +27,8 @@
 
 #include <nrfx_timer.h>
 
+#include "tcu_Uart.h"
+
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
 
@@ -39,11 +41,11 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 /* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO             	ZB_FALSE
-#define PRINT_UART_INFO             	ZB_FALSE
+#define PRINT_ZIGBEE_INFO             	ZB_TRUE//ZB_FALSE
+#define PRINT_UART_INFO             	ZB_TRUE//ZB_FALSE
 
 /* 1000 msec = 1 sec */
-#define SLEEP_TIME_MS   10000
+#define SLEEP_TIME_MS   1000
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
@@ -52,7 +54,6 @@
 #define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 100 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
 
 /*UART Modbus and zigbee buffer size definitions*/
-#define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
 #define MODBUS_MIN_RX_LENGTH             8   // if the messagge has 8 bytes we consider it a modbus frame
 #define MAX_ZIGBEE_PAYLOAD_SIZE 		 82 // Maximum payload size that can be sent at once via zigbee
 
@@ -65,8 +66,7 @@ Note: This part was added to wireshark encription issues
 #define ZB_DISTRIBUTED_GLOBAL_KEY { 0x81, 0x42, , < rest of key > };
 #define ZB_TOUCHLINK_PRECONFIGURED_KEY { 0x81, 0x42, < rest of key > };
 
-/* Get the device pointer of the UART hardware */
-static const struct device *dev_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));;
+uint8_t tcu_transmitted_frames_counter = 0;
 	
 /*
  * A build error on this line means your board is unsupported.
@@ -78,34 +78,16 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
 /* UART configuration variables*/
-static volatile char UART_rx_buffer[UART_RX_BUFFER_SIZE];
-static volatile bool b_UART_receiving_frame;
-static volatile uint16_t UART_ticks_since_last_byte;
-static uint16_t UART_ticks_to_consider_frame_completed;
-static volatile bool b_UART_overflow;
-static volatile uint16_t UART_rx_buffer_index;
-static volatile uint16_t UART_rx_buffer_index_max;
+volatile uint16_t UART_ticks_since_last_byte;
+volatile char UART_rx_buffer[UART_RX_BUFFER_SIZE];
+volatile uint16_t UART_rx_buffer_index;
+volatile uint16_t UART_rx_buffer_index_max;
+uint16_t UART_ticks_to_consider_frame_completed;
+
 static volatile size_t offset = 0;
-
-static volatile uint32_t start;
-
-static volatile uint16_t uart_frame_received_count = 0;
-static volatile uint16_t uart_frame_send_count = 0;
-
-static volatile uint16_t zb_frame_received_count = 0;
-static volatile uint16_t zb_frame_send_count = 0;
+volatile bool b_UART_receiving_frame;
 
 static volatile	zb_uint8_t *pointerToBeginOfBuffer;
-static volatile	zb_int32_t sizeOfPayload;
-
-  // Create a UART configuration structure
-static struct uart_config uart_cfg = {
-        .baudrate = 19200,                    // Set baudrate to 9600 bps
-        .parity = UART_CFG_PARITY_EVEN,      // No parity
-        .stop_bits = UART_CFG_STOP_BITS_1,   // 1 stop bit
-        .data_bits = UART_CFG_DATA_BITS_8,   // 8 data bits
-        .flow_ctrl = UART_CFG_FLOW_CTRL_NONE // No flow control
- };
 
 /* Zigbee messagge info*/
 static volatile uint16_t ZB_profileid;
@@ -127,7 +109,7 @@ LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
 bool b_Modbus_Request_Received_via_Zigbee = false;
 bool b_Modbus_Ready_to_send = false;
 bool b_Zigbe_Connected = false;
-bool b_send_modbus_via_UART = false;
+bool bTimeToSendFrame = false;
 
 /* Main application customizable context.
  * Stores all settings and static values.
@@ -178,25 +160,6 @@ static void app_clusters_attr_init(void)
 	/* Identify cluster attributes data. */
 	dev_ctx.identify_attr.identify_time =
 		ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE;
-}
-
-/*----------------------------------------------------------------------------*/
-/* Function: UART_driver_init()                                              */
-/*                                                                            */
-/* This function initializes the local variables of the UART module          */
-/*                                                                            */
-/* Parameters: None                                                           */
-/* Returns: None                                                              */
-/*                                                                            */
-/*----------------------------------------------------------------------------*/
-void UART_conf_init(void)
-{ 
-    b_UART_receiving_frame = false;
-    UART_ticks_since_last_byte = 0;
-    UART_ticks_to_consider_frame_completed = DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED;
-	b_UART_overflow = false;
-	UART_rx_buffer_index = 0;
-	UART_rx_buffer_index_max = 0;
 }
 
 /**@brief Starts identifying the device.
@@ -265,6 +228,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 			if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
 			{
 				zb_uint8_t *pointerToEndOfBuffer;
+				zb_int32_t sizeOfPayload;
 				pointerToBeginOfBuffer = zb_buf_begin(bufid);
 				pointerToEndOfBuffer = zb_buf_end(bufid);
 				sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
@@ -290,37 +254,35 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 					}
 
 					//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
-					if ((sizeOfPayload >= MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0xC4))
+					//if ((sizeOfPayload >= MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0xC4))
+                    if(sizeOfPayload >= MODBUS_MIN_RX_LENGTH)
 					{
-
+						b_Modbus_Request_Received_via_Zigbee = true;
 						if(PRINT_ZIGBEE_INFO)
 						{
 							printk("bModbusRequestReceived via zigbee and send via UART \n");
 						}
-						zb_frame_received_count++;
 						// safe zigbee source endpoint info to send the asnwer
 						ZB_profileid = ind->profileid;
     					ZB_clusterid = ind->clusterid;
     					ZB_src_endpoint = ind->src_endpoint;
     					ZB_dst_endpoint = ind->dst_endpoint;
     					ZB_aps_counter = ind->aps_counter;
-/*
-						for (uint8_t i = 0; i < sizeOfPayload; i++)
+
+                        sendFrameToTcu(&pointerToBeginOfBuffer[0], sizeOfPayload);
+
+						/*for (uint8_t i = 0; i < sizeOfPayload; i++)
 						{
-							//send_uart(pointerToBeginOfBuffer[i]);
-							
-						}
-
-*/
-						b_send_modbus_via_UART = true;
-
-						uart_frame_send_count++;
-						b_Modbus_Request_Received_via_Zigbee = true;
+							send_uart(pointerToBeginOfBuffer[i]);
+						}*/
 					}
 				}
+
 			}
 		//}
+		
 	}
+
     if (bufid)
     {
 		zb_buf_free(bufid); // JESUS: I don't know if this is needed, but I try, just in case.
@@ -499,7 +461,17 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 	    zb_buf_free(bufid);
 	}
 
+/*
+  Note: This code includes a one-second delay between Zigbee package transmissions for stability.
 
+  To adjust the delay time:
+  - Locate the 'sleep' function.
+  - Modify the argument value in 'sleep' for a different delay duration.
+  - Test the code after changing the delay to ensure proper functionality.
+  
+  Caution: Be mindful when altering the delay to prevent network congestion.
+*/
+	k_msleep(SLEEP_TIME_MS);
 
 }
 
@@ -513,8 +485,6 @@ void send_zigbee_modbus_answer(void)
 
 	//zb_uint8_t outputPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 	zb_uint8_t outputPayload[MAX_ZIGBEE_PAYLOAD_SIZE];
-
-	send_user_payload(&UART_rx_buffer, (UART_rx_buffer_index_max +1));
 /*
 	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
 
@@ -547,7 +517,7 @@ void send_zigbee_modbus_answer(void)
 	{
 		printk("%c- ", UART_rx_buffer[i]);
 	}
-
+*/
 	size_t remaining_length = UART_rx_buffer_index_max +1;
 
     // Transmit the modified payload in chunks via Zigbee
@@ -556,12 +526,12 @@ void send_zigbee_modbus_answer(void)
     	size_t chunk_size = MIN(remaining_length, MAX_ZIGBEE_PAYLOAD_SIZE);
 
 		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
-
+/**
 		for (uint8_t i = 0; i < chunk_size; i++)
 		{
 		printk("%c- ", outputPayload[i]);
 		}
-
+*/
 		send_user_payload(&outputPayload, chunk_size);
 
         // Reset flags for the next chunk
@@ -570,23 +540,7 @@ void send_zigbee_modbus_answer(void)
 		// Update offset and remaining length for the next chunk
     	offset += chunk_size;
     	remaining_length -= chunk_size;
-*/
-		/*
-	  	Note: This code includes a one-second delay between Zigbee package transmissions for stability.
-
-	  	To adjust the delay time:
-	  	- Locate the 'sleep' function.
-	  	- Modify the argument value in 'sleep' for a different delay duration.
-	  	- Test the code after changing the delay to ensure proper functionality.
-
-	  	Caution: Be mindful when altering the delay to prevent network congestion.
-	
-		if(remaining_length)
-		{
-			k_msleep(SLEEP_TIME_MS);
-		}
-			*/
-	//}
+	}
 
 }
 
@@ -595,61 +549,23 @@ void send_zigbee_modbus_answer(void)
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
 void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
-	/* temp array for get_uart function*/
-	char rx_buf[UART_RX_BUFFER_SIZE];
-	int ret;
-
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
-			//if (!bModbusRequestReceived) printk("Timer 1 callback = %d bModbusRequestReceived %d\n", bModbusRequestReceived);
-			if (b_Modbus_Request_Received_via_Zigbee)
-			{
-				UART_ticks_since_last_byte++;
-				if( b_UART_receiving_frame )
+			if( b_UART_receiving_frame )
+            {
+                UART_ticks_since_last_byte++;
+    			if( UART_ticks_since_last_byte > UART_ticks_to_consider_frame_completed )
     			{
-    			    if( UART_ticks_since_last_byte > UART_ticks_to_consider_frame_completed )
-    			    {
-    			        b_UART_receiving_frame = false; 
-						UART_ticks_since_last_byte = 0;
-						b_Modbus_Ready_to_send = true;
-						b_Modbus_Request_Received_via_Zigbee = false;
-						uart_frame_received_count++;
-						uint32_t timeout_in_ms;
-						timeout_in_ms = (k_uptime_get_32() - start);
-						printk("time to GET via uart modbus request %lu\n", timeout_in_ms);
-    			    }
-				}
-			}
-			if(b_send_modbus_via_UART)
-			{	
-				start = k_uptime_get_32();
-
-				for (int i = 0; i < sizeOfPayload; i++) 
-				{
-					uart_poll_out(dev_uart, pointerToBeginOfBuffer[i]);
-				}
-				b_send_modbus_via_UART = false;
-				uint32_t timeout_in_ms;
-				timeout_in_ms = (k_uptime_get_32() - start);
-				printk("time to SEND via uart modbus request %lu\n", timeout_in_ms);
-			}
-
-					// when modbus answer is ready send the answer
-			if(b_Modbus_Ready_to_send)
-			{
-				uint32_t timeout_in_ms;
-				timeout_in_ms = (k_uptime_get_32() - start);
-				printk("time to b_Modbus_Ready_to_send %lu\n", timeout_in_ms);
-	
-				send_zigbee_modbus_answer();
-				b_Modbus_Ready_to_send = false;
-				UART_rx_buffer_index = 0;
-				offset=0;
-				zb_frame_send_count++;
-	
-				timeout_in_ms = (k_uptime_get_32() - start);
-				printk("time to SENT b_Modbus_Ready_to_send %lu\n", timeout_in_ms);
-			}
+    			    b_UART_receiving_frame = false;
+    			    UART_ticks_since_last_byte = 0;
+    			    b_Modbus_Ready_to_send = true;
+    			    b_Modbus_Request_Received_via_Zigbee = false;
+    			}
+            }
+            else
+            {
+                UART_ticks_since_last_byte = 0;
+            }
 			break;
 		default:
 			break;
@@ -673,26 +589,7 @@ static void timer1_init(void)
 
 	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
 	if (err != NRFX_SUCCESS) {
-		if(err == NRFX_ERROR_INVALID_PARAM)
-		{
-			printk("Specified frequency is not supported by the TIMER instance.\n");
-		}
-		else if(err == NRFX_ERROR_ALREADY_INITIALIZED)
-		{
-			printk("The driver is already initialized..\n");
-		}
-		else if(err == NRFX_ERROR_INVALID_STATE )
-		{
-			printk("NRFX_ERROR_INVALID_STATE \n");
-		}
-		else
-		{
-			printk("Error initializing timer: %x\n", err);
-		}
-	}
-	else
-	{
-		printk("timer initialized correctly\n");
+		printk("Error initializing timer: %x\n", err);
 	}
 
 	IRQ_DIRECT_CONNECT(TIMER1_IRQn, 0, nrfx_timer_1_irq_handler, 0);
@@ -700,147 +597,11 @@ static void timer1_init(void)
 
 	// Setup TIMER1 to generate callbacks every second 1000000
 	// Setup TIMER1 to generate callbacks every 100ms 100000
-	timer1_repeated_timer_start(100);
+	timer1_repeated_timer_start(100); //100 us
+	//timer1_repeated_timer_start(200000); // 200 ms
 }
 
-/*
-* Write a character to the device for output.
- */
-void send_uart(uint8_t out_uint8) 
-{
-/*
-Write a character to the device for output.
-This routine checks if the transmitter is full. When the transmitter is not full, it writes a character to the data register. 
-It waits and blocks the calling thread, otherwise. This function is a blocking call.
-To send a character when hardware flow control is enabled, the handshake signal CTS must be asserted.
-*/
-	uart_poll_out(dev_uart, (unsigned char)out_uint8);
-}
-
-/*
- * Read characters from UART until line end is detected. Afterwards push the
- * data to the message queue.
- */
-void serial_cb(const struct device *dev, void *user_data)
-{
-	uint8_t rx_buf;
-	//printk("serial_cb \n");
-
-	if (!uart_irq_update(dev_uart)) {
-		return;
-	}
-
-	if (!uart_irq_rx_ready(dev_uart)) {
-		return;
-	}
-
-/* read until FIFO empty */
-	int ret;
-	ret = uart_fifo_read(dev_uart, &rx_buf, 1);
-
-	if(ret >= 1) 
-	{
-		if (b_Modbus_Request_Received_via_Zigbee)
-		{
-			printk("UART MODBUS response %02x, number of bytes %d \n", rx_buf, ret);     
-			if( b_UART_receiving_frame )
-    		{
-				if( !b_UART_overflow )
-    		    {
-    		        if( UART_rx_buffer_index >= UART_RX_BUFFER_SIZE )
-    		        {
-    		            b_UART_overflow = true;
-						printk("b_UART_overflow \n");
-    		        }
-    		        else
-    		        {                       
-    		            UART_rx_buffer[UART_rx_buffer_index] = rx_buf;     
-						//printk("UART char arrived %02x index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));     
-						UART_rx_buffer_index_max = UART_rx_buffer_index;        
-    		            UART_rx_buffer_index++;
-    		        }
-    		    }
-				UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
-			}
-			else
-			{
-    		    b_UART_receiving_frame = true;
-    		    b_UART_overflow = false;
-    		    UART_rx_buffer[0] = rx_buf;
-				//printk("UART char arrived %02x index: %d \n",UART_rx_buffer[UART_rx_buffer_index], (UART_rx_buffer_index));             
-    		    UART_rx_buffer_index = 1;
-				UART_rx_buffer_index_max = UART_rx_buffer_index;        
-				UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
-			}
-		}
-		else
-		{
-			printk("UART char arrived but is not MODBUS %02x \n", rx_buf);     
-		}
-		
-	}
-	else if (ret == 0)
-	{
-		UART_ticks_since_last_byte++;
-		printk("uart_poll_in No character available. increment rs485_ticks_since_last_byte %d\n", UART_ticks_since_last_byte);
-	}
-	else if (ret == -ENOSYS)
-	{
-		printk("uart_poll_in ENOSYS UART polling operation not implemented \n");
-	}
-		else if (ret == -EBUSY)
-	{
-		printk("uart_poll_in -EBUSY Async reception was enabled.\n");
-	}
-	else
-	{
-		UART_ticks_since_last_byte++;
-		printk("uart_poll_in Unknown error. \n");
-	}
-}
-
-// Function for initializing the UART peripheral
-static void app_uart_init(void)
-{
-	if (!device_is_ready(dev_uart)) {
-		printk("UART device not found!");
-		return 0;
-	}
-
-	// Call uart_configure to apply the configuration
-    int result = uart_configure(dev_uart, &uart_cfg);
-
-	// Check the result
-    if (result == 0) {
-        printf("UART configuration successful!\n");
-    } else {
-        printf("UART configuration failed with error code: %d\n", result);
-    }
-	
-	/* configure interrupt and callback to receive data */
-	int ret = uart_irq_callback_user_data_set(dev_uart, serial_cb, NULL);
-
-	if (ret < 0) {
-		if (ret == -ENOTSUP) {
-			printk("Interrupt-driven UART API support not enabled\n");
-		} else if (ret == -ENOSYS) {
-			printk("UART device does not support interrupt-driven API\n");
-		} else {
-			printk("Error setting UART callback: %d\n", ret);
-		}
-		return 0;
-	}
-	else
-	{
-        printf("UART Interrupt configuration successful!\n");
-	}
-
-	uart_irq_rx_enable(dev_uart);
-
-}
-
-
-// Function for initializing the GPIO 
+// Function for initializing the TIMER1 peripheral using the nrfx driver
 static void gpio_init(void)
 {
 	int ret;
@@ -892,11 +653,6 @@ void diagnostic_toogle_pin()
 	if (ret < 0) {
 		return;
 	}
-
-	printf("uart_frame_received_count %d\n", uart_frame_received_count);
-	printf("uart_frame_send_count %d\n", uart_frame_send_count);
-	printf("zb_frame_received_count %d\n", zb_frame_received_count);
-	printf("zb_frame_send_count %d\n", zb_frame_send_count);
 
 	k_msleep(SLEEP_TIME_MS);
 }
@@ -984,14 +740,10 @@ void diagnostic_zigbee_info()
 
 int main(void)
 {
-	/* Initialize UART*/
-	app_uart_init();
-
+    tcu_uart_init();
 	// Initialize TIMER1
 	timer1_init();
 	
-	UART_conf_init();
-
 	gpio_init();
 
 	zigbee_configuration();
@@ -1004,6 +756,23 @@ int main(void)
 		// run diagnostic functions
 		diagnostic_toogle_pin();
 		diagnostic_zigbee_info();
+
+		// when modbus answer is ready send the answer
+		if(b_Modbus_Ready_to_send)
+		{
+			send_zigbee_modbus_answer();
+			b_Modbus_Ready_to_send = false;
+			UART_rx_buffer_index = 0;
+			offset=0;
+		}
+
+       /* if(bTimeToSendFrame)
+		{
+			bTimeToSendFrame = false;
+            tcu_transmitted_frames_counter++;
+            sendFrameToTcuTest();
+		}*/
+		
 	}
 
 	return 0;

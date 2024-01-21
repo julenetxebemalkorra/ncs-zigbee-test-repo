@@ -13,6 +13,7 @@ project(dual_wireless_test_uart)
 # NORDIC SDK APP START
 target_sources(app PRIVATE
   src/main.c
+  src/Tcu_Uart.c
 )
 
 target_include_directories(app PRIVATE include)
