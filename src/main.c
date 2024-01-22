@@ -67,6 +67,9 @@ Note: This part was added to wireshark encription issues
 #define ZB_DISTRIBUTED_GLOBAL_KEY { 0x81, 0x42, , < rest of key > };
 #define ZB_TOUCHLINK_PRECONFIGURED_KEY { 0x81, 0x42, < rest of key > };
 
+static const zb_ext_pan_id_t ext_pan_id[8] = {{0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};	
+const zb_ext_pan_id_t *ptr_ext_pan_id = ext_pan_id;
+
 /* Get the device pointer of the UART hardware */
 static const struct device *dev_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));;
 	
@@ -80,7 +83,7 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
 /* UART configuration variables*/
-static volatile char UART_rx_buffer[UART_RX_BUFFER_SIZE];
+static volatile zb_uint8_t UART_rx_buffer[UART_RX_BUFFER_SIZE];
 static volatile bool b_UART_receiving_frame;
 static volatile uint16_t UART_ticks_since_last_byte;
 static uint16_t UART_ticks_to_consider_frame_completed;
@@ -88,7 +91,6 @@ static volatile bool b_UART_overflow;
 static volatile uint16_t UART_rx_buffer_index;
 static volatile uint16_t UART_rx_buffer_index_max;
 static volatile bool b_Modbus_Request_algorithm_finished = false;
-
 
 static volatile uint32_t start;
 
@@ -269,6 +271,9 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 					if(PRINT_ZIGBEE_INFO)
 					{
 						printk("Size of received payload is %d bytes \n", sizeOfPayload);
+						 
+						printk("apsde_data_indication: packet %d len %hd status 0x%hx from %d \n", bufid, zb_buf_len(bufid), zb_buf_get_status(bufid), ind->src_addr);
+						
 						for (uint8_t i = 0; i < sizeOfPayload; i++)
 						{
 							printk("0x%02x - ", pointerToBeginOfBuffer[i]);
@@ -315,7 +320,9 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
     if (bufid)
     {
 		zb_buf_free(bufid); // JESUS: I don't know if this is needed, but I try, just in case.
+		return ZB_TRUE;
 	}
+	return ZB_FALSE;
 }
 
 /**@brief Zigbee stack event handler.
@@ -333,7 +340,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
 
 		switch (sig) {
 		case ZB_ZDO_SIGNAL_DEFAULT_START:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEFAULT_START\n");
+			if(PRINT_ZIGBEE_INFO) printk( "Zigbee Device STARTED OK\n");
  		break;
 		case ZB_ZDO_SIGNAL_SKIP_STARTUP:
 			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP\n");
@@ -441,7 +448,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
  * @param[in]   chunk_size   payload size to send 
  *
  */
-void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
+void send_user_payload(volatile zb_uint8_t *outputPayload ,size_t chunk_size)
 {
 	    /*Allocate OUT buffer of the default size.*/
 		zb_bufid_t bufid;
@@ -494,7 +501,7 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 								    	 ZB_dst_endpoint,
 										 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
 				    					 ZB_FALSE,
-					    				 outputPayload,
+					    				 (zb_uint8_t *)outputPayload,
 						    			 chunk_size); 
 				if(ret == RET_OK)
 				{
@@ -629,10 +636,6 @@ void send_zigbee_modbus_answer(void)
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
 void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
-	/* temp array for get_uart function*/
-	char rx_buf[UART_RX_BUFFER_SIZE];
-	int ret;
-
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
 			//if (!bModbusRequestReceived) printk("Timer 1 callback = %d bModbusRequestReceived %d\n", bModbusRequestReceived);
@@ -651,7 +654,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 						uart_frame_received_count++;
 						uint32_t timeout_in_ms;
 						timeout_in_ms = (k_uptime_get_32() - start);
-						printk("time to GET via uart modbus request %lu\n", timeout_in_ms);
+						printk("time to GET via uart modbus request %u\n", timeout_in_ms);
     			    }
 				}
 				if (UART_ticks_since_last_byte >= (UART_ticks_to_consider_frame_completed*10))
@@ -672,7 +675,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 				uart_frame_send_count++;
 				uint32_t timeout_in_ms;
 				timeout_in_ms = (k_uptime_get_32() - start);
-				printk("time to SEND via uart modbus request %lu\n", timeout_in_ms);
+				printk("time to SEND via uart modbus request %u\n", timeout_in_ms);
 			}
 			// when modbus answer is ready send the answer
 			if(b_ZB_send_Modbus_frame)
@@ -680,11 +683,11 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 				b_ZB_send_Modbus_frame = false;
 				uint32_t timeout_in_ms;
 				timeout_in_ms = (k_uptime_get_32() - start);
-				printk("time to b_ZB_send_Modbus_frame %lu\n", timeout_in_ms);
+				printk("time to b_ZB_send_Modbus_frame %u\n", timeout_in_ms);
 	
-				send_user_payload(&UART_rx_buffer, (UART_rx_buffer_index_max +1));	
+				send_user_payload((volatile zb_uint8_t *)UART_rx_buffer, (UART_rx_buffer_index_max +1));	
 				timeout_in_ms = (k_uptime_get_32() - start);
-				printk("time to SENT b_ZB_send_Modbus_frame %lu\n", timeout_in_ms);
+				printk("time to SENT b_ZB_send_Modbus_frame %u\n", timeout_in_ms);
 			}
 			break;
 		default:
@@ -836,11 +839,11 @@ void serial_cb(const struct device *dev, void *user_data)
 }
 
 // Function for initializing the UART peripheral
-static void app_uart_init(void)
+uint16_t app_uart_init(void)
 {
 	if (!device_is_ready(dev_uart)) {
 		printk("UART device not found!");
-		return 0;
+		return -1;
 	}
 
 	// Call uart_configure to apply the configuration
@@ -851,6 +854,7 @@ static void app_uart_init(void)
         printf("UART configuration successful!\n");
     } else {
         printf("UART configuration failed with error code: %d\n", result);
+		return result;
     }
 	
 	/* configure interrupt and callback to receive data */
@@ -864,7 +868,7 @@ static void app_uart_init(void)
 		} else {
 			printk("Error setting UART callback: %d\n", ret);
 		}
-		return 0;
+		return ret;
 	}
 	else
 	{
@@ -873,22 +877,24 @@ static void app_uart_init(void)
 
 	uart_irq_rx_enable(dev_uart);
 
+	return 0;
 }
 
 
 // Function for initializing the GPIO 
-static void gpio_init(void)
+uint16_t gpio_init(void)
 {
 	int ret;
 
 	if (!device_is_ready(led.port)) {
-		return 1;
+		return ZB_TRUE;
 	}
 
 	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
 	if (ret < 0) {
-		return 1;
+		return ZB_TRUE;
 	}
+	return ZB_FALSE;
 }
 
 // Function for initializing the Zigbee configuration
@@ -907,9 +913,7 @@ void zigbee_configuration()
     // 3. Call the function with this pointer
 	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
 
-	zb_ext_pan_id_t ext_pan_id[8] = {0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};	
-
-	zb_set_extended_pan_id(ext_pan_id);
+	zb_set_extended_pan_id(ptr_ext_pan_id);
 
 	//TRUE to disable trust center, legacy support for 
 	zb_bdb_set_legacy_device_support(ZB_TRUE);
@@ -1107,14 +1111,20 @@ void get_restet_reason(void)
 int main(void)
 {
 	/* Initialize UART*/
-	app_uart_init();
+	if(app_uart_init())
+	{
+		printk("app_uart_init error\n");
+	}
 
 	// Initialize TIMER1
 	timer1_init();
 	
 	UART_conf_init();
 
-	gpio_init();
+	if(gpio_init())
+	{
+		printk("gpio_init error\n");
+	}
 
 	zigbee_configuration();
 
