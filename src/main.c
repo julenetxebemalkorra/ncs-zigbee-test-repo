@@ -240,18 +240,6 @@ static void start_identifying(zb_bufid_t bufid)
 	}
 }
 
-/**@brief Callback function for handling ZCL commands.
- *
- * @param[in]   bufid   Reference to Zigbee stack buffer
- *                      used to pass received data.
- */
-static void zcl_device_cb(zb_bufid_t bufid)
-{
-	zb_zcl_device_callback_param_t  *device_cb_param = ZB_BUF_GET_PARAM(bufid, zb_zcl_device_callback_param_t);
-	//printk("Received ZCL command %s where device cb id %hd", __func__, device_cb_param->device_cb_id);
-}
-
-
 //------------------------------------------------------------------------------
 /**@brief Callback to call when AF got APS packet.
  *
@@ -260,8 +248,6 @@ static void zcl_device_cb(zb_bufid_t bufid)
  */
 zb_uint8_t data_indication(zb_bufid_t bufid)
 {
-
- 	zb_uint8_t *ptr;
  	zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
     
     if (bufid)
@@ -918,9 +904,6 @@ void zigbee_configuration()
     zb_uint8_t distributed_key[16] = {0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 
                                      0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00};
 
-    // 2. Create a pointer to the key
-    zb_uint8_t* key_ptr = distributed_key;
-
     // 3. Call the function with this pointer
 	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
 
@@ -981,11 +964,8 @@ void diagnostic_zigbee_info()
 {
 	zb_ieee_addr_t zb_long_address;
 	zb_ext_pan_id_t zb_ext_pan_id;
-	zb_nwk_device_type_t zb_role;
 	zb_uint8_t zb_channel;
 	zb_uint16_t zb_shrot_addr;
-	zb_ret_t zb_err_code;
-    zb_ieee_addr_t ieee_addr;
 
 	if(zb_zdo_joined() && b_infit_info_flag == ZB_TRUE)
 	{
