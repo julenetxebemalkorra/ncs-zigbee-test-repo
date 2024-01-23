@@ -46,28 +46,31 @@ static struct uart_config tcu_uart_config = {
 
 /**@brief Initialization of the TCU UART FW module
  *
- *
+ * @retval -1 Error
+ * @retval 0 OK
  */
-void tcu_uart_init(void)
+int8_t tcu_uart_init(void)
 {
-    tcu_uart_configuration();
+    int8_t ret = tcu_uart_configuration();
     b_UART_receiving_frame = false;
     UART_ticks_since_last_byte = 0;
     UART_ticks_to_consider_frame_completed = DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED;
 	b_UART_overflow = false;
 	UART_rx_buffer_index = 0;
 	UART_rx_buffer_index_max = 0;
+    return ret;
 }
 
 /**@brief Configuration and initialization of the UART used to communicate with the TCU
  *
- *
+ * @retval -1 Error
+ * @retval 0 OK
  */
-void tcu_uart_configuration(void)
+int8_t tcu_uart_configuration(void)
 {
 	if (!device_is_ready(dev_tcu_uart)) {
 		printk("UART device not found!");
-		return 0;
+		return -1;
 	}
 
 	// Call uart_configure to apply the configuration
@@ -78,8 +81,9 @@ void tcu_uart_configuration(void)
         printf("TCU UART configuration successful!\n");
     } else {
         printf("TCU UART configuration failed with error code: %d\n", result);
+        return -1;
     }
-	
+
 	/* configure interrupt and callback to receive data */
 	int ret = uart_irq_callback_user_data_set(dev_tcu_uart, tcu_uart_isr, NULL);
 
@@ -91,7 +95,7 @@ void tcu_uart_configuration(void)
 		} else {
 			printk("Error setting UART callback: %d\n", ret);
 		}
-		return 0;
+		return -1;
 	}
 	else
 	{
@@ -99,6 +103,7 @@ void tcu_uart_configuration(void)
 	}
 
 	uart_irq_rx_enable(dev_tcu_uart);
+    return 0;
 }
 
 /**@brief Interrupt Service Routine for the UART used to communicate with the TCU

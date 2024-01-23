@@ -17,8 +17,8 @@
 #define SIZE_TRANSMISSION_BUFFER MAXIMUM_SIZE_MODBUS_RTU_FRAME
 #define SIZE_OF_RX_FIFO_OF_NRF52840_UART 6
 
-void tcu_uart_init(void);
-void tcu_uart_configuration(void);
+int8_t tcu_uart_init(void);
+int8_t tcu_uart_configuration(void);
 void tcu_uart_isr(const struct device *dev, void *user_data);
 void sendFrameToTcuTest(void);
 void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data);

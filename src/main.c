@@ -69,6 +69,9 @@ Note: This part was added to wireshark encription issues
 
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
+static const zb_ext_pan_id_t ext_pan_id[8] = {{0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+const zb_ext_pan_id_t *ptr_ext_pan_id = ext_pan_id;
+
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
 uint8_t tcu_transmitted_frames_counter = 0;
@@ -242,97 +245,69 @@ static void start_identifying(zb_bufid_t bufid)
 	}
 }
 
-/**@brief Callback function for handling ZCL commands.
- *
- * @param[in]   bufid   Reference to Zigbee stack buffer
- *                      used to pass received data.
- */
-static void zcl_device_cb(zb_bufid_t bufid)
-{
-	zb_zcl_device_callback_param_t  *device_cb_param = ZB_BUF_GET_PARAM(bufid, zb_zcl_device_callback_param_t);
-	//printk("Received ZCL command %s where device cb id %hd", __func__, device_cb_param->device_cb_id);
-}
-
-
 //------------------------------------------------------------------------------
 /**@brief Callback to call when AF got APS packet.
  *
- * @param[in]   bufid   Reference to the Zigbee stack buffer
- *                      used to pass signal.
+ * @param[in]   bufid   Reference to the Zigbee stack buffer used to pass signal.
+ *                      
  */
 zb_uint8_t data_indication(zb_bufid_t bufid)
 {
-
- 	zb_uint8_t *ptr;
  	zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
     
     if (bufid)
 	{
-		//if(!b_Modbus_Request_Received_via_Zigbee)
-		//{
-			//if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 1 ) && ( ind->dst_endpoint == 1 ) )
-			if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
-			{
-				zb_uint8_t *pointerToEndOfBuffer;
-				zb_int32_t sizeOfPayload;
-				pointerToBeginOfBuffer = zb_buf_begin(bufid);
-				pointerToEndOfBuffer = zb_buf_end(bufid);
-				sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
+        if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
+        {
+            zb_uint8_t *pointerToEndOfBuffer;
+            zb_int32_t sizeOfPayload;
+            pointerToBeginOfBuffer = zb_buf_begin(bufid);
+            pointerToEndOfBuffer = zb_buf_end(bufid);
+            sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
 
-				if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
-				{
-					if(PRINT_ZIGBEE_INFO)
-					{
-						printk("\nSize of received payload is %d bytes \n", sizeOfPayload);
-						for (uint8_t i = 0; i < sizeOfPayload; i++)
-						{
-							printk("0x%02x - ", pointerToBeginOfBuffer[i]);
-						}
-							printk("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
-							printk("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
-							printk("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+            if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
+            {
+                if(PRINT_ZIGBEE_INFO)
+                {
+                    printk("Size of received payload is %d bytes \n", sizeOfPayload);
+                    for (uint8_t i = 0; i < sizeOfPayload; i++)
+                    {
+                        printk("0x%02x - ", pointerToBeginOfBuffer[i]);
+                    }
+                    printk("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
+                    printk("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
+                    printk("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+                    printk("ind APS counter %d \n", ind->aps_counter);
+                }
 
-							printk("ind Profileid 0x%04x \n", ind->profileid);
-    						printk("ind Clusterid 0x%04x \n", ind->clusterid);
-    						printk("ind Source Endpoint %d \n", ind->src_endpoint);
-    						printk("ind Destination Endpoint %d \n", ind->dst_endpoint);
-    						printk("ind APS counter %d \n", ind->aps_counter);
-					}
+                if(sizeOfPayload >= MODBUS_MIN_RX_LENGTH)
+                {
+                    b_Modbus_Request_Received_via_Zigbee = true;
+                    if(PRINT_ZIGBEE_INFO)
+                    {
+                        printk("bModbusRequestReceived via zigbee and send via UART \n");
+                    }
+                    // safe zigbee source endpoint info to send the asnwer
+                    ZB_profileid = ind->profileid;
+                    ZB_clusterid = ind->clusterid;
+                    ZB_src_endpoint = ind->src_endpoint;
+                    ZB_dst_endpoint = ind->dst_endpoint;
+                    ZB_aps_counter = ind->aps_counter;
 
-					//if ((sizeOfPayload == 8) && (pointerToBeginOfBuffer[0] == 0xC2))
-					//if ((sizeOfPayload >= MODBUS_MIN_RX_LENGTH) && (pointerToBeginOfBuffer[0] == 0xC4))
-                    if(sizeOfPayload >= MODBUS_MIN_RX_LENGTH)
-					{
-						b_Modbus_Request_Received_via_Zigbee = true;
-						if(PRINT_ZIGBEE_INFO)
-						{
-							printk("bModbusRequestReceived via zigbee and send via UART \n");
-						}
-						// safe zigbee source endpoint info to send the asnwer
-						ZB_profileid = ind->profileid;
-    					ZB_clusterid = ind->clusterid;
-    					ZB_src_endpoint = ind->src_endpoint;
-    					ZB_dst_endpoint = ind->dst_endpoint;
-    					ZB_aps_counter = ind->aps_counter;
+                    sendFrameToTcu(&pointerToBeginOfBuffer[0], sizeOfPayload);
+ 
+                }
+            }
 
-                        sendFrameToTcu(&pointerToBeginOfBuffer[0], sizeOfPayload);
-
-						/*for (uint8_t i = 0; i < sizeOfPayload; i++)
-						{
-							send_uart(pointerToBeginOfBuffer[i]);
-						}*/
-					}
-				}
-
-			}
-		//}
-		
+        }
 	}
 
     if (bufid)
     {
 		zb_buf_free(bufid); // JESUS: I don't know if this is needed, but I try, just in case.
+		return ZB_TRUE;
 	}
+	return ZB_FALSE;
 }
 
 /**@brief Zigbee stack event handler.
@@ -350,7 +325,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
 
 		switch (sig) {
 		case ZB_ZDO_SIGNAL_DEFAULT_START:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEFAULT_START\n");
+			if(PRINT_ZIGBEE_INFO) printk( "Zigbee Device STARTED OK\n");
  		break;
 		case ZB_ZDO_SIGNAL_SKIP_STARTUP:
 			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP\n");
@@ -490,16 +465,28 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 		    					 ZB_FALSE,
 			    				 outputPayload,
 				    			 9); */
-		zb_aps_send_user_payload(bufid, 
-		    					 dst_addr,
-			    				 ZB_profileid,
-				    			 ZB_clusterid,
-					    		 ZB_src_endpoint,
-						    	 ZB_dst_endpoint,
-								 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-		    					 ZB_FALSE,
-			    				 outputPayload,
-				    			 chunk_size);
+		zb_ret_t ret = zb_aps_send_user_payload(bufid, 
+		    					                dst_addr,
+			    				                ZB_profileid,
+				    			                ZB_clusterid,
+					    		                ZB_src_endpoint,
+						    	                ZB_dst_endpoint,
+								                ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+		    					                ZB_FALSE,
+			    				                outputPayload,
+				    			                chunk_size);
+        if(bufid)
+        {
+            if(ret == RET_OK) printk("RET_OK - if transmission was successful scheduled;\n");
+		    else if(ret == RET_INVALID_PARAMETER_1) printk("RET_INVALID_PARAMETER_1 - if the buffer is invalid\n");
+		    else if(ret == RET_INVALID_PARAMETER_2) printk("RET_INVALID_PARAMETER_2 - if the payload_ptr parameter is invalid;\n");
+		    else if(ret == RET_INVALID_PARAMETER_3) printk("RET_INVALID_PARAMETER_3 - if the payload_size parameter is too large;\n");
+		    else printk("Unkown error zb_aps_send_user_payload ;\n");
+        }
+        else
+        {
+            printk("\n\n bufid NULL error ZB not answered \n\n");
+        }
 
 	/*Free packet buffer and put it into free list after payload is sent*/
 	if (bufid) 
@@ -648,19 +635,27 @@ static void timer1_init(void)
 	//timer1_repeated_timer_start(200000); // 200 ms
 }
 
-// Function for initializing the TIMER1 peripheral using the nrfx driver
-static void gpio_init(void)
+//------------------------------------------------------------------------------
+
+/**@brief Function for initializing the GPIO pins.
+ *        Currently, only one pin is initialized. Configured as output to drive a led.
+ * @retval -1 Error
+ * @retval 0 OK
+ */
+static int8_t gpio_init(void)
 {
 	int ret;
 
 	if (!device_is_ready(led.port)) {
-		return 1;
+		return -1;
 	}
 
 	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
 	if (ret < 0) {
-		return 1;
+		return -1;
 	}
+
+    return 0;
 }
 
 // Function for initializing the Zigbee configuration
@@ -672,19 +667,14 @@ void zigbee_configuration()
 	/* Register device context (endpoints). */
 	ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
 
-		// 1. Define a distributed key (assuming key size of 16 bytes, you might need to adjust based on documentation)
+	// Define a distributed key (assuming key size of 16 bytes, you might need to adjust based on documentation)
     zb_uint8_t distributed_key[16] = {0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 
                                      0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00};
 
-    // 2. Create a pointer to the key
-    zb_uint8_t* key_ptr = distributed_key;
-
-    // 3. Call the function with this pointer
+    // Set the network key
 	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
 
-	zb_ext_pan_id_t ext_pan_id[8] = {0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};	
-
-	zb_set_extended_pan_id(ext_pan_id);
+	zb_set_extended_pan_id(ptr_ext_pan_id);
 
 	//TRUE to disable trust center, legacy support for 
 	zb_bdb_set_legacy_device_support(ZB_TRUE);
@@ -733,11 +723,8 @@ void diagnostic_zigbee_info()
 {
 	zb_ieee_addr_t zb_long_address;
 	zb_ext_pan_id_t zb_ext_pan_id;
-	zb_nwk_device_type_t zb_role;
 	zb_uint8_t zb_channel;
 	zb_uint16_t zb_shrot_addr;
-	zb_ret_t zb_err_code;
-    zb_ieee_addr_t ieee_addr;
 
 	if(zb_zdo_joined() && b_infit_info_flag == ZB_TRUE)
 	{
@@ -787,11 +774,18 @@ void diagnostic_zigbee_info()
 int main(void)
 {
     get_reset_reason();
-    tcu_uart_init();
+    if(tcu_uart_init() < 0)
+    {
+        printk("tcu_uart_init error\n");
+    }
+    
 	// Initialize TIMER1
 	timer1_init();
-	
-	gpio_init();
+
+	if(gpio_init() < 0)
+	{
+		printk("gpio_init error\n");
+	}
 
 	zigbee_configuration();
 
