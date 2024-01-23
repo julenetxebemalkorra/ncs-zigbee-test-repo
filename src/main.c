@@ -69,8 +69,9 @@ Note: This part was added to wireshark encription issues
 
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
-static const zb_ext_pan_id_t ext_pan_id[8] = {{0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
-const zb_ext_pan_id_t *ptr_ext_pan_id = ext_pan_id;
+//
+static const zb_uint8_t ext_pan_id[8] = {0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+const zb_uint8_t * ptr_ext_pan_id = ext_pan_id;
 
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
@@ -294,7 +295,8 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
                     ZB_dst_endpoint = ind->dst_endpoint;
                     ZB_aps_counter = ind->aps_counter;
 
-                    sendFrameToTcu(&pointerToBeginOfBuffer[0], sizeOfPayload);
+                    //sendFrameToTcu(&pointerToBeginOfBuffer[0], sizeOfPayload);
+                    sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
  
                 }
             }
@@ -515,42 +517,8 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
  */
 void send_zigbee_modbus_answer(void)
 {
-
-	//zb_uint8_t outputPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
 	zb_uint8_t outputPayload[MAX_ZIGBEE_PAYLOAD_SIZE];
-/*
-	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
 
-	for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
-	{
-		printk("%c- ", UART_rx_buffer[i]);
-	}
-
-	printk("UART_rx_buffer \n ");
-
-	
-
-
-    // Manipulating the received buffer before processing this is to test big data packages
-	for (uint8_t i = 0; i <= (UART_rx_buffer_index_max * 20); i = i+5)
-	{
-		UART_rx_buffer[i] = UART_rx_buffer[0];
-		UART_rx_buffer[i+1] = UART_rx_buffer[1];
-		UART_rx_buffer[i+2] = UART_rx_buffer[2];
-		UART_rx_buffer[i+3] = UART_rx_buffer[3];
-		UART_rx_buffer[i+4] = UART_rx_buffer[4];
-	}
-
-	UART_rx_buffer_index_max = (UART_rx_buffer_index_max * 20);
-
-
-	printk("send_zigbee_modbus_answer Size of answer send via zigbee is %d bytes \n", UART_rx_buffer_index_max);
-
-	for (uint8_t i = 0; i < (UART_rx_buffer_index_max); i++)
-	{
-		printk("%c- ", UART_rx_buffer[i]);
-	}
-*/
 	size_t remaining_length = UART_rx_buffer_index_max +1;
 
     // Transmit the modified payload in chunks via Zigbee
@@ -565,7 +533,8 @@ void send_zigbee_modbus_answer(void)
 		printk("%c- ", outputPayload[i]);
 		}
 */
-		send_user_payload(&outputPayload, chunk_size);
+		//send_user_payload(&outputPayload, chunk_size);
+        send_user_payload(outputPayload, chunk_size);
 
         // Reset flags for the next chunk
 		b_Modbus_Request_Received_via_Zigbee = false;
