@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include <nrfx_timer.h>
+#include <zephyr/drivers/hwinfo.h>
 
 #include "tcu_Uart.h"
 
@@ -65,6 +66,8 @@ Note: This part was added to wireshark encription issues
 #define ZB_STANDARD_TC_KEY { 0x81, 0x42, < rest of key > };
 #define ZB_DISTRIBUTED_GLOBAL_KEY { 0x81, 0x42, , < rest of key > };
 #define ZB_TOUCHLINK_PRECONFIGURED_KEY { 0x81, 0x42, < rest of key > };
+
+uint32_t reset_cause; // Bit register containg the last reset cause.
 
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
@@ -151,6 +154,47 @@ ZB_DECLARE_RANGE_EXTENDER_EP(
 ZBOSS_DECLARE_DEVICE_CTX_1_EP(
 	app_template_ctx,
 	app_template_ep);
+
+/*----------------------------------------------------------------------------*/
+/*                           FUNCTION DEFINITIONS                             */
+/*----------------------------------------------------------------------------*/
+
+/**@brief Function to read the reason for the last reset. The reason is printed in the console. */
+void get_reset_reason(void)
+{
+	int result = hwinfo_get_reset_cause(&reset_cause);
+    if (result == 0) // Success, reset_cause now contains the reset cause flags
+	{
+        printk("\n\n\n RESET \n\n\n ");
+		printk("Reset cause is:");
+
+		if (reset_cause & RESET_PIN) printk("RESET_PIN\n"); // 0
+		else if (reset_cause & RESET_SOFTWARE) printk("RESET_SOFTWARE\n"); // 1
+		else if (reset_cause & RESET_BROWNOUT) printk("RESET_BROWNOUT\n"); // 2
+		else if(reset_cause & RESET_POR) printk("RESET_POR\n"); // 3
+		else if(reset_cause & RESET_WATCHDOG) printk("RESET_WATCHDOG\n"); // 4
+		else if(reset_cause & RESET_DEBUG) printk("RESET_DEBUG\n"); // 5
+    	else if(reset_cause & RESET_SECURITY) printk("RESET_SECURITY\n"); // 6
+		else if(reset_cause & RESET_LOW_POWER_WAKE) printk("RESET_LOW_POWER_WAKE\n"); // 7
+		else if(reset_cause & RESET_CPU_LOCKUP) printk("RESET_CPU_LOCKUP\n"); // 8
+		else if(reset_cause & RESET_PARITY) printk("RESET_PARITY\n"); // 9
+		else if(reset_cause & RESET_PLL) printk("RESET_PLL\n"); // 10
+		else if(reset_cause & RESET_CLOCK) printk("RESET_CLOCK\n"); // 11
+		else if(reset_cause & RESET_HARDWARE) printk("RESET_HARDWARE\n"); // 12
+		else if(reset_cause & RESET_USER) printk("RESET_USER\n"); // 13
+		else if (reset_cause & RESET_TEMPERATURE) printk("RESET_TEMPERATURE\n\n"); // 14
+		else printk("\n\n reset cause is %d\n\n",reset_cause);
+
+    	hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset
+    } else if (result == -ENOSYS) 
+	{
+		printk("\n\n there is no implementation for the particular device.\n\n");
+    } else 
+	{
+		printk("\n\n negative value on driver specific errors\n\n");
+    }
+}
+
 
 /**@brief Function for initializing all clusters attributes. */
 static void app_clusters_attr_init(void)
@@ -742,6 +786,7 @@ void diagnostic_zigbee_info()
 
 int main(void)
 {
+    get_reset_reason();
     tcu_uart_init();
 	// Initialize TIMER1
 	timer1_init();
