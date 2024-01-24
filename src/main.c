@@ -69,6 +69,11 @@ Note: This part was added to wireshark encription issues
 
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
+uint16_t correct_RF_packets_received_counter = 0;
+uint16_t tcu_uart_frames_received_counter = 0;
+uint16_t correct_RF_packets_received_counter_old = 0;
+uint16_t tcu_uart_frames_received_counter_old = 0;
+
 //
 static const zb_uint8_t ext_pan_id[8] = {0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 const zb_uint8_t * ptr_ext_pan_id = ext_pan_id;
@@ -268,6 +273,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
             if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
             {
+                correct_RF_packets_received_counter ++;
                 if(PRINT_ZIGBEE_INFO)
                 {
                     printk("Size of received payload is %d bytes \n", sizeOfPayload);
@@ -740,6 +746,21 @@ void diagnostic_zigbee_info()
 	}
 }
 
+void display_counters(void)
+{
+    if(correct_RF_packets_received_counter != correct_RF_packets_received_counter_old)
+    {
+        correct_RF_packets_received_counter_old = correct_RF_packets_received_counter;
+        printk("Input counter: %d \n", correct_RF_packets_received_counter);
+    }
+
+    if(tcu_uart_frames_received_counter != tcu_uart_frames_received_counter_old)
+    {
+        tcu_uart_frames_received_counter_old = tcu_uart_frames_received_counter;
+        printk("Output counter: %d \n", tcu_uart_frames_received_counter);
+    }
+}
+
 int main(void)
 {
     get_reset_reason();
@@ -748,42 +769,36 @@ int main(void)
         printk("tcu_uart_init error\n");
     }
     
-	// Initialize TIMER1
-	timer1_init();
+    // Initialize TIMER1
+    timer1_init();
 
-	if(gpio_init() < 0)
-	{
-		printk("gpio_init error\n");
-	}
+    if(gpio_init() < 0)
+    {
+        printk("gpio_init error\n");
+    }
 
-	zigbee_configuration();
+    zigbee_configuration();
 
-	/* Start Zigbee default thread */
-	zigbee_enable();
+    /* Start Zigbee default thread */
+    zigbee_enable();
 
-	while(1)
-	{		
-		// run diagnostic functions
-		diagnostic_toogle_pin();
-		diagnostic_zigbee_info();
+    while(1)
+    {
+        // run diagnostic functions
+        diagnostic_toogle_pin();
+        diagnostic_zigbee_info();
+        display_counters();
 
-		// when modbus answer is ready send the answer
-		if(b_Modbus_Ready_to_send)
-		{
-			send_zigbee_modbus_answer();
-			b_Modbus_Ready_to_send = false;
-			UART_rx_buffer_index = 0;
-			offset=0;
-		}
+        // when modbus answer is ready send the answer
+        if(b_Modbus_Ready_to_send)
+        {
+            tcu_uart_frames_received_counter++;
+            send_zigbee_modbus_answer();
+            b_Modbus_Ready_to_send = false;
+            UART_rx_buffer_index = 0;
+            offset=0;
+        }
+    }
 
-       /* if(bTimeToSendFrame)
-		{
-			bTimeToSendFrame = false;
-            tcu_transmitted_frames_counter++;
-            sendFrameToTcuTest();
-		}*/
-		
-	}
-
-	return 0;
+    return 0;
 }
