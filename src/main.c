@@ -594,6 +594,7 @@ static void timer1_repeated_timer_start(uint32_t timeout_us)
 static void timer1_init(void)
 {
 	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(NRF_TIMER_FREQ_1MHz);
+	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(1000000);
 	timer_config.bit_width = NRF_TIMER_BIT_WIDTH_32;
 
 	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
