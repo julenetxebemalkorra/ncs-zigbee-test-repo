@@ -10,6 +10,7 @@
  */
 
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 
 #include <zboss_api.h>
 #include <zigbee/zigbee_error_handler.h>
@@ -42,8 +43,8 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 /* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO             	ZB_TRUE//ZB_FALSE
-#define PRINT_UART_INFO             	ZB_TRUE//ZB_FALSE
+#define PRINT_ZIGBEE_INFO             	ZB_TRUE
+#define PRINT_UART_INFO             	ZB_TRUE
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
@@ -117,7 +118,7 @@ static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
  
  Note: it may be removed
  */
-LOG_MODULE_REGISTER(app, LOG_LEVEL_NONE);
+LOG_MODULE_REGISTER(ZB_router_app, LOG_LEVEL_DBG);
 
 // boolean flags for detecting modbus request handling
 bool b_Modbus_Request_Received_via_Zigbee = false;
@@ -174,33 +175,32 @@ void get_reset_reason(void)
 	int result = hwinfo_get_reset_cause(&reset_cause);
     if (result == 0) // Success, reset_cause now contains the reset cause flags
 	{
-        printk("\n\n\n RESET \n\n\n ");
-		printk("Reset cause is:");
+        LOG_ERR("RESET");
 
-		if (reset_cause & RESET_PIN) printk("RESET_PIN\n"); // 0
-		else if (reset_cause & RESET_SOFTWARE) printk("RESET_SOFTWARE\n"); // 1
-		else if (reset_cause & RESET_BROWNOUT) printk("RESET_BROWNOUT\n"); // 2
-		else if(reset_cause & RESET_POR) printk("RESET_POR\n"); // 3
-		else if(reset_cause & RESET_WATCHDOG) printk("RESET_WATCHDOG\n"); // 4
-		else if(reset_cause & RESET_DEBUG) printk("RESET_DEBUG\n"); // 5
-    	else if(reset_cause & RESET_SECURITY) printk("RESET_SECURITY\n"); // 6
-		else if(reset_cause & RESET_LOW_POWER_WAKE) printk("RESET_LOW_POWER_WAKE\n"); // 7
-		else if(reset_cause & RESET_CPU_LOCKUP) printk("RESET_CPU_LOCKUP\n"); // 8
-		else if(reset_cause & RESET_PARITY) printk("RESET_PARITY\n"); // 9
-		else if(reset_cause & RESET_PLL) printk("RESET_PLL\n"); // 10
-		else if(reset_cause & RESET_CLOCK) printk("RESET_CLOCK\n"); // 11
-		else if(reset_cause & RESET_HARDWARE) printk("RESET_HARDWARE\n"); // 12
-		else if(reset_cause & RESET_USER) printk("RESET_USER\n"); // 13
-		else if (reset_cause & RESET_TEMPERATURE) printk("RESET_TEMPERATURE\n\n"); // 14
-		else printk("\n\n reset cause is %d\n\n",reset_cause);
+		if (reset_cause & RESET_PIN) LOG_DBG("Reset cause is: RESET_PIN\n"); // 0
+		else if (reset_cause & RESET_SOFTWARE) LOG_DBG("Reset cause is: RESET_SOFTWARE\n"); // 1
+		else if (reset_cause & RESET_BROWNOUT) LOG_DBG("Reset cause is: RESET_BROWNOUT\n"); // 2
+		else if(reset_cause & RESET_POR) LOG_DBG("Reset cause is: RESET_POR\n"); // 3
+		else if(reset_cause & RESET_WATCHDOG) LOG_DBG("Reset cause is: RESET_WATCHDOG\n"); // 4
+		else if(reset_cause & RESET_DEBUG) LOG_DBG("Reset cause is: RESET_DEBUG\n"); // 5
+    	else if(reset_cause & RESET_SECURITY) LOG_DBG("Reset cause is: RESET_SECURITY\n"); // 6
+		else if(reset_cause & RESET_LOW_POWER_WAKE) LOG_DBG("Reset cause is: RESET_LOW_POWER_WAKE\n"); // 7
+		else if(reset_cause & RESET_CPU_LOCKUP) LOG_DBG("Reset cause is: RESET_CPU_LOCKUP\n"); // 8
+		else if(reset_cause & RESET_PARITY) LOG_DBG("Reset cause is: RESET_PARITY\n"); // 9
+		else if(reset_cause & RESET_PLL) LOG_DBG("Reset cause is: RESET_PLL\n"); // 10
+		else if(reset_cause & RESET_CLOCK) LOG_DBG("Reset cause is: RESET_CLOCK\n"); // 11
+		else if(reset_cause & RESET_HARDWARE) LOG_DBG("Reset cause is: RESET_HARDWARE\n"); // 12
+		else if(reset_cause & RESET_USER) LOG_DBG("Reset cause is: RESET_USER\n"); // 13
+		else if (reset_cause & RESET_TEMPERATURE) LOG_DBG("Reset cause is: RESET_TEMPERATURE\n\n"); // 14
+		else LOG_DBG("\n\n reset cause is: %d\n\n",reset_cause);
 
     	hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset
     } else if (result == -ENOSYS) 
 	{
-		printk("\n\n there is no implementation for the particular device.\n\n");
+		LOG_ERR("\n\n there is no implementation for the particular device.\n\n");
     } else 
 	{
-		printk("\n\n negative value on driver specific errors\n\n");
+		LOG_ERR("\n\n negative value on driver specific errors\n\n");
     }
 }
 
@@ -236,18 +236,18 @@ static void start_identifying(zb_bufid_t bufid)
 				APP_TEMPLATE_ENDPOINT);
 
 			if (zb_err_code == RET_OK) {
-				//printk("Enter identify mode");
+				LOG_DBG("Enter identify mode");
 			} else if (zb_err_code == RET_INVALID_STATE) {
-				printk("RET_INVALID_STATE - Cannot enter identify mode");
+				LOG_ERR("RET_INVALID_STATE - Cannot enter identify mode");
 			} else {
 				ZB_ERROR_CHECK(zb_err_code);
 			}
 		} else {
-			printk("Cancel identify mode");
+			LOG_INF("Cancel identify mode");
 			zb_bdb_finding_binding_target_cancel();
 		}
 	} else {
-		printk("Device not in a network - cannot enter identify mode");
+		LOG_ERR("Device not in a network - cannot enter identify mode");
 	}
 }
 
@@ -276,15 +276,15 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
                 correct_RF_packets_received_counter ++;
                 if(PRINT_ZIGBEE_INFO)
                 {
-                    printk("Size of received payload is %d bytes \n", sizeOfPayload);
+                    LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
                     for (uint8_t i = 0; i < sizeOfPayload; i++)
                     {
-                        printk("0x%02x - ", pointerToBeginOfBuffer[i]);
+                        LOG_DBG("0x%02x - ", pointerToBeginOfBuffer[i]);
                     }
-                    printk("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
-                    printk("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
-                    printk("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
-                    printk("ind APS counter %d \n", ind->aps_counter);
+                    LOG_DBG("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
+                    LOG_DBG("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
+                    LOG_DBG("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+                    LOG_DBG("ind APS counter %d \n", ind->aps_counter);
                 }
 
                 if(sizeOfPayload >= MODBUS_MIN_RX_LENGTH)
@@ -292,7 +292,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
                     b_Modbus_Request_Received_via_Zigbee = true;
                     if(PRINT_ZIGBEE_INFO)
                     {
-                        printk("bModbusRequestReceived via zigbee and send via UART \n");
+                        LOG_DBG("bModbusRequestReceived via zigbee and send via UART \n");
                     }
                     // safe zigbee source endpoint info to send the asnwer
                     ZB_profileid = ind->profileid;
@@ -333,89 +333,89 @@ void zboss_signal_handler(zb_bufid_t bufid)
 
 		switch (sig) {
 		case ZB_ZDO_SIGNAL_DEFAULT_START:
-			if(PRINT_ZIGBEE_INFO) printk( "Zigbee Device STARTED OK\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "Zigbee Device STARTED OK\n");
  		break;
 		case ZB_ZDO_SIGNAL_SKIP_STARTUP:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP\n");
 		break;
 		case ZB_ZDO_SIGNAL_DEVICE_ANNCE:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEVICE_ANNCE\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_DEVICE_ANNCE\n");
 		break;
 		case ZB_ZDO_SIGNAL_LEAVE:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_LEAVE\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_LEAVE\n");
 		break;
 		case ZB_ZDO_SIGNAL_ERROR:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_ERROR\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_ERROR\n");
 		break;
 		case ZB_BDB_SIGNAL_DEVICE_FIRST_START:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START\n");
 		break;
 		case ZB_BDB_SIGNAL_DEVICE_REBOOT:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_DEVICE_REBOOT\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_DEVICE_REBOOT\n");
 		break;
 		case ZB_BDB_SIGNAL_STEERING:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_STEERING\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_STEERING\n");
 			start_identifying(bufid);
 		break;
 		case ZB_BDB_SIGNAL_FORMATION:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FORMATION\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_FORMATION\n");
 		break;
 		case ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED\n");
 		break;
 		case ZB_BDB_SIGNAL_FINDING_AND_BINDING_INITIATOR_FINISHED:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_INITIATOR_FINISHED\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_INITIATOR_FINISHED\n");
 		break;
 		case ZB_NWK_SIGNAL_DEVICE_ASSOCIATED:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_NWK_SIGNAL_DEVICE_ASSOCIATED\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_NWK_SIGNAL_DEVICE_ASSOCIATED\n");
 		break;
 		case ZB_ZDO_SIGNAL_LEAVE_INDICATION:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_LEAVE_INDICATION\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_LEAVE_INDICATION\n");
 		break;
 		case ZB_BDB_SIGNAL_WWAH_REJOIN_STARTED:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_WWAH_REJOIN_STARTED\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_WWAH_REJOIN_STARTED\n");
 		break;
 		case ZB_ZGP_SIGNAL_COMMISSIONING:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZGP_SIGNAL_COMMISSIONING\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZGP_SIGNAL_COMMISSIONING\n");
 		break;
 		case ZB_COMMON_SIGNAL_CAN_SLEEP:
-			//printk( "JULEN ZB_COMMON_SIGNAL_CAN_SLEEP\n");
+			//LOG_DBG( "JULEN ZB_COMMON_SIGNAL_CAN_SLEEP\n");
 		break;
 		case ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY\n");
 		break;
 		case ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT\n");
 		break;
 		case ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED\n");
 		break;
 		case ZB_ZDO_SIGNAL_DEVICE_UPDATE:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_ZDO_SIGNAL_DEVICE_UPDATE\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_DEVICE_UPDATE\n");
 		break;
 		case ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED\n");
 		break;
 		case ZB_NLME_STATUS_INDICATION:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_NLME_STATUS_INDICATION\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_NLME_STATUS_INDICATION\n");
 		break;
 		case ZB_TCSWAP_DB_BACKUP_REQUIRED_SIGNAL:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_TCSWAP_DB_BACKUP_REQUIRED_SIGNAL\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_TCSWAP_DB_BACKUP_REQUIRED_SIGNAL\n");
 		break;
 		case ZB_BDB_SIGNAL_TC_REJOIN_DONE:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_TC_REJOIN_DONE\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_TC_REJOIN_DONE\n");
 		break;
 		case ZB_BDB_SIGNAL_STEERING_CANCELLED:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_STEERING_CANCELLED\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_STEERING_CANCELLED\n");
 		break;
 		case ZB_BDB_SIGNAL_FORMATION_CANCELLED:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_BDB_SIGNAL_FORMATION_CANCELLED\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_FORMATION_CANCELLED\n");
 		break;
 		case ZB_SIGNAL_READY_TO_SHUT:
-			if(PRINT_ZIGBEE_INFO) printk( "JULEN ZB_SIGNAL_READY_TO_SHUT\n");
+			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_SIGNAL_READY_TO_SHUT\n");
 		break;
  		default:
-			//printk( "JULEN Unknown signal\n");
+			//LOG_DBG( "JULEN Unknown signal\n");
 			zb_af_set_data_indication(data_indication);
  		break;
  		}
@@ -453,11 +453,11 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 
 		if(PRINT_UART_INFO)
 		{
-			printk("send_user_payload: chunk_size %d\n", chunk_size);
+			LOG_DBG("send_user_payload: chunk_size %d\n", chunk_size);
 
 			for (uint8_t i = 0; i < chunk_size; i++)
 			{
-				printk("0x%02x- ", outputPayload[i]);
+				LOG_DBG("0x%02x- ", outputPayload[i]);
 			}
 		}
 
@@ -485,15 +485,15 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 				    			                chunk_size);
         if(bufid)
         {
-            if(ret == RET_OK) printk("RET_OK - if transmission was successful scheduled;\n");
-		    else if(ret == RET_INVALID_PARAMETER_1) printk("RET_INVALID_PARAMETER_1 - if the buffer is invalid\n");
-		    else if(ret == RET_INVALID_PARAMETER_2) printk("RET_INVALID_PARAMETER_2 - if the payload_ptr parameter is invalid;\n");
-		    else if(ret == RET_INVALID_PARAMETER_3) printk("RET_INVALID_PARAMETER_3 - if the payload_size parameter is too large;\n");
-		    else printk("Unkown error zb_aps_send_user_payload ;\n");
+            if(ret == RET_OK) LOG_DBG("RET_OK - if transmission was successful scheduled;\n");
+		    else if(ret == RET_INVALID_PARAMETER_1) LOG_ERR("RET_INVALID_PARAMETER_1 - if the buffer is invalid\n");
+		    else if(ret == RET_INVALID_PARAMETER_2) LOG_ERR("RET_INVALID_PARAMETER_2 - if the payload_ptr parameter is invalid;\n");
+		    else if(ret == RET_INVALID_PARAMETER_3) LOG_ERR("RET_INVALID_PARAMETER_3 - if the payload_size parameter is too large;\n");
+		    else LOG_ERR("Unkown error zb_aps_send_user_payload ;\n");
         }
         else
         {
-            printk("\n\n bufid NULL error ZB not answered \n\n");
+            LOG_ERR("\n\n bufid NULL error ZB not answered \n\n");
         }
 
 	/*Free packet buffer and put it into free list after payload is sent*/
@@ -536,7 +536,7 @@ void send_zigbee_modbus_answer(void)
 /**
 		for (uint8_t i = 0; i < chunk_size; i++)
 		{
-		printk("%c- ", outputPayload[i]);
+		LOG_DBG("%c- ", outputPayload[i]);
 		}
 */
 		//send_user_payload(&outputPayload, chunk_size);
@@ -598,7 +598,7 @@ static void timer1_init(void)
 
 	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
 	if (err != NRFX_SUCCESS) {
-		printk("Error initializing timer: %x\n", err);
+		LOG_WRN("Error initializing timer: %x\n", err);
 	}
 
 	IRQ_DIRECT_CONNECT(TIMER1_IRQn, 0, nrfx_timer_1_irq_handler, 0);
@@ -683,13 +683,13 @@ void get_endpoint_descriptor(zb_uint8_t endpoint)
         zb_uint16_t device_id = endpoint_desc->simple_desc->app_device_id;
 		zb_uint16_t device_version = endpoint_desc->simple_desc->app_device_version;
 		
-		printk("Profileid 0x%04x \n", profile_id);
-    	printk("Clusterid 0x%04x \n", device_id);
-		printk("device_version 0x%04x \n", device_version);
+		LOG_DBG("Profileid 0x%04x \n", profile_id);
+    	LOG_DBG("Clusterid 0x%04x \n", device_id);
+		LOG_DBG("device_version 0x%04x \n", device_version);
 
     } else 
 	{
-    	printk("endpoint descriptor not available\n");
+    	LOG_ERR("endpoint descriptor not available\n");
     }
 }
 
@@ -705,41 +705,41 @@ void diagnostic_zigbee_info()
 	{
 		b_infit_info_flag = ZB_FALSE;
 		b_Zigbe_Connected = true;
-		printk("Zigbee application joined the network: bellow some info: \n");
+		LOG_DBG("Zigbee application joined the network: bellow some info: \n");
 		zb_get_long_address(zb_long_address);
 		// Log Long Address
-		printk("zigbee long addr: ");
+		LOG_DBG("zigbee long addr: ");
 		for (int i = 7; i >= 0; i--) {
-		    printk("%02x", zb_long_address[i]);
+		    LOG_DBG("%02x", zb_long_address[i]);
 		}
-		printk("\n");
+		LOG_DBG("\n");
 		zb_shrot_addr = zb_get_short_address();
-		printk("zigbee shrot addr:  0x%x\n", zb_shrot_addr);
+		LOG_DBG("zigbee shrot addr:  0x%x\n", zb_shrot_addr);
 		zb_get_extended_pan_id(zb_ext_pan_id);	
 		// Log Extended PAN ID
-		printk("zigbee extended pan id: ");
+		LOG_DBG("zigbee extended pan id: ");
 		for (int i = 7; i >= 0; i--) {
-		    printk("%02x", zb_ext_pan_id[i]);
+		    LOG_DBG("%02x", zb_ext_pan_id[i]);
 		}
-		printk("\n");
+		LOG_DBG("\n");
 		switch(zb_get_network_role())
 		{
 		case 0:
-			printk("zigbee role coordinator\n");
+			LOG_DBG("zigbee role coordinator\n");
 			break;
 		case 1:
-			printk("zigbee role router\n");
+			LOG_DBG("zigbee role router\n");
 			break;
 		case 2:
-			printk("zigbee role end device\n");
+			LOG_DBG("zigbee role end device\n");
 			break;
 		default:
-			printk("Zigbee role NOT found \n");
+			LOG_DBG("Zigbee role NOT found \n");
 			break;
 		}
 		
 	zb_channel = zb_get_current_channel();	
-	printk("zigbee channel: %d \n", zb_channel);
+	LOG_DBG("zigbee channel: %d \n", zb_channel);
 
 	get_endpoint_descriptor(232);
 
@@ -763,24 +763,30 @@ void display_counters(void)
 
 int main(void)
 {
+	LOG_INF("Router started successfully");
+	int ret = 0;
+
     get_reset_reason();
-    if(tcu_uart_init() < 0)
+
+	ret = tcu_uart_init();
+    if( ret < 0)
     {
-        printk("tcu_uart_init error\n");
+		LOG_ERR("tcu_uart_init error %d", ret);
     }
     
-    // Initialize TIMER1
-    timer1_init();
+	// Initialize TIMER1
+	timer1_init();
+	ret = gpio_init();
 
-    if(gpio_init() < 0)
-    {
-        printk("gpio_init error\n");
-    }
+	if( ret < 0)
+	{
+		LOG_ERR("gpio_init error %d", ret);
+	}
 
-    zigbee_configuration();
+	zigbee_configuration();
 
-    /* Start Zigbee default thread */
-    zigbee_enable();
+	/* Start Zigbee default thread */
+	zigbee_enable();
 
     while(1)
     {

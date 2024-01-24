@@ -18,7 +18,12 @@
 #include <zephyr/drivers/uart.h>
 #include <string.h>
 
+#include <zephyr/logging/log.h>
+
 #include "tcu_Uart.h"
+
+LOG_MODULE_REGISTER(uart_app, LOG_LEVEL_DBG);
+
 
 static uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
 static uint8_t tcu_transmission_buffer_index = 0;
@@ -69,7 +74,7 @@ int8_t tcu_uart_init(void)
 int8_t tcu_uart_configuration(void)
 {
 	if (!device_is_ready(dev_tcu_uart)) {
-		printk("UART device not found!");
+		LOG_ERR("UART device not found!");
 		return -1;
 	}
 
@@ -78,9 +83,9 @@ int8_t tcu_uart_configuration(void)
 
 	// Check the result
     if (result == 0) {
-        printf("TCU UART configuration successful!\n");
+        LOG_DBG("TCU UART configuration successful!\n");
     } else {
-        printf("TCU UART configuration failed with error code: %d\n", result);
+        LOG_ERR("TCU UART configuration failed with error code: %d\n", result);
         return -1;
     }
 
@@ -89,17 +94,17 @@ int8_t tcu_uart_configuration(void)
 
 	if (ret < 0) {
 		if (ret == -ENOTSUP) {
-			printk("Interrupt-driven UART API support not enabled\n");
+			LOG_ERR("Interrupt-driven UART API support not enabled\n");
 		} else if (ret == -ENOSYS) {
-			printk("UART device does not support interrupt-driven API\n");
+			LOG_ERR("UART device does not support interrupt-driven API\n");
 		} else {
-			printk("Error setting UART callback: %d\n", ret);
+			LOG_ERR("Error setting UART callback: %d\n", ret);
 		}
 		return -1;
 	}
 	else
 	{
-        printf("UART Interrupt configuration successful!\n");
+        LOG_DBG("UART Interrupt configuration successful!\n");
 	}
 
 	uart_irq_rx_enable(dev_tcu_uart);
