@@ -29,8 +29,10 @@ static uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
 static uint8_t tcu_transmission_buffer_index = 0;
 static uint8_t tcu_transmission_size = 0;
 static bool    tcu_transmission_running = false;
+static bool    b_tcu_uart_in_command_mode = false;
 static uint8_t tcuTransmittedFramesCounter = 0;
-
+static volatile bool b_tcu_uart_receiving_frame = false;
+static volatile uint16_t tcu_uart_ticks_since_last_byte;
 
 /* Get the device pointer of the UART hardware */
 static const struct device *dev_tcu_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
@@ -57,9 +59,9 @@ static struct uart_config tcu_uart_config = {
 int8_t tcu_uart_init(void)
 {
     int8_t ret = tcu_uart_configuration();
-    b_UART_receiving_frame = false;
-    UART_ticks_since_last_byte = 0;
-    UART_ticks_to_consider_frame_completed = DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED;
+    b_tcu_uart_in_command_mode = false;
+    b_tcu_uart_receiving_frame = false;
+    tcu_uart_ticks_since_last_byte = 0;
 	b_UART_overflow = false;
 	UART_rx_buffer_index = 0;
 	UART_rx_buffer_index_max = 0;
@@ -111,6 +113,34 @@ int8_t tcu_uart_configuration(void)
     return 0;
 }
 
+/**@brief This function evaluates the time elapsed since the reception of the
+ *        last character through the TCU UART.
+ *
+ * After 10 ms without receiving a character, it is considered that the frame is completed.
+ * This function should be executed at 10 kHz.
+ *
+ */
+void tcu_uart_end_of_frame_time_control_10kHz(void)
+{
+    if( !b_tcu_uart_in_command_mode )
+    {
+        if( b_tcu_uart_receiving_frame )
+        {
+            tcu_uart_ticks_since_last_byte++;
+            if( tcu_uart_ticks_since_last_byte > TICKS_TO_CONSIDER_FRAME_COMPLETED )
+            {
+                b_tcu_uart_receiving_frame = false;
+                tcu_uart_ticks_since_last_byte = 0;
+                b_Modbus_Ready_to_send = true;
+            }
+        }
+        else
+        {
+            tcu_uart_ticks_since_last_byte = 0;
+        }
+    }
+}
+
 /**@brief Interrupt Service Routine for the UART used to communicate with the TCU
  *
  *
@@ -132,8 +162,8 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
         while(number_of_bytes_available > 0)
         {
             number_of_bytes_available--;
-            UART_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
-            if( b_UART_receiving_frame )
+            tcu_uart_ticks_since_last_byte = 0; //Reset 3.5T Modbus timer
+            if( b_tcu_uart_receiving_frame )
             {
                 if( !b_UART_overflow )
                 {
@@ -152,7 +182,7 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
             }
             else
             {
-                b_UART_receiving_frame = true;
+                b_tcu_uart_receiving_frame = true;
                 b_UART_overflow = false;
                 UART_rx_buffer[0] = uart_rx_hw_fifo[uart_rx_hw_fifo_index];
                 uart_rx_hw_fifo_index++;
@@ -187,33 +217,6 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
     }
 }
 
-/**@brief Test function to check that the UART TX ISR has been properly written
- *
- *
- */
-void sendFrameToTcuTest(void)
-{    
-    if(!tcu_transmission_running)
-    {
-        tcu_transmission_buffer_index = 0;        
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = tcuTransmittedFramesCounter; tcu_transmission_buffer_index++;
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = 0xC5; tcu_transmission_buffer_index++;
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = 0x04; tcu_transmission_buffer_index++;
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = 0x75; tcu_transmission_buffer_index++;
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = 0x30; tcu_transmission_buffer_index++;
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = 0x00; tcu_transmission_buffer_index++;
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = 0x02; tcu_transmission_buffer_index++;
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = 0x7B; tcu_transmission_buffer_index++;
-        tcu_transmission_buffer[tcu_transmission_buffer_index] = 0x4C; tcu_transmission_buffer_index++;
-        tcu_transmission_size = tcu_transmission_buffer_index;        
-        tcu_transmission_running = true;
-        tcuTransmittedFramesCounter++;
-        uart_poll_out(dev_tcu_uart, tcu_transmission_buffer[0]); // Place the first byte in the UART transmission buffer
-        tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
-        uart_irq_tx_enable(dev_tcu_uart);        // Enable tx interrupt of UART
-    }
-}
-
 /**@brief Transmit frame using the TCU uart
  *
  *
@@ -232,4 +235,23 @@ void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
         tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
         uart_irq_tx_enable(dev_tcu_uart);
     }
+}
+
+/**@brief Switch the TCU uart to command mode
+ *
+ *
+ */
+void switch_tcu_uart_to_command_mode(void)
+{
+    b_tcu_uart_in_command_mode = true;
+}
+
+/**@brief Switch the TCU uart out of command mode
+ *
+ *
+ */
+void switch_tcu_uart_out_of_command_mode(void)
+{
+    tcu_uart_ticks_since_last_byte = 0;
+    b_tcu_uart_in_command_mode = false;
 }

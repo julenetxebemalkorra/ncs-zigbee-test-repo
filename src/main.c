@@ -93,14 +93,11 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
 /* UART configuration variables*/
-volatile uint16_t UART_ticks_since_last_byte;
 volatile char UART_rx_buffer[UART_RX_BUFFER_SIZE];
 volatile uint16_t UART_rx_buffer_index;
 volatile uint16_t UART_rx_buffer_index_max;
-uint16_t UART_ticks_to_consider_frame_completed;
 
 static volatile size_t offset = 0;
-volatile bool b_UART_receiving_frame;
 
 static volatile	zb_uint8_t *pointerToBeginOfBuffer;
 
@@ -121,8 +118,7 @@ static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
 LOG_MODULE_REGISTER(ZB_router_app, LOG_LEVEL_DBG);
 
 // boolean flags for detecting modbus request handling
-bool b_Modbus_Request_Received_via_Zigbee = false;
-bool b_Modbus_Ready_to_send = false;
+volatile bool b_Modbus_Ready_to_send = false;
 bool b_Zigbe_Connected = false;
 bool bTimeToSendFrame = false;
 
@@ -289,7 +285,6 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
                 if(sizeOfPayload >= MODBUS_MIN_RX_LENGTH)
                 {
-                    b_Modbus_Request_Received_via_Zigbee = true;
                     if(PRINT_ZIGBEE_INFO)
                     {
                         LOG_DBG("bModbusRequestReceived via zigbee and send via UART \n");
@@ -542,9 +537,6 @@ void send_zigbee_modbus_answer(void)
 		//send_user_payload(&outputPayload, chunk_size);
         send_user_payload(outputPayload, chunk_size);
 
-        // Reset flags for the next chunk
-		b_Modbus_Request_Received_via_Zigbee = false;
-
 		// Update offset and remaining length for the next chunk
     	offset += chunk_size;
     	remaining_length -= chunk_size;
@@ -559,22 +551,8 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
-            if(debug_led_ms_x10 < 10000) debug_led_ms_x10++;            
-			if( b_UART_receiving_frame )
-            {
-                UART_ticks_since_last_byte++;
-    			if( UART_ticks_since_last_byte > UART_ticks_to_consider_frame_completed )
-    			{
-    			    b_UART_receiving_frame = false;
-    			    UART_ticks_since_last_byte = 0;
-    			    b_Modbus_Ready_to_send = true;
-    			    b_Modbus_Request_Received_via_Zigbee = false;
-    			}
-            }
-            else
-            {
-                UART_ticks_since_last_byte = 0;
-            }
+            if(debug_led_ms_x10 < 10000) debug_led_ms_x10++;
+            tcu_uart_end_of_frame_time_control_10kHz();
 			break;
 		default:
 			break;
@@ -593,7 +571,7 @@ static void timer1_repeated_timer_start(uint32_t timeout_us)
 // Function for initializing the TIMER1 peripheral using the nrfx driver
 static void timer1_init(void)
 {
-	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(NRF_TIMER_FREQ_1MHz);
+	//nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(NRF_TIMER_FREQ_1MHz);
 	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(1000000);
 	timer_config.bit_width = NRF_TIMER_BIT_WIDTH_32;
 
