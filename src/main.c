@@ -273,14 +273,11 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
                 if(PRINT_ZIGBEE_INFO)
                 {
                     LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
-                    for (uint8_t i = 0; i < sizeOfPayload; i++)
-                    {
-                        LOG_DBG("0x%02x - ", pointerToBeginOfBuffer[i]);
-                    }
-                    LOG_DBG("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
-                    LOG_DBG("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
-                    LOG_DBG("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
-                    LOG_DBG("ind APS counter %d \n", ind->aps_counter);
+                    LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
+                    //LOG_DBG("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
+                    //LOG_DBG("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
+                    //LOG_DBG("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+                    //LOG_DBG("ind APS counter %d \n", ind->aps_counter);
                 }
 
                 if(sizeOfPayload >= MODBUS_MIN_RX_LENGTH)
@@ -449,11 +446,7 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 		if(PRINT_UART_INFO)
 		{
 			LOG_DBG("send_user_payload: chunk_size %d\n", chunk_size);
-
-			for (uint8_t i = 0; i < chunk_size; i++)
-			{
-				LOG_DBG("0x%02x- ", outputPayload[i]);
-			}
+            LOG_HEXDUMP_DBG(outputPayload,chunk_size,"Payload of output RF packet");
 		}
 
 	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
@@ -783,6 +776,7 @@ int main(void)
             UART_rx_buffer_index = 0;
             offset=0;
         }
+        k_sleep(K_MSEC(5));
     }
 
     return 0;
