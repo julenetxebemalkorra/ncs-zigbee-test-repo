@@ -52,9 +52,6 @@
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
 
-/* Default tick to consider a modbus frame completed*/
-#define DEFAULT_TICKS_TO_CONSIDER_FRAME_COMPLETED 100 // At 19200 bps, 4T = 2083 us --> 21 ticks of 100 us
-
 /*UART Modbus and zigbee buffer size definitions*/
 #define MODBUS_MIN_RX_LENGTH             8   // if the messagge has 8 bytes we consider it a modbus frame
 #define MAX_ZIGBEE_PAYLOAD_SIZE 		 82 // Maximum payload size that can be sent at once via zigbee
@@ -545,7 +542,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
             if(debug_led_ms_x10 < 10000) debug_led_ms_x10++;
-            tcu_uart_end_of_frame_time_control_10kHz();
+            tcu_uart_timers_10kHz();
 			break;
 		default:
 			break;

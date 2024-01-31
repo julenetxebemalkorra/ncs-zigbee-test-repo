@@ -14,6 +14,7 @@ project(dual_wireless_test_uart)
 target_sources(app PRIVATE
   src/main.c
   src/Tcu_Uart.c
+  src/Digi_At_commands.c
 )
 
 target_include_directories(app PRIVATE include)
