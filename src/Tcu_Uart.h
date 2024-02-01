@@ -37,6 +37,7 @@ void tcu_uart_isr(const struct device *dev, void *user_data);
 void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data);
 void switch_tcu_uart_to_command_mode(void);
 void switch_tcu_uart_out_of_command_mode(void);
+bool is_tcu_uart_in_command_mode(void);
 void check_input_sequence_for_entering_in_command_mode(uint8_t input_byte);
 
 

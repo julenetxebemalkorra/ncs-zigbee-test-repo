@@ -277,12 +277,9 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
                     //LOG_DBG("ind APS counter %d \n", ind->aps_counter);
                 }
 
-                if(sizeOfPayload >= MODBUS_MIN_RX_LENGTH)
+                if( !is_tcu_uart_in_command_mode() && (sizeOfPayload >= MODBUS_MIN_RX_LENGTH) )
                 {
-                    if(PRINT_ZIGBEE_INFO)
-                    {
-                        LOG_DBG("bModbusRequestReceived via zigbee and send via UART \n");
-                    }
+                    if(PRINT_ZIGBEE_INFO) LOG_DBG("Payload of input RF packet sent to Tcu UART \n");
                     // safe zigbee source endpoint info to send the asnwer
                     ZB_profileid = ind->profileid;
                     ZB_clusterid = ind->clusterid;

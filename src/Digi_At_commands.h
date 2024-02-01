@@ -5,7 +5,6 @@
 
 #ifndef DIGI_AT_COMMANDS_H_
 #define DIGI_AT_COMMANDS_H_
-
 /* Enumerative with the supported Xbee AT commands                            */
 enum {
     AT_CN, // Exit from command mode
@@ -49,6 +48,14 @@ struct xbee_parameters_t {
     uint8_t at_nb;   // Xbee's UART parity parameter
     uint8_t at_ni[33];   // Node identifier string parameter
 };
+
+/* Function prototypes                                                        */
+void digi_at_init_xbee_parameters(void);
+void digi_at_reply_ok(void);
+void digi_at_reply_error(void);
+void digi_at_reply_read_ni(void);
+void digi_at_reply_read_command(uint8_t at_command);
+int8_t digi_at_extract_command(uint8_t *input_data, uint16_t size_input_data);
 
 #endif /* DIGI_AT_COMMANDS_H_ */
 

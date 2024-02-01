@@ -21,6 +21,7 @@
 #include <zephyr/logging/log.h>
 
 #include "tcu_Uart.h"
+#include "Digi_At_commands.h"
 
 LOG_MODULE_REGISTER(uart_app, LOG_LEVEL_DBG);
 
@@ -174,6 +175,7 @@ void tcu_uart_timers_10kHz(void)
                 {
                     switch_tcu_uart_to_command_mode();
                 }
+                digi_at_reply_ok();
                 enter_cmd_mode_sequence_st = ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_INITIAL_SILENCE_ST;
             }
         }
@@ -195,6 +197,7 @@ void tcu_uart_timers_10kHz(void)
  */
 void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
 {
+    leave_cmd_mode_silence_timer_ms = 0; //Reset the timer every time a character is received
     check_input_sequence_for_entering_in_command_mode(input_byte); // It also has to be checked when we are already in command mode.
 
     if(input_byte == '\r') // End of frame
@@ -242,11 +245,14 @@ void tcu_uart_process_byte_received_in_transparent_mode(uint8_t input_byte)
     }
     else
     {
-        b_tcu_uart_receiving_frame = true;
-        b_UART_overflow = false;
-        UART_rx_buffer[0] = input_byte;
-        UART_rx_buffer_index = 1;
-        UART_rx_buffer_index_max = UART_rx_buffer_index;
+        if(input_byte != '+') // Do not consider inout frames starting by '+'
+        {
+            b_tcu_uart_receiving_frame = true;
+            b_UART_overflow = false;
+            UART_rx_buffer[0] = input_byte;
+            UART_rx_buffer_index = 1;
+            UART_rx_buffer_index_max = UART_rx_buffer_index;
+        }
     }
 }
 
@@ -349,6 +355,16 @@ void switch_tcu_uart_out_of_command_mode(void)
     UART_rx_buffer_index = 0;
     tcu_uart_ticks_since_last_byte = 0;
     b_zigbee_module_in_command_mode = false;
+}
+
+/**@brief Indicate if the TCU UART is in command mode
+ *
+ * @retval true In command mode
+ * @retval false Not in command mode (i.e. transparent mode)
+ */
+bool is_tcu_uart_in_command_mode(void)
+{
+    return b_zigbee_module_in_command_mode;
 }
 
 /**@brief Check if the TCU has sent the "+++" sequence
