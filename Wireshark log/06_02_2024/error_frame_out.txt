@@ -1,0 +1,37 @@
+
+uart:~$ zcl cmd 0x3a13 232 0x00
+Command sent successfully. Count: 11
+Received data: 11 -p 0x0008 0x00 -l ca0375300002ce73
+uart:~$ zcl cmd 0xbc40 232 0x0011 -p 0x0008 0x00 -l ca0375300002ce73
+Done
+Done
+[00:43:59.058,807] <inf> app: Size of received payload is 9 bytes
+
+[00:43:59.058,837] <inf> app: Payload of input RF packet
+                              c4 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:43:59.058,868] <inf> app: Payload of input RF packet sent to Tcu UART
+
+[00:43:59.092,926] <inf> app: Size of received payload is 72 bytes
+
+[00:43:59.092,956] <inf> app: Payload of input RF packet
+                              61 88 78 2a ad 40 bc 00  00 48 1a 40 bc 00 00 1e |a.x*.@.. .H.@....
+                              b0 8e bf 7f 2c 77 36 ce  f4 f1 a3 dc 2e 56 36 ce |....,w6. .....V6.
+                              f4 28 90 08 00 00 f1 a3  dc 2e 56 36 ce f4 00 41 |.(...... ..V6...A
+                              ea ce ae db 54 61 f8 9a  42 ff 32 75 fe c3 b9 99 |....Ta.. B.2u....
+                              a2 6e 7b 38 a3 9e 5c 68                          |.n{8..\h
+[00:43:59.092,987] <inf> app: Payload of input RF packet sent to Tcu UART
+
+uart:~$ zc
+Command sent successfully. Count: 12
+Received data: l cmd 0x3a13 232 0x0011 -p 0x0008 0x00 -l ca0375300002ce73
+uart:~$ zcl cmd 0xbc40 232 0x0011 -p 0x0008 0x00 -l ca0375300002ce73
+Done
+[00:44:04.153,717] <inf> app: Size of received payload is 9 bytes
+
+[00:44:04.153,747] <inf> app: Payload of input RF packet
+                              c4 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:44:04.153,778] <inf> app: Payload of input RF packet sent to Tcu UART
+
+[00:44:04.680,297] <inf> zigbee_app_utils: Device authorization event received (short: 0xbc40, long: f4ce36772c7fbf8e, authorization type: 0, authorization status: 0)
+[00:44:04.681,243] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:44:07.739,959] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)

@@ -24,7 +24,6 @@
 #include <zephyr/sys/ring_buffer.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/uart.h>
-#include <string.h>
 
 #include <nrfx_timer.h>
 #include <zephyr/drivers/hwinfo.h>
@@ -254,15 +253,17 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 {
  	zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
     
-    if (bufid)
+    if (bufid && (zb_buf_get_status(bufid) == 0))
 	{
+		unsigned int key = irq_lock();
         if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
         {
-            zb_uint8_t *pointerToEndOfBuffer;
+            //zb_uint8_t *pointerToEndOfBuffer;
             zb_int32_t sizeOfPayload;
+			
             pointerToBeginOfBuffer = zb_buf_begin(bufid);
-            pointerToEndOfBuffer = zb_buf_end(bufid);
-            sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
+            //pointerToEndOfBuffer = zb_buf_end(bufid);
+            sizeOfPayload = zb_buf_len(bufid);
 
             if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
             {
@@ -271,10 +272,10 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
                 {
                     LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
                     LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
-                    //LOG_DBG("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
-                    //LOG_DBG("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
-                    //LOG_DBG("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
-                    //LOG_DBG("ind APS counter %d \n", ind->aps_counter);
+                    LOG_DBG("\n Frame control field: %d \n", pointerToBeginOfBuffer[0]);
+                    LOG_DBG("Sequence number: %d - \n", pointerToBeginOfBuffer[1]);
+                    LOG_DBG("Zigbee Command: 0x%02x - \n", pointerToBeginOfBuffer[2]);
+                    LOG_DBG("ind APS counter %d \n", ind->aps_counter);
                 }
 
                 if( !is_tcu_uart_in_command_mode() && (sizeOfPayload >= MODBUS_MIN_RX_LENGTH) )
@@ -289,19 +290,35 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
                     //sendFrameToTcu(&pointerToBeginOfBuffer[0], sizeOfPayload);
                     sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
- 
+					b_Modbus_Ready_to_send = true;
+
                 }
             }
 
         }
+		irq_unlock(key);
 	}
 
-    if (bufid)
-    {
-		zb_buf_free(bufid); // JESUS: I don't know if this is needed, but I try, just in case.
+	// Get the status of the buffer
+	zb_uint8_t buffer_status = zb_buf_get_status(bufid);
+	zb_uint8_t buffer_len =  zb_buf_len(bufid);
+
+
+	/*Free packet buffer and put it into free list after payload is sent*/
+	if (bufid) 
+	{
+		if ((buffer_status !=0) && (buffer_len != 9))
+		{
+			LOG_ERR("Buffer Status ERR when zb_buf_free");
+		}	
+	    zb_buf_free(bufid);
 		return ZB_TRUE;
 	}
-	return ZB_FALSE;
+	else
+	{
+		return ZB_FALSE;
+	}
+
 }
 
 /**@brief Zigbee stack event handler.
@@ -427,25 +444,26 @@ void zboss_signal_handler(zb_bufid_t bufid)
  * @param[in]   chunk_size   payload size to send 
  *
  */
-void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
+void send_user_payload(zb_bufid_t bufid)
 {
-	    /*Allocate OUT buffer of the default size.*/
-		zb_bufid_t bufid;
-		bufid = zb_buf_get_out();
-
 		/*destination address: for the first test the network coordinator will be the destination */
 		zb_addr_u dst_addr;
 		dst_addr.addr_short = 0x0000;
+		
+
+		zb_uint8_t outputCustomPayload[255] = {0xC4, 0x03, 0x04, 0x0b, 0x2b, 0x00, 0x1a, 0x9c, 0xd8};
 
 		if(PRINT_UART_INFO)
 		{
-			LOG_DBG("send_user_payload: chunk_size %d\n", chunk_size);
-            LOG_HEXDUMP_DBG(outputPayload,chunk_size,"Payload of output RF packet");
+			LOG_DBG("outputCustomPayload: chunk_size 9\n");
+            LOG_HEXDUMP_DBG(outputCustomPayload,9,"Payload of output RF packet");
 		}
 
-	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
+        if(bufid && (zb_buf_get_status(bufid) == 0))
+        {
+			unsigned int key_zb_aps_send_user_payload = irq_lock();
 
-		/*zb_aps_send_user_payload(bufid, 
+			/*zb_aps_send_user_payload(bufid, 
 		    					 dst_addr,
 			    				 0xc105,
 				    			 0X0011,
@@ -455,18 +473,20 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 		    					 ZB_FALSE,
 			    				 outputPayload,
 				    			 9); */
-		zb_ret_t ret = zb_aps_send_user_payload(bufid, 
-		    					                dst_addr,
-			    				                ZB_profileid,
-				    			                ZB_clusterid,
-					    		                ZB_src_endpoint,
-						    	                ZB_dst_endpoint,
-								                ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-		    					                ZB_FALSE,
-			    				                outputPayload,
-				    			                chunk_size);
-        if(bufid)
-        {
+
+			zb_ret_t ret = zb_aps_send_user_payload(bufid, 
+			    					                dst_addr,
+				    				                ZB_profileid,
+					    			                ZB_clusterid,
+						    		                ZB_src_endpoint,
+							    	                ZB_dst_endpoint,
+									                ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+			    					                ZB_FALSE,
+				    				                outputCustomPayload,
+					    			                9);
+			irq_unlock(key_zb_aps_send_user_payload);
+
+
             if(ret == RET_OK) LOG_DBG("RET_OK - if transmission was successful scheduled;\n");
 		    else if(ret == RET_INVALID_PARAMETER_1) LOG_ERR("RET_INVALID_PARAMETER_1 - if the buffer is invalid\n");
 		    else if(ret == RET_INVALID_PARAMETER_2) LOG_ERR("RET_INVALID_PARAMETER_2 - if the payload_ptr parameter is invalid;\n");
@@ -478,9 +498,18 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
             LOG_ERR("\n\n bufid NULL error ZB not answered \n\n");
         }
 
+		// Get the status of the buffer
+	zb_uint8_t buffer_status = zb_buf_get_status(bufid);
+	zb_uint8_t buffer_len =  zb_buf_len(bufid);
+
+
 	/*Free packet buffer and put it into free list after payload is sent*/
 	if (bufid) 
 	{
+		if ((buffer_status !=0) && (buffer_len != 9))
+		{
+			LOG_ERR("Buffer Status ERR when zb_buf_free");
+		}	
 	    zb_buf_free(bufid);
 	}
 
@@ -495,39 +524,6 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
   Caution: Be mindful when altering the delay to prevent network congestion.
 */
 	//k_msleep(SLEEP_TIME_MS);
-
-}
-
-//------------------------------------------------------------------------------
-/**@brief Function to send the received modbus answer. Logic to split the messages in MAX_ZIGBEE_PAYLOAD_SIZE
- *
- *
- */
-void send_zigbee_modbus_answer(void)
-{
-	zb_uint8_t outputPayload[MAX_ZIGBEE_PAYLOAD_SIZE];
-
-	size_t remaining_length = UART_rx_buffer_index_max +1;
-
-    // Transmit the modified payload in chunks via Zigbee
-	while(remaining_length > 0) 
-	{
-    	size_t chunk_size = MIN(remaining_length, MAX_ZIGBEE_PAYLOAD_SIZE);
-
-		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
-/**
-		for (uint8_t i = 0; i < chunk_size; i++)
-		{
-		LOG_DBG("%c- ", outputPayload[i]);
-		}
-*/
-		//send_user_payload(&outputPayload, chunk_size);
-        send_user_payload(outputPayload, chunk_size);
-
-		// Update offset and remaining length for the next chunk
-    	offset += chunk_size;
-    	remaining_length -= chunk_size;
-	}
 
 }
 
@@ -603,7 +599,7 @@ static int8_t gpio_init(void)
 void zigbee_configuration()
 {
 	/* disable NVRAM erasing on every application startup*/
-	zb_set_nvram_erase_at_start(ZB_TRUE);
+	zb_set_nvram_erase_at_start(ZB_FALSE);
 
 	/* Register device context (endpoints). */
 	ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
@@ -765,8 +761,14 @@ int main(void)
         if(b_Modbus_Ready_to_send)
         {
             tcu_uart_frames_received_counter++;
-            send_zigbee_modbus_answer();
-            b_Modbus_Ready_to_send = false;
+            //send_zigbee_modbus_answer();
+			zb_ret_t zb_err_code = zb_buf_get_out_delayed(send_user_payload);
+			ZB_ERROR_CHECK(zb_err_code);
+            //send_user_payload();
+			//zb_bufid_t bufid;
+			//bufid = zb_buf_get_out();
+			//ZB_SCHEDULE_APP_CALLBACK(send_user_payload, bufid);
+			b_Modbus_Ready_to_send = false;
             UART_rx_buffer_index = 0;
             offset=0;
         }

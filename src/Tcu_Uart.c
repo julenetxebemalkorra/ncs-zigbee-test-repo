@@ -50,7 +50,7 @@ static volatile bool b_UART_overflow;
 
 // Create a configuration structure for the UART used to communicate with the TCU
 static struct uart_config tcu_uart_config = {
-    .baudrate = 19200,
+    .baudrate = 115200,
     .parity = UART_CFG_PARITY_EVEN,
     .stop_bits = UART_CFG_STOP_BITS_1,
     .data_bits = UART_CFG_DATA_BITS_8,

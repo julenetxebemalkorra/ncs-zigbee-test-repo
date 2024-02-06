@@ -1,0 +1,49 @@
+[0xcb84 dual_board
+    00:18:44.807,434] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:18:44.807,464] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 2e 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:18:44.807,495] <dbg> ZInput counter: 184
+[00:18:44.813,842] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:18:44.813,903] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:18:44.813,934] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:18:44.813,934] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:18:44.813,964] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 184
+▒[00:00:00.000,518] <err> qspi_nor: JEDEC id [00 00 00] expect [c2 28 17]
+[00:00:00.000,823] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.010,498] <inf> ZB_router_app: Router started successfully
+[00:00:00.010,498] <err> ZB_router_app: RESET
+[00:00:00.010,498] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE
+
+
+0x7619 fanstel EV
+s[00:18:44.848,541] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:18:44.848,571] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 2d 00 ca 03 75 30 00  02 ce 73                |.-...u0. ..s
+[00:18:44.848,571] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 184
+[00:18:44.854,858] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:18:44.854,888] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:18:44.854,919] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:18:44.854,949] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:18:44.854,949] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 184
+▒[00:00:00.000,488] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.010,314] <inf> ZB_router_app: Router started successfully
+[00:00:00.010,314] <err> ZB_router_app: RESET
+[00:00:00.010,345] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE

@@ -1,0 +1,30 @@
+[00:00:00.544,189] <inf> ZB_router_app: Router started successfully
+[00:00:00.544,189] <err> ZB_router_app: RESET
+[00:00:00.544,219] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE
+
+[00:00:00.544,250] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+
+[00:00:00.544,250] <dbg> uart_app: tcu_uart_configuration: UART Interrupt configuration successful!
+
+[00:00:00.544,281] <wrn> ZB_router_app: Error initializing timer: bad0004
+
+ASSERTION FAIL @ WEST_TOPDIR/modules/hal/nordic/nrfx/drivers/src/nrfx_timer.c:194
+[00:00:00.544,342] <err> os: r0/a1:  0x00000004  r1/a2:  0x000000c2  r2/a3:  0x00000009
+[00:00:00.544,342] <err> os: r3/a4:  0x00000000 r12/ip:  0x00000010 r14/lr:  0x00015321
+[00:00:00.544,372] <err> os:  xpsr:  0x61000000
+[00:00:00.544,372] <err> os: s[ 0]:  0x00000003  s[ 1]:  0x000054ad  s[ 2]:  0x0bad0004  s[ 3]:  0x200031d0
+[00:00:00.544,403] <err> os: s[ 4]:  0x00000004  s[ 5]:  0x00070300  s[ 6]:  0x00000000  s[ 7]:  0x20004248
+[00:00:00.544,433] <err> os: s[ 8]:  0x00000002  s[ 9]:  0x000550eb  s[10]:  0x20004248  s[11]:  0x2000feb4
+[00:00:00.544,433] <err> os: s[12]:  0x0001af01  s[13]:  0x00000000  s[14]:  0x00000000  s[15]:  0x0001af21
+[00:00:00.544,464] <err> os: fpscr:  0x20003108
+[00:00:00.544,464] <err> os: Faulting instruction address (r15/pc): 0x0004b2c6
+[00:00:00.544,494] <err> os: >>> ZEPHYR FATAL ERROR 4: Kernel panic on CPU 0
+[00:00:00.544,555] <err> os: Current thread: 0x20003108 (unknown)
+▒[00:00:00.532,287] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.544,067] <inf> ZB_router_app: Router started successfully
+[00:00:00.544,067] <err> ZB_router_app: RESET
+[00:00:00.544,097] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE
+
+[00:00:00.544,097] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+

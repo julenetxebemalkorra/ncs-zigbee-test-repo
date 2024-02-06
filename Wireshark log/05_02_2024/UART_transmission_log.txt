@@ -1,0 +1,1039 @@
+[00:00:00.000,427] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.011,230] <inf> ZB_router_app: Router started successfully
+[00:00:00.011,260] <err> ZB_router_app: RESET
+[00:00:00.011,260] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_                                                                                                             PIN
+
+[00:00:00.011,291] <dbg> uart_app: tcu_uart_configuration: TCU UART configuratio                                                                                                             n successful!
+
+[00:00:00.011,291] <dbg> uart_app: tcu_uart_configuration: UART Interrupt config                                                                                                             uration successful!
+
+[00:00:00.692,749] <inf> zigbee_app_utils: Production configuration is not prese                                                                                                             nt or invalid (status: -1)
+[00:00:00.693,084] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_ZDO_SIGNA                                                                                                             L_SKIP_STARTUP
+
+[00:00:00.693,115] <inf> zigbee_app_utils: Zigbee stack initialized
+[00:00:00.697,418] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNA                                                                                                             L_DEVICE_FIRST_START
+
+[00:00:00.697,448] <inf> zigbee_app_utils: Device started for the first time
+[00:00:00.697,448] <inf> zigbee_app_utils: Start network steering
+[00:00:00.697,479] <inf> zigbee_app_utils: Started network rejoin procedure.
+[00:00:10.288,482] <dbg> ZB_router_app: diagnostic_zigbee_info: Zigbee application joined the network: bellow some info:
+
+[00:00:10.288,513] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee long addr:
+[00:00:10.288,513] <dbg> ZB_router_app: diagnostic_zigbee_info: f4
+[00:00:10.288,543] <dbg> ZB_router_app: diagnostic_zigbee_info: ce
+[00:00:10.288,543] <dbg> ZB_router_app: diagnostic_zigbee_info: 36
+[00:00:10.288,543] <dbg> ZB_router_app: diagnostic_zigbee_info: 1f
+[00:00:10.288,574] <dbg> ZB_router_app: diagnostic_zigbee_info: cc
+[00:00:10.288,574] <dbg> ZB_router_app: diagnostic_zigbee_info: b3
+[00:00:10.288,604] <dbg> ZB_router_app: diagnostic_zigbee_info: 46
+[00:00:10.288,604] <dbg> ZB_router_app: diagnostic_zigbee_info: a2
+[00:00:10.288,635] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.288,635] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee shrot addr:  0x3a2
+
+[00:00:10.288,665] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee extended pan id:
+[00:00:10.288,665] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.288,696] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,062] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,093] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,093] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,123] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,123] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.289,154] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.289,154] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.289,184] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee role router
+
+[00:00:10.289,184] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee channel: 15
+
+[00:00:10.289,215] <dbg> ZB_router_app: get_endpoint_descriptor: Profileid 0x0004
+
+[00:00:10.289,215] <dbg> ZB_router_app: get_endpoint_descriptor: Clusterid 0x0008
+
+[00:00:10.289,215] <dbg> ZB_router_app: get_endpoint_descriptor: device_version 0x0000
+
+[00:00:10.601,409] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:10.693,603] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:10.695,312] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_STEERING
+
+[00:00:10.695,404] <dbg> ZB_router_app: start_identifying: Enter identify mode
+[00:00:10.695,617] <inf> zigbee_app_utils: Joined network successfully (Extended PAN ID: 0000000000009999, PAN ID: 0x393d)
+[00:00:10.695,648] <inf> zigbee_app_utils: Network rejoin procedure stopped.
+[00:02:11.891,662] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:02:11.891,693] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:02:27.060,668] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:02:27.060,699] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:02:41.192,108] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:02:41.192,108] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:02:56.352,172] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:02:56.352,172] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:03:10.001,617] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED
+
+[00:03:10.001,617] <inf> zigbee_app_utils: Find and bind target finished (status: 0)
+[00:03:11.518,615] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:03:11.518,646] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:03:12.444,702] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:03:26.664,825] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:03:26.664,825] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:03:41.805,877] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:03:41.805,908] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:03:56.956,024] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:03:56.956,054] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:04:12.108,825] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:04:12.108,856] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:04:37.357,818] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:04:37.357,818] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:04:51.495,361] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:04:51.495,391] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:05:06.628,326] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:05:06.628,387] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:05:21.795,928] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:05:21.795,959] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:05:36.961,761] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:05:36.961,761] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:05:52.125,396] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:05:52.125,427] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+^C[00:06:07.295,349] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:06:07.295,379] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:06:22.457,366] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:06:22.457,366] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)                                                                                                    ^C[00:06:37.647,918] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:06:37.647,949] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:06:56.861,328] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:06:56.861,358] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:00:00.000,427] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.011,230] <inf> ZB_router_app: Router started successfully
+[00:00:00.011,230] <err> ZB_router_app: RESET
+[00:00:00.011,260] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_PIN
+
+[00:00:00.011,260] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+
+[00:00:00.011,291] <dbg> uart_app: tcu_uart_configuration: UART Interrupt configuration successful!
+
+[00:00:00.692,779] <inf> zigbee_app_utils: Production configuration is not present or invalid (status: -1)
+[00:00:00.693,115] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP
+
+[00:00:00.693,145] <inf> zigbee_app_utils: Zigbee stack initialized
+[00:00:00.697,448] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START
+
+[00:00:00.697,479] <inf> zigbee_app_utils: Device started for the first time
+[00:00:00.697,479] <inf> zigbee_app_utils: Start network steering
+[00:00:00.697,509] <inf> zigbee_app_utils: Started network rejoin procedure.
+[00:00:10.288,970] <dbg> ZB_router_app: diagnostic_zigbee_info: Zigbee application joined the network: bellow some info:
+
+[00:00:10.289,001] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee long addr:
+[00:00:10.289,001] <dbg> ZB_router_app: diagnostic_zigbee_info: f4
+[00:00:10.289,031] <dbg> ZB_router_app: diagnostic_zigbee_info: ce
+[00:00:10.289,031] <dbg> ZB_router_app: diagnostic_zigbee_info: 36
+[00:00:10.289,062] <dbg> ZB_router_app: diagnostic_zigbee_info: 1f
+[00:00:10.289,062] <dbg> ZB_router_app: diagnostic_zigbee_info: cc
+[00:00:10.289,093] <dbg> ZB_router_app: diagnostic_zigbee_info: b3
+[00:00:10.289,093] <dbg> ZB_router_app: diagnostic_zigbee_info: 46
+[00:00:10.289,123] <dbg> ZB_router_app: diagnostic_zigbee_info: a2
+[00:00:10.289,123] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.289,154] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee shrot addr:  0xd583
+
+[00:00:10.289,154] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee extended pan id:
+[00:00:10.289,184] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,184] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,581] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,581] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,611] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,611] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,611] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.289,642] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.289,642] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.289,672] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee role router
+
+[00:00:10.289,672] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee channel: 15
+
+[00:00:10.289,703] <dbg> ZB_router_app: get_endpoint_descriptor: Profileid 0x0004
+
+[00:00:10.289,703] <dbg> ZB_router_app: get_endpoint_descriptor: Clusterid 0x0008
+
+[00:00:10.289,733] <dbg> ZB_router_app: get_endpoint_descriptor: device_version 0x0000
+
+[00:00:10.627,502] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:10.704,803] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:10.706,573] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_STEERING
+
+[00:00:10.706,634] <dbg> ZB_router_app: start_identifying: Enter identify mode
+[00:00:10.706,848] <inf> zigbee_app_utils: Joined network successfully (Extended PAN ID: 0000000000009999, PAN ID: 0x3432)
+[00:00:10.706,848] <inf> zigbee_app_utils: Network rejoin procedure stopped.                                                                                                               ^C▒u0▒s[00:00:30.053,344] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:30.053,375] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 00 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:30.053,375] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 1
+[00:00:30.058,715] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:00:30.058,746] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:30.058,807] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:30.058,807] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:00:30.058,837] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 1
+▒u0▒s[00:00:40.064,971] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:40.065,032] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 01 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:40.065,032] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 2
+[00:00:40.070,739] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:00:40.070,770] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:40.070,800] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:40.070,800] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:00:40.070,831] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 2
+▒u0▒s[00:00:50.086,486] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:50.086,517] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 02 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:50.086,547] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 3
+[00:00:50.092,193] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:00:50.092,224] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:50.092,254] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:50.092,285] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:00:50.092,285] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 3
+▒u0▒s[00:01:00.095,672] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:00.095,703] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 03 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:00.095,764] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 4
+[00:01:00.101,776] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:00.101,806] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:00.101,837] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:00.101,837] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:00.101,867] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 4
+▒u0▒s[00:01:10.106,689] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:10.106,750] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 04 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:10.106,750] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 5
+[00:01:10.110,900] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:10.110,931] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:10.110,961] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:10.110,992] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:10.110,992] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 5
+PuTTY▒u0▒s[00:01:20.120,239] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:20.120,269] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 05 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:20.120,300] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 6
+[00:01:20.124,694] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:20.124,725] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:20.124,755] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:20.124,755] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:20.124,816] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 6
+▒u0▒s[00:01:30.135,101] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:30.135,131] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 06 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:30.135,162] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 7
+[00:01:30.140,197] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:30.140,228] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:30.140,258] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:30.140,258] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:30.140,289] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 7
+▒u0▒s[00:01:40.154,724] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:40.154,754] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 07 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:40.154,785] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 8
+[00:01:40.160,125] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:40.160,156] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:40.160,186] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:40.160,217] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:40.160,217] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 8                                                                                                                                                                           ▒u0▒s[00:01:50.174,865] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:50.174,896] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 08 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:50.174,896] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 9
+[00:01:50.178,985] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:50.179,016] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:50.179,046] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:50.179,077] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:50.179,077] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 9
+        ▒u0▒s[00:02:00.183,319] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:00.183,349] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 09 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:00.183,380] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 10
+[00:02:00.188,110] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:00.188,140] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:00.188,171] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:00.188,171] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:00.188,201] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 10
+
+▒u0▒s[00:02:10.202,423] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:10.202,453] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 0a 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:10.202,484] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 11
+[00:02:10.207,519] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:10.207,550] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:10.207,580] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:10.207,580] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:10.207,611] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 11
+
+▒u0▒s[00:02:20.213,409] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:20.213,439] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 0b 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:20.213,439] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 12
+[00:02:20.219,787] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:20.219,818] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:20.219,848] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:20.219,848] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:20.219,879] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 12
+▒u0▒s[00:02:30.221,099] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:30.221,160] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 0c 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:30.221,160] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 13
+[00:02:30.227,111] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:30.227,142] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:30.227,172] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:30.227,203] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:30.227,203] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 13
+▒u0▒s[00:02:40.230,438] <dbg> ZB_router_app: data_indd[00:02:40.230,468] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 0d 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:40.230,468] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 14
+[00:02:40.235,168] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:40.235,198] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:40.235,260] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:40.235,260] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:40.235,290] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 14
+[00:02:40.568,908] <err> os: ***** BUS FAULT *****
+[00:02:40.568,908] <err> os:   Precise data bus error
+[00:02:40.568,939] <err> os:   BFAR Address: 0x20040000
+[00:02:40.568,969] <err> os: r0/a1:  0x2000d648  r1/a2:  0x2003fff5  r2/a3:  0x2000d600
+[00:02:40.568,969] <err> os: r3/a4:  0x0000000b r12/ip:  0x000028e9 r14/lr:  0x0004e02f
+[00:02:40.569,000] <err> os:  xpsr:  0x81000200
+[00:02:40.569,000] <err> os: s[ 0]:  0x00000001  s[ 1]:  0x0000c56d  s[ 2]:  0x2000d600  s[ 3]:  0x00000010
+[00:02:40.569,030] <err> os: s[ 4]:  0x2000d648  s[ 5]:  0x00000010  s[ 6]:  0x00000010  s[ 7]:  0x2000d5b8
+[00:02:40.569,030] <err> os: s[ 8]:  0x00000001  s[ 9]:  0x00008ead  s[10]:  0x2000aa71  s[11]:  0x00051040
+[00:02:40.569,061] <err> os: s[12]:  0x00000000  s[13]:  0x00000000  s[14]:  0x00000000  s[15]:  0x00320010
+[00:02:40.569,061] <err> os: fpscr:  0x00000000
+[00:02:40.569,061] <err> os: Faulting instruction address (r15/pc): 0x0004dede
+[00:02:40.569,122] <err> os: >>> ZEPHYR FATAL ERROR 25: Unknown error on CPU 0
+[00:02:40.569,152] <err> os: Current thread: 0x20002928 (unknown)
+[00:00:00.000,427] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+
+
+
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.011,230] <inf> ZB_router_app: Router started successfully
+[00:00:00.011,260] <err> ZB_router_app: RESET
+[00:00:00.011,260] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE
+
+[00:00:00.011,291] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+
+[00:00:00.011,291] <dbg> uart_app: tcu_uart_configuration: UART Interrupt configuration successful!
+
+[00:00:00.692,749] <inf> zigbee_app_utils: Production configuration is not present or invalid (status: -1)
+[00:00:00.693,084] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP
+
+[00:00:00.693,115] <inf> zigbee_app_utils: Zigbee stack initialized
+[00:00:00.697,418] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START
+
+[00:00:00.697,418] <inf> zigbee_app_utils: Device started for the first time
+[00:00:00.697,448] <inf> zigbee_app_utils: Start network steering
+[00:00:00.697,479] <inf> zigbee_app_utils: Started network rejoin procedure.
+[00:00:10.289,916] <dbg> ZB_router_app: diagnostic_zigbee_info: Zigbee application joined the network: bellow some info:
+
+[00:00:10.289,947] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee long addr:
+[00:00:10.289,947] <dbg> ZB_router_app: diagnostic_zigbee_info: f4
+[00:00:10.289,978] <dbg> ZB_router_app: diagnostic_zigbee_info: ce
+[00:00:10.289,978] <dbg> ZB_router_app: diagnostic_zigbee_info: 36
+[00:00:10.290,008] <dbg> ZB_router_app: diagnostic_zigbee_info: 1f
+[00:00:10.290,008] <dbg> ZB_router_app: diagnostic_zigbee_info: cc
+[00:00:10.290,039] <dbg> ZB_router_app: diagnostic_zigbee_info: b3
+[00:00:10.290,039] <dbg> ZB_router_app: diagnostic_zigbee_info: 46
+[00:00:10.290,069] <dbg> ZB_router_app: diagnostic_zigbee_info: a2
+[00:00:10.290,069] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.290,100] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee shrot addr:  0xd583
+
+[00:00:10.290,100] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee extended pan id:
+[00:00:10.290,130] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.290,130] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.290,527] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.290,527] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.290,557] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.290,557] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.290,588] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.290,588] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.290,588] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.290,618] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee role router
+
+[00:00:10.290,618] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee channel: 15
+
+[00:00:10.290,649] <dbg> ZB_router_app: get_endpoint_descriptor: Profileid 0x0004
+
+[00:00:10.290,649] <dbg> ZB_router_app: get_endpoint_descriptor: Clusterid 0x0008
+
+[00:00:10.290,679] <dbg> ZB_router_app: get_endpoint_descriptor: device_version 0x0000
+
+[00:00:10.628,479] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:10.735,870] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:10.737,670] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_STEERING
+
+[00:00:10.737,731] <dbg> ZB_router_app: start_identifying: Enter identify mode
+[00:00:10.737,915] <inf> zigbee_app_utils: Joined network successfully (Extended PAN ID: 0000000000009999, PAN ID: 0x3432)
+[00:00:10.737,945] <inf> zigbee_app_utils: Network rejoin procedure stopped.
+▒u0▒s[00:00:19.000,549] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:19.000,579] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 0f 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:19.000,610] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 1
+[00:00:19.005,981] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:00:19.005,981] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:19.006,042] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:19.006,042] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:00:19.006,072] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 1
+▒u0▒s[00:00:28.997,192] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:28.997,222] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 10 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:28.997,253] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 2
+[00:00:29.001,983] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:00:29.002,014] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:29.002,044] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:29.002,044] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:00:29.002,075] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 2
+▒u0▒s[00:00:39.007,415] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:39.007,476] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 11 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:39.007,476] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 3
+[00:00:39.011,871] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:00:39.011,901] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:39.011,932] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:39.011,932] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:00:39.011,962] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 3
+▒u0▒s[00:00:49.022,949] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:49.022,979] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 12 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:49.023,010] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 4
+[00:00:49.027,709] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:00:49.027,740] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:49.027,770] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:49.027,770] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:00:49.027,801] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 4
+▒u0▒s[00:00:59.025,695] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:59.025,726] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 13 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:59.025,756] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 5
+[00:00:59.030,151] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:00:59.030,212] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:59.030,242] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:59.030,242] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:00:59.030,273] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 5
+▒u0▒s[00:01:09.031,555] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:09.031,585] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 14 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:09.031,616] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 6
+[00:01:09.036,315] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:09.036,346] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:09.036,376] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:09.036,407] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:09.036,407] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 6
+▒u0▒s[00:01:19.034,576] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:19.034,606] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 15 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:19.034,606] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 7
+[00:01:19.039,337] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:19.039,367] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:19.039,398] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:19.039,398] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:19.039,428] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 7
+▒u0▒s[00:01:29.045,043] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:29.045,074] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 16 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:29.045,104] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 8
+[00:01:29.051,116] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:29.051,147] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:29.051,177] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:29.051,177] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:29.051,208] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 8
+▒u0▒s[00:01:39.060,638] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:39.060,668] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 17 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:39.060,668] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 9
+Output counter: 9
+[00:01:39.067,016] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:39.067,047] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:39.067,077] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:39.067,077] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:39.067,108] <wrn> ZB_router_app: Buffer length: 9
+
+▒u0▒s[00:01:49.073,974] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:49.074,005] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 18 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:49.074,005] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 10
+[00:01:49.078,430] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:49.078,460] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:49.078,491] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:49.078,491] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:49.078,521] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 10
+▒u0▒s[00:01:59.092,163] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:01:59.092,193] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 19 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:01:59.092,193] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 11
+[00:01:59.097,564] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:01:59.097,595] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:59.097,625] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:59.097,625] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:01:59.097,656] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 11
+▒u0▒s[00:02:09.114,196] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:09.114,227] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 1a 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:09.114,227] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 12
+[00:02:09.120,239] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:09.120,269] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:09.120,300] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:09.120,300] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:09.120,330] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 12
+u0▒s[00:02:19.133,026] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:19.133,087] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 1b 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:19.133,087] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 13
+[00:02:19.138,153] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:19.138,183] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:19.138,214] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:19.138,214] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:19.138,244] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 13
+▒u0▒s[00:02:29.142,456] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:29.142,486] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 1c 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:29.142,486] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 14
+[00:02:29.148,468] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:29.148,498] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:29.148,529] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:29.148,559] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:29.148,559] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 14
+▒u0▒s[00:02:39.160,736] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:39.160,766] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 1d 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:39.160,766] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 15
+[00:02:39.165,191] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:39.165,222] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:39.165,252] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:39.165,252] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:39.165,283] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 15
+▒u0▒s[00:02:49.163,513] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:49.163,543] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 1e 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:49.163,574] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 16
+[00:02:49.168,609] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:49.168,640] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:49.168,670] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:49.168,670] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:49.168,701] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 16
+▒u0▒s[00:02:59.173,187] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:02:59.173,217] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 1f 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:02:59.173,217] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 17
+[00:02:59.177,429] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:02:59.177,459] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:59.177,490] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:59.177,520] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:02:59.177,520] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 17
+ ▒u0▒s[00:03:09.192,932] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:03:09.192,962] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 20 00 ca 03 75 30 00  02 ce 73                |. ...u0. ..s
+[00:03:09.192,993] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 18
+[00:03:09.198,669] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:03:09.198,699] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:09.198,730] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:09.198,730] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:03:09.198,760] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 18
+[00:03:10.037,231] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED
+
+[00:03:10.037,231] <inf> zigbee_app_utils: Find and bind target finished (status: 0)
+[00:03:12.490,417] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+!▒u0▒s[00:03:19.201,812] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:03:19.201,843] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 21 00 ca 03 75 30 00  02 ce 73                |.!...u0. ..s
+[00:03:19.201,873] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 19
+[00:03:19.205,963] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:03:19.205,993] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:19.206,024] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:19.206,054] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:03:19.206,054] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 19
+"▒u0▒s[00:03:29.211,730] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:03:29.211,761] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 22 00 ca 03 75 30 00  02 ce 73                |."...u0. ..s
+[00:03:29.211,791] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 20
+[00:03:29.215,972] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:03:29.216,003] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:29.216,033] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:29.216,033] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:03:29.216,064] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 20
+#▒u0▒s[00:03:39.219,909] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:03:39.219,940] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 23 00 ca 03 75 30 00  02 ce 73                |.#...u0. ..s
+[00:03:39.219,970] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 21
+[00:03:39.224,365] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:03:39.224,365] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:39.224,426] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:39.224,426] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:03:39.224,456] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 21
+$▒u0▒s[00:03:49.239,746] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:03:49.239,807] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 24 00 ca 03 75 30 00  02 ce 73                |.$...u0. ..s
+[00:03:49.239,807] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 22
+[00:03:49.245,483] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:03:49.245,513] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:49.245,544] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:49.245,544] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:03:49.245,574] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 22
+%▒u0▒s[00:03:59.255,645] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:03:59.255,676] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 25 00 ca 03 75 30 00  02 ce 73                |.%...u0. ..s
+[00:03:59.255,706] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 23
+[00:03:59.262,023] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:03:59.262,054] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:59.262,084] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:59.262,115] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:03:59.262,145] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 23
+&▒u0▒s[00:04:09.275,054] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:04:09.275,085] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 26 00 ca 03 75 30 00  02 ce 73                |.&...u0. ..s
+[00:04:09.275,115] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 24
+[00:04:09.279,510] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:04:09.279,541] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:04:09.279,571] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:04:09.279,571] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:04:09.279,602] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 24
+'▒u0▒s[00:04:19.294,525] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:04:19.294,555] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 27 00 ca 03 75 30 00  02 ce 73                |.'...u0. ..s
+[00:04:19.294,586] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 25
+[00:04:19.299,621] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:04:19.299,652] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:04:19.299,682] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:04:19.299,682] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:04:19.299,713] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 25
+(▒u0▒s[00:04:29.299,743] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:04:29.299,774] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 28 00 ca 03 75 30 00  02 ce 73                |.(...u0. ..s
+[00:04:29.299,774] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 26
+[00:04:29.306,091] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:04:29.306,121] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:04:29.306,152] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:04:29.306,152] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:04:29.306,182] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 26
+)▒u0▒s[00:04:39.319,061] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:04:39.319,152] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 29 00 ca 03 75 30 00  02 ce 73                |.)...u0. ..s
+[00:04:39.319,152] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 27
+[00:04:39.323,272] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:04:39.323,303] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:04:39.323,333] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:04:39.323,364] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:04:39.323,364] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 27
+*▒u0▒s[00:04:49.339,691] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:04:49.339,721] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 2a 00 ca 03 75 30 00  02 ce 73                |.*...u0. ..s
+[00:04:49.339,721] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 28
+[00:04:49.345,428] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:04:49.345,458] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:04:49.345,489] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:04:49.345,489] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:04:49.345,520] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 28
++▒u0▒s[00:04:59.350,036] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:04:59.350,097] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 2b 00 ca 03 75 30 00  02 ce 73                |.+...u0. ..s
+[00:04:59.350,097] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 29
+[00:04:59.356,414] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:04:59.356,445] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:04:59.356,475] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:04:59.356,475] <wrn> ZB_router_app: Buffer Status: 0
+
+[00:04:59.356,506] <wrn> ZB_router_app: Buffer length: 9
+
+Output counter: 29

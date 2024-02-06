@@ -1,0 +1,132 @@
+[00:24:17.952,941] <dbg> ZB_router_app: data_indication:
+ Frame control field: 17
+
+[00:24:17.952,972] <dbg> ZB_router_app: data_indication: Sequence number: 142 -
+
+[00:24:17.952,972] <dbg> ZB_router_app: data_indication: Zigbee Command: 0x00 -
+
+[00:24:17.953,002] <dbg> ZB_router_app: data_indication: ind APS counter 19
+
+[00:24:17.953,002] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 291
+[00:24:17.958,648] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:24:17.958,679] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:24:17.958,740] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+Output counter: 291
+[00:24:22.970,123] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:24:22.970,153] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 8f 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:24:22.970,184] <dbg> ZB_router_app: data_indication:
+ Frame control field: 17
+
+[00:24:22.970,184] <dbg> ZB_router_app: data_indication: Sequence number: 143 -
+
+[00:24:22.970,214] <dbg> ZB_router_app: data_indication: Zigbee Command: 0x00 -
+
+[00:24:22.970,214] <dbg> ZB_router_app: data_indication: ind APS counter 20
+
+[00:24:22.970,245] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 292
+[00:24:22.974,670] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:24:22.974,670] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:24:22.974,761] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+Output counter: 292
+[00:24:27.975,860] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:24:27.975,891] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 90 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:24:27.975,921] <dbg> ZB_router_app: data_indication:[00:24:27.975,921] <dbg> ZB_router_app: data_indication: Sequence number: 144 -
+
+[00:24:27.975,952] <dbg> ZB_router_app: data_indication: Zigbee Command: 0x00 -
+
+[00:24:27.975,952] <dbg> ZB_router_app: data_indication: ind APS counter 21
+
+[00:24:27.975,982] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 293
+[00:24:27.980,377] <dbg> ZB_router_app: send_user_payload: outputCustomPayload: chunk_size 9
+
+[00:24:27.980,407] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:24:27.980,468] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+Output counter: 293
+▒[00:00:00.529,510] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.540,283] <inf> ZB_router_app: Router started successfully
+[00:00:00.540,313] <err> ZB_router_app: RESET
+[00:00:00.540,313] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE
+
+[00:00:00.540,344] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+
+[00:00:00.540,344] <dbg> uart_app: tcu_uart_configuration: UART Interrupt configuration successful!
+
+[00:00:00.545,227] <inf> zigbee_app_utils: Production configuration is not present or invalid (status: -1)
+[00:00:00.545,837] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP
+
+[00:00:00.545,837] <inf> zigbee_app_utils: Zigbee stack initialized
+[00:00:00.553,405] <dbg> ZB_router_app: diagnostic_zigbee_info: Zigbee application joined the network: bellow some info:
+
+[00:00:00.553,436] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee long addr:
+[00:00:00.553,436] <dbg> ZB_router_app: diagnostic_zigbee_info: f4
+[00:00:00.553,466] <dbg> ZB_router_app: diagnostic_zigbee_info: ce
+[00:00:00.553,466] <dbg> ZB_router_app: diagnostic_zigbee_info: 36
+[00:00:00.553,497] <dbg> ZB_router_app: diagnostic_zigbee_info: 77
+[00:00:00.553,497] <dbg> ZB_router_app: diagnostic_zigbee_info: 2c
+[00:00:00.553,527] <dbg> ZB_router_app: diagnostic_zigbee_info: 7f
+[00:00:00.553,527] <dbg> ZB_router_app: diagnostic_zigbee_info: bf
+[00:00:00.553,558] <dbg> ZB_router_app: diagnostic_zigbee_info: 8e
+[00:00:00.553,588] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:00.553,588] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee shrot addr:  0xa9f2
+
+[00:00:00.553,619] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee extended pan id:
+[00:00:00.553,619] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:00.553,649] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:00.553,649] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:00.553,680] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:00.553,680] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:00.553,710] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:00.553,741] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:00.553,741] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:00.553,771] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:00.553,771] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee role router
+
+[00:00:00.553,802] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee channel: 15
+
+[00:00:00.553,802] <dbg> ZB_router_app: get_endpoint_descriptor: Profileid 0x0004
+
+[00:00:00.553,833] <dbg> ZB_router_app: get_endpoint_descriptor: Clusterid 0x0008
+
+[00:00:00.553,863] <dbg> ZB_router_app: get_endpoint_descriptor: device_version 0x0000
+
+[00:00:00.580,444] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:00.583,770] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_DEVICE_REBOOT
+
+[00:00:00.583,953] <inf> zigbee_app_utils: Joined network successfully on reboot signal (Extended PAN ID: 0000000000009999, PAN ID: 0x6e4c)
+[00:00:04.418,762] <dbg> ZB_router_app: data_indication: Size of received payload is 11 bytes
+
+[00:00:04.418,823] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        11 91 00 ca 03 75 30 00  02 ce 73                |.....u0. ..s
+[00:00:04.418,853] <dbg> ZB_router_app: data_indication:
+ Frame control field: 17
+
+[00:00:04.418,853] <dbg> ZB_router_app: data_indication: Sequence number: 145 -
+
+[00:00:04.418,884] <dbg> ZB_router_app: data_indication: Zigbee Command: 0x00 -
+
+[00:00:04.418,884] <dbg> ZB_router_app: data_indication: ind APS counter 22
+
+[00:00:04.418,914] <dbg> ZB_router_app: data_indication: Payload of input RF packet sent to Tcu UART
+
+Input counter: 1

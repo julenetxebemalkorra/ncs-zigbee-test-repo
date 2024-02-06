@@ -1,0 +1,2049 @@
+[00:00:10.286,346] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+--- 6 messages dropped ---
+[00:00:10.292,083] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 96, len: 12
+--- 3 messages dropped ---
+[00:00:10.292,266] <dbg> ZB_router_app: diagnostic_zigbee_info: ce
+[00:00:10.292,297] <dbg> ZB_router_app: diagnostic_zigbee_info: 36
+[00:00:10.292,297] <dbg> ZB_router_app: diagnostic_zigbee_info: 77
+[00:00:10.292,327] <dbg> ZB_router_app: diagnostic_zigbee_info: 2c
+[00:00:10.292,327] <dbg> ZB_router_app: diagnostic_zigbee_info: 7f
+[00:00:10.292,358] <dbg> ZB_router_app: diagnostic_zigbee_info: bf
+[00:00:10.292,388] <dbg> ZB_router_app: diagnostic_zigbee_info: 8e
+[00:00:10.292,388] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.292,419] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee shrot addr:  0x79e3
+
+[00:00:10.292,877] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee extended pan id:
+[00:00:10.292,755] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 112, len: 16
+[00:00:10.292,877] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.292,907] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.292,938] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.292,938] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.292,968] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.292,968] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.292,999] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.292,999] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.293,029] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.293,060] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee role router
+
+[00:00:10.293,060] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee channel: 17
+
+[00:00:10.293,090] <dbg> ZB_router_app: get_endpoint_descriptor: Profileid 0x0004
+
+[00:00:10.293,609] <dbg> ZB_router_app: get_endpoint_descriptor: Clusterid 0x0008
+
+[00:00:10.293,487] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 128, len: 16
+[00:00:10.293,640] <dbg> ZB_router_app: get_endpoint_descriptor: device_version 0x0000
+
+[00:00:10.294,250] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 108, len: 4
+[00:00:10.294,830] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 144, len: 8
+[00:00:10.295,501] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 152, len: 12
+[00:00:10.296,173] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 168, len: 8
+[00:00:10.296,844] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 164, len: 4
+[00:00:10.297,424] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 176, len: 8
+[00:00:10.298,065] <dbg> zboss_osif: zb_trans_is_active: Function: zb_trans_is_active, is active: 0
+[00:00:10.298,095] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.298,492] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 a1 02 17 00  09 00 be 02 00 00 00 00 |........ ........
+                                     e3 79 00 00 00 00 00 00  11 00 00 00 00 00 00 00 |.y...... ........
+[00:00:10.298,767] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 a1 02 18 00  09 00 c0 02 99 99 00 00 |........ ........
+                                     00 00 00 00                                      |....
+[00:00:10.299,377] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0x79e3
+[00:00:10.299,530] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.300,567] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.357,116] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.357,238] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.359,527] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 184, len: 12
+[00:00:10.369,567] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 196, len: 4
+[00:00:10.376,617] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 200, len: 28
+[00:00:10.383,758] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 228, len: 8
+[00:00:10.391,418] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.391,693] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 a7 02 19 00  a4 09 c4 00 00 00 00 00 |........ ........
+                                     00 00 00 00 00 00 00 00  00 00 12 34             |........ ...4
+[00:00:10.391,815] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 236, len: 12
+[00:00:10.404,357] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 248, len: 8
+[00:00:10.411,346] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 256, len: 8
+[00:00:10.419,952] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.435,424] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 264, len: 12
+[00:00:10.444,763] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 276, len: 8
+[00:00:10.451,751] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 284, len: 8
+[00:00:10.459,106] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:10.466,339] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:10.486,694] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.486,846] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.488,128] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 292, len: 12
+[00:00:10.497,985] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 304, len: 92
+[00:00:10.505,889] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 396, len: 8
+[00:00:10.513,427] <dbg> zboss_osif: zb_trans_set_pan_coord: Function: zb_trans_set_pan_coord, enabled: 0
+[00:00:10.513,519] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:10.513,610] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.513,702] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:10.513,732] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0x79e3
+[00:00:10.513,793] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xb754
+[00:00:10.514,373] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 af 02 1a 00  44 01 3d 00 20 00 00 00 |........ D.=. ...
+                                     00 00 00 00 00 00 00 00  01 00 00 00             |........ ....
+[00:00:10.514,862] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.515,960] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 404, len: 12
+[00:00:10.526,550] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 416, len: 92
+[00:00:10.534,423] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 508, len: 8
+[00:00:10.542,114] <inf> zigbee_app_u[00:00:10.575,439] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:10.579,742] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:10.615,478] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.615,570] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.617,584] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:10.620,361] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 b6 02 1b 00  3e 00 fa 01 0a 00 00 00 |........ >.......
+                                     00 00 00 00                                      |....
+[00:00:10.620,483] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_STEERING
+
+[00:00:10.620,574] <dbg> ZB_router_app: start_identifying: Enter identify mode
+[00:00:10.620,788] <inf> zigbee_app_utils: Joined network successfully (Extended PAN ID: 0000000000009999, PAN ID: 0xb754)
+[00:00:10.620,819] <inf> zigbee_app_utils: Network rejoin procedure stopped.
+[00:00:10.637,023] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.637,145] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.637,847] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 516, len: 12
+[00:00:10.651,031] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 528, len: 16
+[00:00:10.658,111] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 544, len: 8
+[00:00:10.897,644] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.897,766] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.899,383] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:10.903,015] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:10.903,594] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:10.933,807] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.933,898] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.975,494] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.975,616] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:11.052,246] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:11.052,368] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:11.053,680] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:00:11.053,710] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:00:11.053,741] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:00:11.055,267] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 1
+Output counter: 1
+[00:00:11.063,049] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 d3 02 1c 00  32 75 02 01 04 00 00 00 |........ 2u......
+[00:00:11.086,334] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:11.086,517] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:00:11.086,547] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:00:11.086,578] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:00:11.086,608] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:00:11.086,822] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.086,975] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.091,827] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 d4 02 1d 00  32 75 02 01 04 00 00 00 |........ 2u......
+[00:00:11.115,905] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.116,058] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.119,628] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 d6 02 1e 00  32 75 02 01 04 00 00 00 |........ 2u......
+[00:00:11.142,822] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:11.143,310] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.143,463] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.147,064] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:11.147,644] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 d8 02 1f 00  47 01 29 08 01 00 00 00 |........ G.).....
+[00:00:11.148,986] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.154,663] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 d9 02 20 00  32 75 02 01 04 00 00 00 |...... . 2u......
+[00:00:11.178,070] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.178,253] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.184,265] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 da 02 21 00  32 75 02 01 04 00 00 00 |......!. 2u......
+[00:00:11.207,519] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.207,641] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.213,958] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 dc 02 22 00  32 75 02 01 04 00 00 00 |......". 2u......
+[00:00:11.237,213] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.237,365] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.244,018] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 de 02 23 00  32 75 02 01 04 00 00 00 |......#. 2u......
+[00:00:11.267,242] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.267,364] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.267,761] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.271,972] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 e0 02 24 00  32 75 02 01 04 00 00 00 |......$. 2u......
+[00:00:11.295,288] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.295,471] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.300,048] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:11.300,781] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:11.359,222] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:11.359,344] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:11.359,619] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.364,410] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 e6 02 25 00  32 75 02 01 04 00 00 00 |......%. 2u......
+[00:00:11.387,695] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 e8 02 26 00  47 01 29 08 00 00 00 00 |......&. G.).....
+[00:00:11.387,817] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.387,969] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.393,402] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 e8 02 27 00  32 75 02 01 04 00 00 00 |......'. 2u......
+[00:00:11.416,625] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.416,778] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.421,234] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 ea 02 28 00  32 75 02 01 04 00 00 00 |......(. 2u......
+[00:00:11.444,396] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:11.444,702] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:11.444,885] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.448,486] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 ec 02 29 00  60 08 4c 00 17 00 00 00 |......). `.L.....
+                                     69 00 00 00                                      |i...
+▒[00:00:00.000,579] <err> qspi_nor: JEDEC id [00 00 00] expect [c2 28 17]
+[00:00:00.000,946] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+[00:00:00.001,007] <dbg> zboss_osif: zb_trans_set_auto_ack: Function: zb_trans_set_auto_ack, enabled: 1
+[00:00:00.011,596] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 00 00 00 00  77 00 b3 00             |........ w...
+[00:00:00.011,718] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 26 02 00 00 01 00  77 00 b7 00 08 10 00 00 |..&..... w.......
+                                     00 01 00 00 10 00 00 00  0c 03 00 00 84 02 00 00 |........ ........
+                                     98 01 00 00 68 02 00 00                          |....h...
+[00:00:00.011,779] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 02 00  77 00 c0 00 02 00 00 00 |........ w.......
+[00:00:00.011,840] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 03 00  77 00 c2 00 c0 02 00 00 |........ w.......
+[00:00:00.011,901] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 04 00  77 00 c8 00 50 04 00 00 |........ w...P...
+[00:00:00.011,962] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 05 00  77 00 cb 00 90 01 00 00 |........ w.......
+[00:00:00.012,023] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 06 00  77 00 ce 00 70 00 00 00 |........ w...p...
+[00:00:00.012,084] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 07 00  77 00 d1 00 04 00 00 00 |........ w.......
+[00:00:00.012,145] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 08 00  77 00 d8 00 30 00 00 00 |........ w...0...
+[00:00:00.012,237] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 00 00 09 00  77 00 db 00 dc 03 00 00 |........ w.......
+                                     0c 00 00 00                                      |....
+[00:00:00.012,298] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 0a 00  77 00 df 00 01 00 00 00 |........ w.......
+[00:00:00.012,390] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 22 02 00 00 0b 00  77 00 e5 00 30 00 00 00 |.."..... w...0...
+                                     18 00 00 00 0c 00 00 00  20 00 00 00 0c 00 00 00 |........  .......
+                                     12 00 00 00                                      |....
+[00:00:00.012,451] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 00 00 0c 00  77 00 03 01 80 00 00 00 |........ w.......
+                                     a0 00 00 00 80 00 00 00  80 00 00 00 20 00 00 00 |........ .... ...
+[00:00:00.012,542] <dbg> zboss_osif: ieee802154_init: The 802.15.4 interface initialized.
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.012,847] <inf> ZB_router_app: Router started successfully
+[00:00:00.012,847] <err> ZB_router_app: RESET
+[00:00:00.012,878] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE
+
+[00:00:00.012,878] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+
+[00:00:00.012,908] <dbg> uart_app: tcu_uart_configuration: UART Interrupt configuration successful!
+
+[00:00:00.013,092] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 0d 00  90 0c 55 01 01 00 00 00 |........ ..U.....
+[00:00:00.351,196] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 0, len: 12
+[00:00:00.351,867] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 12, len: 4
+[00:00:00.352,447] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 16, len: 8
+[00:00:00.691,070] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 0, len: 12
+[00:00:00.691,741] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 12, len: 4
+[00:00:00.692,321] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 16, len: 8
+[00:00:00.693,023] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 0e 00  0b 00 8c 00             |....-... ....
+[00:00:00.693,084] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 0f 00  0b 00 3b 02             |....-... ..;.
+[00:00:00.693,145] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 24, len: 12
+[00:00:00.693,878] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 36, len: 16
+[00:00:00.694,610] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 52, len: 8
+[00:00:00.695,404] <inf> zigbee_app_utils: Production configuration is not present or invalid (status: -1)
+[00:00:00.695,922] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP
+
+[00:00:00.695,953] <inf> zigbee_app_utils: Zigbee stack initialized
+[00:00:00.697,143] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:00.698,699] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:00.700,103] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 2d 00 10 00  3e 00 5a 00:00:01.717,529] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:01.718,811] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xfffe
+[00:00:01.719,146] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:01.720,581] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 70 00 13 00  3e 00 5a 01 01 00 00 00 |....p... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:00:01.720,886] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 70 00 14 00  3e 00 95 01             |....p... >...
+[00:00:01.722,045] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+--- 19 messages dropped ---
+[00:00:04.239,410] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:00:04.743,103] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:04.743,225] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:04.743,408] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:04.769,592] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:04.769,836] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 60, len: 12
+[00:00:04.782,745] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 72, len: 16
+[00:00:04.789,855] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 88, len: 8
+[00:00:04.880,676] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 21 messages dropped ---
+[00:00:08.278,198] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 3 messages dropped ---
+[00:00:08.285,095] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 1 messages dropped ---
+[00:00:08.285,217] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 1d 02 16 00  26 01 df 03             |........ &...
+--- 2 messages dropped ---
+[00:00:08.783,386] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+--- 2 messages dropped ---
+[00:00:09.288,421] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+--- 4 messages dropped ---
+[00:00:09.795,867] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 80 02 17 00  45 01 24 01 54 b7 00 00 |........ E.$.T...
+                                     11 00 00 00 5e 4a 00 00  00 00 00 00             |....^J.. ....
+[00:00:09.796,051] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:09.796,173] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:09.796,234] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xb754
+[00:00:09.796,264] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:09.796,447] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:09.800,354] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:10.282,196] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:10.284,240] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:10.286,987] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.287,139] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.287,292] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 a0 02 18 00  27 01 bd 01             |........ '...
+[00:00:10.287,322] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0x79e3
+[00:00:10.287,780] <dbg> zboss_osif: zb_trans_is_receiving: Function: zb_trans_is_receiving, is receiv: 1
+[00:00:10.287,811] <dbg> zboss_osif: zb_trans_enter_sleep: Function: zb_trans_enter_sleep
+[00:00:10.288,146] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 132, len: 12
+[00:00:10.288,269] <dbg> ZB_router_app: diagnostic_zigbee_info: Zigbee application joined the network: bellow some info:
+
+[00:00:10.288,299] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee long addr:
+[00:00:10.288,299] <dbg> ZB_router_app: diagnostic_zigbee_info: f4
+[00:00:10.288,330] <dbg> ZB_router_app: diagnostic_zigbee_info: ce
+[00:00:10.288,330] <dbg> ZB_router_app: diagnostic_zigbee_info: 36
+[00:00:10.288,360] <dbg> ZB_router_app: diagnostic_zigbee_info: 77
+[00:00:10.288,391] <dbg> ZB_router_app: diagnostic_zigbee_info: 2c
+[00:00:10.288,391] <dbg> ZB_router_app: diagnostic_zigbee_info: 7f
+[00:00:10.288,421] <dbg> ZB_router_app: diagnostic_zigbee_info: bf
+[00:00:10.288,421] <dbg> ZB_router_app: diagnostic_zigbee_info: 8e
+[00:00:10.288,452] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.288,452] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee shrot addr:  0x79e3
+
+[00:00:10.288,482] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee extended pan id:
+[00:00:10.288,818] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 148, len: 16
+[00:00:10.288,940] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.288,970] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.288,970] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,001] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,001] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,031] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:10.289,062] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.289,062] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:10.289,093] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:10.289,093] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee role router
+
+[00:00:10.289,123] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee channel: 17
+
+[00:00:10.289,123] <dbg> ZB_router_app: get_endpoint_descriptor: Profileid 0x0004
+
+[00:00:10.289,672] <dbg> ZB_router_app: get_endpoint_descriptor: Clusterid 0x0008
+
+[00:00:10.289,550] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 164, len: 16
+[00:00:10.289,703] <dbg> ZB_router_app: get_endpoint_descriptor: device_version 0x0000
+
+[00:00:10.290,344] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 144, len: 4
+[00:00:10.290,924] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 180, len: 8
+[00:00:10.291,595] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 188, len: 12
+[00:00:10.292,266] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 204, len: 8
+[00:00:10.292,938] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 200, len: 4
+[00:00:10.293,518] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 220, len: 8
+[00:00:10.294,158] <dbg> zboss_osif: zb_trans_is_active: Function: zb_trans_is_active, is active: 0
+[00:00:10.294,189] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.294,586] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 a0 02 19 00  09 00 be 02 00 00 00 00 |........ ........
+                                     e3 79 00 00 00 00 00 00  11 00 00 00 00 00 00 00 |.y...... ........
+[00:00:10.294,830] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 a0 02 1a 00  09 00 c0 02 99 99 00 00 |........ ........
+                                     00 00 00 00                                      |....
+[00:00:10.295,471] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0x79e3
+[00:00:10.295,623] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.296,661] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.357,238] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.357,360] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.359,710] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 228, len: 12
+[00:00:10.372,039] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 240, len: 4
+[00:00:10.379,089] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 244, len: 28
+[00:00:10.386,230] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 272, len: 8
+[00:00:10.393,890] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.394,165] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 a7 02 1b 00  a4 09 c4 00 00 00 00 00 |........ ........
+                                     00 00 00 00 00 00 00 00  00 00 12 34             |........ ...4
+[00:00:10.394,287] <dbg> zboss_osif: zb_trans_is_receiving: Function: zb_trans_is_receiving, is receiv: 1
+[00:00:10.394,348] <dbg> zboss_osif: zb_trans_enter_sleep: Function: zb_trans_enter_sleep
+[00:00:10.394,683] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 280, len: 12
+[00:00:10.395,416] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 296, len: 16
+[00:00:10.396,148] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 312, len: 16
+[00:00:10.396,881] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 328, len: 16
+[00:00:10.397,644] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 292, len: 4
+[00:00:10.398,223] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 344, len: 8
+[00:00:10.398,895] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 352, len: 12
+[00:00:10.399,566] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 368, len: 8
+[00:00:10.400,207] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 376, len: 8
+[00:00:10.400,909] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 364, len: 4
+[00:00:10.401,489] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 384, len: 8
+[00:00:10.402,130] <dbg> zboss_osif: zb_trans_is_active: Function: zb_trans_is_active, is active: 0
+[00:00:10.402,160] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.402,404] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 392, len: 12
+[00:00:10.409,484] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 404, len: 8
+[00:00:10.416,534] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 412, len: 8
+[00:00:10.423,553] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.425,628] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.456,420] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 420, len: 12
+[00:00:10.469,085] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 432, len: 8
+[00:00:10.476,104] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 440, len: 8
+[00:00:10.483,489] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:10.486,816] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:10.521,942] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.522,064] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.888,275] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:10.893,005] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 448, len: 12
+[00:00:10.906,280] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 460, len: 92
+[00:00:10.914,215] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 552, len: 8
+[00:00:10.921,264] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.922,210] <dbg> zboss_osif: zb_trans_set_pan_coord: Function: zb_trans_set_pan_coord, enabled: 0
+[00:00:10.922,302] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:10.922,332] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.922,424] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:10.922,454] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0x79e3
+[00:00:10.922,485] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xb754
+[00:00:10.923,065] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 c9 02 1c 00  44 01 3d 00 20 00 00 00 |........ D.=. ...
+                                     00 00 00 00 00 00 00 00  01 00 00 00             |........ ....
+[00:00:10.923,553] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.924,652] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 560, len: 12
+[00:00:10.934,814] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 572, len: 92
+[00:00:10.942,749] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 664, len: 8
+[00:00:10.949,798] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.950,683] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:10.953,277] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:10.984,283] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.001,373] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:11.053,009] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:11.053,131] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:11.399,780] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:11.405,242] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:11.407,989] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 e9 02 1d 00  3e 00 fa 01 0a 00 00 00 |........ >.......
+                                     00 00 00 00                                      |....
+[00:00:11.408,111] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_STEERING
+
+[00:00:11.408,203] <dbg> ZB_router_app: start_identifying: Enter identify mode
+[00:00:11.408,386] <inf> zigbee_app_utils: Joined network successfully (Extended PAN ID: 0000000000009999, PAN ID: 0xb754)
+[00:00:11.408,416] <inf> zigbee_app_utils: Network rejoin procedure stopped.
+[00:00:11.408,660] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:11.478,210] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:11.478,332] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:16.530,853] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:16.531,005] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:16.563,629] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:16.568,847] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:16.590,148] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:16.590,301] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:16.672,485] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:16.672,607] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:17.423,187] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:17.423,278] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:23.137,115] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:23.137,268] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:23.138,153] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 672, len: 12
+[00:00:23.148,956] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 684, len: 92
+[00:00:23.156,890] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 776, len: 8
+[00:00:25.951,965] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:25.956,481] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:27.035,400] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:27.035,583] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:27.068,267] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:27.074,401] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:27.075,866] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:27.516,387] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:27.516,540] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:31.637,908] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:31.638,031] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:34.808,502] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:34.808,624] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:34.861,877] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:34.861,999] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.569,671] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:36.569,793] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.602,355] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:36.608,734] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.610,168] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:37.050,781] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:37.050,903] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:37.519,470] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:37.519,561] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:37.796,936] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:37.797,058] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:40.944,915] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:40.948,852] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:46.574,859] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:46.574,981] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:46.612,091] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:46.612,213] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:46.644,409] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:46.649,475] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:46.665,313] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:47.024,139] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:47.024,261] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:47.488,281] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:47.488,403] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:53.168,395] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:53.168,518] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:55.907,684] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:55.910,644] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:56.585,296] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:56.585,449] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:56.618,041] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:56.623,626] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:56.625,061] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:57.075,286] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:57.075,408] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:57.548,339] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:57.548,461] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:58.507,476] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:58.507,598] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:58.575,012] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:58.575,134] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:01.557,128] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:01.557,250] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:06.589,172] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:06.589,294] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:06.621,887] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:06.625,335] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:07.014,617] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:07.014,770] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:07.033,264] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:07.033,386] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:07.045,715] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:07.049,194] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:07.050,506] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:07.464,569] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:07.464,691] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:10.904,357] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:10.907,653] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:11.053,253] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:11.053,344] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:16.552,276] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:16.552,398] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:16.608,612] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:16.608,734] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:16.641,326] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:16.645,874] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:17.067,687] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:17.072,906] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:17.077,178] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:17.077,301] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:17.084,777] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:17.084,899] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:17.538,146] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:17.538,269] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:22.774,719] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:22.774,841] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:22.807,067] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:22.807,189] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:24.148,651] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:24.148,773] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:25.854,370] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:25.858,276] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:27.093,139] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:27.093,261] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:27.125,885] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:27.132,263] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:27.133,697] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:27.533,813] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:27.533,935] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:31.513,031] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:31.513,153] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:36.638,610] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:36.638,732] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:36.671,356] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:36.674,743] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:36.680,053] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:36.680,145] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:37.123,626] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:37.123,748] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:37.587,432] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:37.587,554] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:40.858,703] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:40.863,555] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:41.298,797] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:41.298,919] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:46.477,630] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:46.477,752] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:46.656,921] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:46.657,012] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:46.689,666] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:46.697,814] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:46.699,249] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:47.093,292] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:47.093,414] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:47.571,350] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:47.571,472] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:48.754,364] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:48.754,516] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:48.807,464] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:48.807,586] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:55.842,681] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:55.847,564] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:56.603,759] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:56.603,881] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:56.677,337] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:56.677,459] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:56.710,021] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:56.717,407] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:56.718,841] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:57.150,238] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:57.150,360] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:57.587,982] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:57.588,104] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:01.461,029] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:01.461,151] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:06.678,070] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:06.678,192] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:06.710,784] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:06.717,285] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:06.730,316] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:07.117,736] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:07.117,858] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:07.611,389] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:07.611,511] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:10.809,173] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:10.813,079] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:11.722,900] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:11.723,022] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:14.258,148] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:14.258,270] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:16.411,163] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:16.411,285] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:16.695,190] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:16.695,312] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:16.696,929] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:16.702,392] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 e6 22 1e 00  32 75 02 01 04 00 00 00 |.....".. 2u......
+[00:02:16.725,646] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:16.725,830] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:16.730,743] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:16.737,335] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:16.804,656] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:16.804,779] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:16.806,091] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:02:16.806,121] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:02:16.806,121] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:02:16.807,495] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 1
+[00:02:16.811,676] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 ed 22 1f 00  32 75 02 01 04 00 00 00 |.....".. 2u......
+Output counter: 1
+[00:02:16.834,930] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:02:16.834,991] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:16.835,021] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:16.835,052] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:02:16.835,174] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:16.835,327] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:16.839,874] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 ef 22 20 00  32 75 02 01 04 00 00 00 |....." . 2u......
+[00:02:16.863,250] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:16.863,403] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:16.867,919] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:16.868,927] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:16.874,633] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 f2 22 21 00  32 75 02 01 04 00 00 00 |....."!. 2u......
+[00:02:16.897,979] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:16.898,132] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:16.901,733] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:16.902,648] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:16.971,862] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:16.971,984] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:17.244,476] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:17.244,598] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:17.585,906] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:17.585,998] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:25.791,809] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:25.795,410] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:26.713,531] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:26.713,653] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:26.714,996] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:02:26.715,026] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:02:26.715,026] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:02:26.716,400] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 2
+[00:02:26.721,954] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:26.722,229] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:02:26.722,259] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:26.722,290] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:26.722,320] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:02:26.723,785] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Output counter: 2
+[00:02:26.727,996] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:26.728,942] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:27.358,917] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_NLME_STATUS_INDICATION
+
+[00:02:27.358,947] <inf> zigbee_app_utils: Unimplemented signal (signal: 50, status: 0)
+[00:02:29.251,983] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:29.252,105] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:31.391,326] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:31.391,448] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:36.719,909] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:36.720,031] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:36.721,374] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:02:36.721,405] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:02:36.721,435] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:02:36.722,778] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 3
+[00:02:36.726,104] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:36.726,348] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:02:36.726,379] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:36.726,440] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:36.726,440] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:02:36.727,874] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Output counter: 3
+[00:02:36.731,689] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 03 28 22 00  32 75 02 01 04 00 00 00 |.....(". 2u......
+[00:02:36.754,943] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:36.755,096] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:36.760,894] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:36.761,810] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:38.985,443] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:38.985,595] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:39.051,361] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:39.051,483] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:40.803,588] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:40.807,830] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:43.098,937] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:43.099,090] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:46.405,761] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:46.405,883] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:46.726,104] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:46.726,226] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:46.727,508] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:02:46.727,569] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:02:46.727,569] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:02:46.728,942] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 4
+[00:02:46.732,879] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:46.733,123] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:02:46.733,154] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:46.733,184] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:46.733,215] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:02:46.734,649] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Output counter: 4
+[00:02:46.738,555] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:46.739,471] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:55.750,915] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:55.753,875] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:56.743,835] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:56.743,957] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:56.745,300] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:02:56.745,330] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:02:56.745,330] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:02:56.746,704] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 5
+[00:02:56.751,251] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:56.751,495] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:02:56.751,525] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:02:56.751,556] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:02:56.751,586] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:02:56.753,082] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Output counter: 5
+[00:02:56.758,209] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 20 2d 23 00  32 75 02 01 04 00 00 00 |.... -#. 2u......
+[00:02:56.781,433] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:56.781,585] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:56.785,430] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 22 2d 24 00  32 75 02 01 04 00 00 00 |...."-$. 2u......
+[00:02:56.808,654] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:56.808,807] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:56.812,713] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:02:56.813,629] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:02:57.679,931] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:02:57.680,084] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:01.339,477] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:01.339,630] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:02.484,771] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:02.484,893] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:02.488,983] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:02.489,105] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:06.758,941] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:06.759,094] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:06.760,375] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:03:06.760,406] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:03:06.760,437] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:03:06.761,749] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 6
+[00:03:06.766,632] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:03:06.766,876] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:03:06.766,906] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:06.766,967] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:06.766,998] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:03:06.768,524] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Output counter: 6
+[00:03:06.773,315] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 af 2f 25 00  32 75 02 01 04 00 00 00 |...../%. 2u......
+[00:03:06.796,539] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:03:06.796,691] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:06.800,598] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:03:06.813,293] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:03:10.713,684] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED
+
+[00:03:10.713,714] <inf> zigbee_app_utils: Find and bind target finished (status: 0)
+[00:03:10.746,734] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:10.751,556] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:03:13.177,917] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:03:13.859,893] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:13.860,015] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:16.306,793] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:16.306,915] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:16.767,974] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:16.768,066] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:16.769,378] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:03:16.769,409] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:03:16.769,439] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:03:16.770,843] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 7
+[00:03:16.775,665] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 3d 32 26 00  32 75 02 01 04 00 00 00 |....=2&. 2u......
+Output counter: 7
+[00:03:16.798,980] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:03:16.799,011] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:16.799,072] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:16.799,102] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:03:16.799,194] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:03:16.799,377] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:16.802,978] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:03:16.804,412] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:16.809,600] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:03:16.810,516] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:03:25.731,109] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:25.735,321] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:03:26.167,236] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:26.167,358] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:26.172,088] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:26.172,210] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:26.779,937] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:03:26.780,090] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:03:26.781,402] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:03:26.781,433] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:03:26.781,433] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:03:26.782,836] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 8
+[00:03:26.787,353] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:03:26.787,597] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:03:26.787,628] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:03:26.787,689] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:03:26.787,719] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:03:26.789,184] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Output counter: 8
+[00:03:26.794,952] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 cb 34 27 00  32 75 02 01 04 00 00 00 |.....4'. 2u......
+[00:03:26.818,1[00:03:26.818,328] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:26.823,059] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 cd 34 28 00  32 75 02 01 04 00 00 00 |.....4(. 2u......
+[00:03:26.846,313] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:03:26.846,435] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:26.850,646] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 cf 34 29 00  32 75 02 01 04 00 00 00 |.....4). 2u......
+[00:03:26.873,870] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:03:26.874,023] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:26.878,112] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 d1 34 2a 00  32 75 02 01 04 00 00 00 |.....4*. 2u......
+[00:03:26.901,336] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:03:26.901,458] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:03:26.902,160] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x00
+[00:03:26.948,760] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:03:26.950,988] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:03:26.951,538] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 d6 34 2b 00  60 08 4c 00 17 00 00 00 |.....4+. `.L.....
+                                     69 00 00 00                                      |i...
+▒[00:00:00.000,579] <err> qspi_nor: JEDEC id [00 00 00] expect [c2 28 17]
+[00:00:00.000,946] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+[00:00:00.001,007] <dbg> zboss_osif: zb_trans_set_auto_ack: Function: zb_trans_set_auto_ack, enabled: 1
+[00:00:00.011,627] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 00 00 00 00  77 00 b3 00             |........ w...
+[00:00:00.011,718] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 26 02 00 00 01 00  77 00 b7 00 08 10 00 00 |..&..... w.......
+                                     00 01 00 00 10 00 00 00  0c 03 00 00 84 02 00 00 |........ ........
+                                     98 01 00 00 68 02 00 00                          |....h...
+[00:00:00.011,779] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 02 00  77 00 c0 00 02 00 00 00 |........ w.......
+[00:00:00.011,840] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 03 00  77 00 c2 00 c0 02 00 00 |........ w.......
+[00:00:00.011,901] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 04 00  77 00 c8 00 50 04 00 00 |........ w...P...
+[00:00:00.011,962] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 05 00  77 00 cb 00 90 01 00 00 |........ w.......
+[00:00:00.012,023] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 06 00  77 00 ce 00 70 00 00 00 |........ w...p...
+[00:00:00.012,084] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 07 00  77 00 d1 00 04 00 00 00 |........ w.......
+[00:00:00.012,145] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 08 00  77 00 d8 00 30 00 00 00 |........ w...0...
+[00:00:00.012,237] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 00 00 09 00  77 00 db 00 dc 03 00 00 |........ w.......
+                                     0c 00 00 00                                      |....
+[00:00:00.012,298] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 0a 00  77 00 df 00 01 00 00 00 |........ w.......
+[00:00:00.012,390] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 22 02 00 00 0b 00  77 00 e5 00 30 00 00 00 |.."..... w...0...
+                                     18 00 00 00 0c 00 00 00  20 00 00 00 0c 00 00 00 |........  .......
+                                     12 00 00 00                                      |....
+[00:00:00.012,481] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 00 00 0c 00  77 00 03 01 80 00 00 00 |........ w.......
+                                     a0 00 00 00 80 00 00 00  80 00 00 00 20 00 00 00 |........ .... ...
+[00:00:00.012,542] <dbg> zboss_osif: ieee802154_init: The 802.15.4 interface initialized.
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.012,847] <inf> ZB_router_app: Router started successfully
+[00:00:00.012,847] <err> ZB_router_app: RESET
+[00:00:00.012,878] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE
+
+[00:00:00.012,908] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+
+[00:00:00.012,908] <dbg> uart_app: tcu_uart_configuration: UART Interrupt configuration successful!
+
+[00:00:00.013,092] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 0d 00  90 0c 55 01 01 00 00 00 |........ ..U.....
+[00:00:00.351,196] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 0, len: 12
+[00:00:00.351,867] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 12, len: 4
+[00:00:00.352,478] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 16, len: 8
+[00:00:00.691,131] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 0, len: 12
+[00:00:00.691,802] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 12, len: 4
+[00:00:00.692,413] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 16, len: 8
+[00:00:00.693,115] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 0e 00  0b 00 8c 00             |....-... ....
+[00:00:00.693,176] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 0f 00  0b 00 3b 02             |....-... ..;.
+[00:00:00.693,237] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 24, len: 12
+[00:00:00.693,969] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 36, len: 16
+[00:00:00.694,702] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 52, len: 8
+[00:00:00.695,495] <inf> zigbee_app_utils: Production configuration is not present or invalid (status: -1)
+[00:00:00.696,014] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP
+
+[00:00:00.696,044] <inf> zigbee_app_utils: Zigbee stack initialized
+[00:00:00.697,235] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:00.698,791] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:00.700,164] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 2d 00 10 00  3e 00 5a 01 01 00 00 00 |....-... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:00:00.700,469] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 11 00  3e 00 95 01             |....-... >...
+[00:00:00.702,484] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 2d 00 12 00  3e 00 fa 01 05 00 00 00 |....-... >.......
+                                     00 00 00 00                                      |....
+[00:00:00.702,606] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START
+
+[00:00:00.702,636] <inf> zigbee_app_utils: Device started for the first time
+[00:00:00.702,636] <inf> zigbee_app_utils: Start network steering
+[00:00:00.702,667] <inf> zigbee_app_utils: Started network rejoin procedure.
+[00:00:00.702,941] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x03
+[00:00:01.717,590] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:01.718,872] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xfffe
+[00:00:01.719,238] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:01.720,611] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 70 00 13 00  3e 00 5a 01 01 00 00 00 |....p... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:00:01.720,947] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 70 00 14 00  3e 00 95 01             |....p... >...
+[00:00:01.722,106] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:01.722,381] <dbg> zboss_osif: zb_trans_set_tx_power: Function: zb_trans_set_tx_power, power: 20
+--- 17 messages dropped ---
+[00:00:04.239,166] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:04.239,349] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:00:04.287,200] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 9 messages dropped ---
+[00:00:06.258,239] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 23 messages dropped ---
+[00:00:09.792,114] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+--- 31 messages dropped ---
+[00:00:12.852,172] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:12.852,355] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:12.902,252] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 8 messages dropped ---
+[00:00:14.872,161] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 21 messages dropped ---
+[00:00:17.901,245] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 20 messages dropped ---
+[00:00:20.473,358] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 6 messages dropped ---
+[00:00:20.961,120] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:20.961,242] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 8 messages dropped ---
+[00:00:22.981,079] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+--- 22 messages dropped ---
+[00:00:26.010,345] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+--- 22 messages dropped ---
+[00:00:29.575,347] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+--- 13 messages dropped ---
+[00:00:30.080,108] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:00:30.080,230] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:30.080,413] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+[00:00:30.585,083] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:00:30.585,205] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:30.585,388] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:00:31.090,057] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:00:31.090,209] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:31.090,362] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:00:31.595,092] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:00:31.595,214] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:31.595,428] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:00:32.100,097] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:00:32.100,219] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:32.100,402] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:00:32.605,041] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:00:32.605,163] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:32.605,346] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:00:32.616,638] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:32.616,790] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 53 08 1a 00  26 01 df 03             |....S... &...
+[00:00:33.110,076] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:00:33.110,198] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:33.110,382] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:00:33.615,112] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:33.615,234] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:33.615,417] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:00:34.119,110] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:34.119,171] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.119,232] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:34.119,293] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.119,354] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:34.119,384] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.123,199] <dbg> zboss_osif: zb_trans_src_match_tbl_drop: Function: zb_trans_src_match_tbl_drop
+[00:00:34.123,474] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:34.153,991] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:34.154,113] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 11
+[00:00:34.154,266] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.154,479] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 11
+[00:00:34.655,090] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 12
+[00:00:34.655,242] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.655,395] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 12
+[00:00:35.160,064] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 13
+[00:00:35.160,186] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:35.160,369] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 13
+[00:00:35.665,069] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 14
+[00:00:35.665,222] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:35.665,374] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 14
+[00:00:36.170,104] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 15
+[00:00:36.170,227] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:36.170,410] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 15
+[00:00:36.675,079] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 16
+[00:00:36.675,201] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:36.675,384] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:00:36.712,768] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.739,959] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.742,309] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.791,870] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.807,281] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:37.179,107] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:37.179,229] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:37.179,412] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:37.290,832] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:37.684,082] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:00:37.684,204] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:37.684,387] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+[00:00:38.189,117] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:00:38.189,239] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:38.189,422] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+[00:00:38.694,091] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:00:38.694,213] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:38.694,396] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:00:39.199,096] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:00:39.199,218] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:39.199,401] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:00:39.704,101] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:00:39.704,223] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:39.704,406] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:00:40.209,106] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:00:40.209,228] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:40.209,411] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:00:40.714,141] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:00:40.714,263] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:40.714,447] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:00:40.726,379] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:40.726,501] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 65 0a 1b 00  26 01 df 03             |....e... &...
+[00:00:40.727,569] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:40.727,722] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 65 0a 1c 00  26 01 df 03             |....e... &...
+[00:00:41.219,085] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:00:41.219,207] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:41.219,390] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:00:41.724,121] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:41.724,273] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:41.724,456] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:00:42.228,118] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:42.228,149] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:42.228,210] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:42.228,271] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:42.228,332] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:42.228,393] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:42.232,116] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 c8 0a 1d 00  41 00 c9 00 06 00 00 00 |........ A.......
+[00:00:42.232,452] <dbg> zboss_osif: zb_trans_src_match_tbl_drop: Function: zb_trans_src_match_tbl_drop
+[00:00:42.233,459] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 c8 0a 1e 00  3e 00 fa 01 0a 00 00 00 |........ >.......
+                                     03 00 00 00                                      |....
+[00:00:42.233,612] <inf> zigbee_app_utils: Network steering was not successful (status: -1)
+[00:00:42.233,917] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:44.246,948] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:44.248,260] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xfffe
+[00:00:44.248,626] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:44.250,061] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 4c 0b 1f 00  3e 00 5a 01 01 00 00 00 |....L... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:00:44.250,366] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 4c 0b 20 00  3e 00 95 01             |....L. . >...
+[00:00:44.251,586] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:44.251,708] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 11
+--- 10 messages dropped ---
+[00:00:45.763,336] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 14
+[00:00:46.268,066] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 15
+--- 3 messages dropped ---
+[00:00:47.782,073] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+--- 38 messages dropped ---
+[00:00:52.330,291] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+--- 27 messages dropped ---
+[00:00:55.891,082] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:00:55.891,204] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:55.891,357] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+--- 12 messages dropped ---
+[00:00:58.936,614] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 16 messages dropped ---
+[00:01:00.470,123] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 11
+--- 24 messages dropped ---
+[00:01:03.049,499] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:03.083,526] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:03.085,754] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 9 messages dropped ---
+[00:01:05.515,106] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+--- 26 messages dropped ---
+[00:01:08.578,979] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+--- 27 messages dropped ---
+[00:01:11.604,064] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:01:11.604,187] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:11.604,370] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:12.109,130] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:01:12.109,252] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:12.109,405] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+[00:01:12.614,105] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:01:12.614,227] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:12.614,440] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+[00:01:13.119,110] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:01:13.119,232] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:13.119,415] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:01:13.624,084] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:01:13.624,206] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:13.624,389] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:01:14.129,089] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:01:14.129,211] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:14.129,394] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:01:14.634,094] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:01:14.634,216] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:14.634,429] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:01:15.139,068] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:01:15.139,190] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:15.139,373] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:01:15.644,073] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:01:15.644,195] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:15.644,378] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:01:16.149,139] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:01:16.149,261] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:16.149,444] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:01:16.653,106] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:01:16.653,167] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:16.653,228] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:01:16.653,289] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:16.653,350] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:01:16.653,411] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:16.657,196] <dbg> zboss_osif: zb_trans_src_match_tbl_drop: Function: zb_trans_src_match_tbl_drop
+[00:01:16.657,470] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:16.687,988] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:01:16.688,110] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 11
+[00:01:16.688,232] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:16.688,476] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 11
+[00:01:17.189,117] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 12
+[00:01:17.189,208] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:17.189,392] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 12
+[00:01:17.694,091] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 13
+[00:01:17.694,213] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:17.694,396] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 13
+[00:01:18.199,127] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 14
+[00:01:18.199,249] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:18.199,432] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 14
+[00:01:18.704,101] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 15
+[00:01:18.704,223] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:18.704,406] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 15
+[00:01:19.209,106] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 16
+[00:01:19.209,228] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:19.209,411] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:01:19.225,036] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:19.256,805] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:19.713,073] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:01:19.713,195] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:19.713,409] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:19.813,964] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:20.218,109] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:01:20.218,231] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:20.218,414] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+[00:01:20.723,114] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:01:20.723,236] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:20.723,419] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+[00:01:21.228,088] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:01:21.228,240] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:21.228,424] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:01:21.733,062] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:01:21.733,184] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:21.733,398] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:01:22.238,067] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:01:22.238,189] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:22.238,372] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:01:22.743,103] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:01:22.743,225] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:22.743,408] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:01:23.248,107] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:01:23.248,229] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:23.248,413] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:01:23.256,408] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:23.256,561] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 41 15 24 00  26 01 df 03             |....A.$. &...
+[00:01:23.753,143] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:01:23.753,265] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:23.753,448] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:01:24.258,087] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:01:24.258,209] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:24.258,392] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:01:24.762,145] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:01:24.762,176] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:24.762,268] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:01:24.762,298] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:24.762,359] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:01:24.762,420] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:24.766,143] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 a4 15 25 00  41 00 c9 00 06 00 00 00 |......%. A.......
+[00:01:24.766,479] <dbg> zboss_osif: zb_trans_src_match_tbl_drop: Function: zb_trans_src_match_tbl_drop
+[00:01:24.767,486] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 a4 15 26 00  3e 00 fa 01 0a 00 00 00 |......&. >.......
+                                     03 00 00 00                                      |....
+[00:01:24.767,639] <inf> zigbee_app_utils: Network steering was not successful (status: -1)
+[00:01:24.767,944] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:28.760,833] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:01:28.762,145] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xfffe
+[00:01:28.762,481] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:01:28.763,916] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 a9 16 27 00  3e 00 5a 01 01 00 00 00 |......'. >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:01:28.764,221] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 a9 16 28 00  3e 00 95 01             |......(. >...
+[00:01:28.765,441] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:01:28.765,533] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 11
+--- 7 messages dropped ---
+[00:01:29.766,418] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 13
+[00:01:30.270,080] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 14
+--- 10 messages dropped ---
+[00:01:31.853,393] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 19 messages dropped ---
+[00:01:35.824,066] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+--- 31 messages dropped ---
+[00:01:38.884,185] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:38.884,338] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 15
+[00:01:39.389,099] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 16
+--- 16 messages dropped ---
+[00:01:42.419,097] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+--- 22 messages dropped ---
+[00:01:44.978,240] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 29 messages dropped ---
+[00:01:49.518,188] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 24 messages dropped ---
+[00:01:53.056,457] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+--- 29 messages dropped ---
+[00:01:56.112,396] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:56.129,486] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:56.209,259] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:56.617,095] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:01:56.617,218] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:56.617,401] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+[00:01:57.122,070] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:01:57.122,192] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:57.122,375] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+[00:01:57.627,105] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:01:57.627,227] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:57.627,380] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:01:58.132,080] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:01:58.132,202] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:58.132,385] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:01:58.637,084] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:01:58.637,207] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:58.637,390] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:01:59.142,120] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:01:59.142,242] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:59.142,425] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:01:59.646,118] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:01:59.646,240] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:01:59.646,423] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:01:59.664,398] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:59.664,520] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 8d 1e 2a 00  26 01 df 03             |......*. &...
+[00:02:00.151,062] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:02:00.151,184] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:00.151,367] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:02:00.656,127] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:02:00.656,250] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:00.656,402] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:02:01.161,071] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:02:01.161,132] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:01.161,193] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:02:01.161,254] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:01.161,315] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:02:01.161,346] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:01.165,130] <dbg> zboss_osif: zb_trans_src_match_tbl_drop: Function: zb_trans_src_match_tbl_drop
+[00:02:01.192,230] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:02:01.192,321] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 11
+[00:02:01.192,443] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:01.192,657] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 11
+[00:02:01.697,143] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 12
+[00:02:01.697,235] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:01.697,448] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 12
+[00:02:02.202,087] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 13
+[00:02:02.202,209] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:02.202,392] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 13
+[00:02:02.706,115] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 14
+[00:02:02.706,237] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:02.706,420] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 14
+[00:02:03.211,090] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 15
+[00:02:03.211,212] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:03.211,395] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 15
+[00:02:03.716,064] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 16
+[00:02:03.716,186] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:03.716,369] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:02:03.771,911] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:03.778,350] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:03.808,288] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:03.819,335] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:03.838,256] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:04.221,130] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:02:04.221,252] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:04.221,435] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:02:04.726,074] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:02:04.726,196] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:04.726,348] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+[00:02:05.231,079] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:02:05.231,201] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:05.231,384] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+[00:02:05.736,114] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:02:05.736,236] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:05.736,419] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:02:06.241,210] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:02:06.241,333] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:06.241,546] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:02:06.746,093] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:02:06.746,185] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:06.746,398] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:02:07.251,068] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:02:07.251,190] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:07.251,342] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:02:07.755,096] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:02:07.755,218] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:07.755,401] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:02:07.764,221] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:02:07.764,373] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 9e 20 2b 00  26 01 df 03             |..... +. &...
+[00:02:08.260,101] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:02:08.260,223] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:08.260,406] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:02:08.765,075] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:02:08.765,197] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:02:08.765,380] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:02:09.270,080] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:[00:00:00.000,579] <err> qspi_nor: JEDEC id [00 00 00] expect [c2 28 17]
+[00:00:00.000,946] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+[00:00:00.001,007] <dbg> zboss_osif: zb_trans_set_auto_ack: Function: zb_trans_set_auto_ack, enabled: 1
+[00:00:00.011,627] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 00 00 00 00  77 00 b3 00             |........ w...
+[00:00:00.011,718] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 26 02 00 00 01 00  77 00 b7 00 08 10 00 00 |..&..... w.......
+                                     00 01 00 00 10 00 00 00  0c 03 00 00 84 02 00 00 |........ ........
+                                     98 01 00 00 68 02 00 00                          |....h...
+[00:00:00.011,779] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 02 00  77 00 c0 00 02 00 00 00 |........ w.......
+[00:00:00.011,840] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 03 00  77 00 c2 00 c0 02 00 00 |........ w.......
+[00:00:00.011,901] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 04 00  77 00 c8 00 50 04 00 00 |........ w...P...
+[00:00:00.011,962] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 05 00  77 00 cb 00 90 01 00 00 |........ w.......
+[00:00:00.012,023] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 06 00  77 00 ce 00 70 00 00 00 |........ w...p...
+[00:00:00.012,084] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 07 00  77 00 d1 00 04 00 00 00 |........ w.......
+[00:00:00.012,145] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 08 00  77 00 d8 00 30 00 00 00 |........ w...0...
+[00:00:00.012,237] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 00 00 09 00  77 00 db 00 dc 03 00 00 |........ w.......
+                                     0c 00 00 00                                      |....
+[00:00:00.012,298] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 0a 00  77 00 df 00 01 00 00 00 |........ w.......
+[00:00:00.012,390] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 22 02 00 00 0b 00  77 00 e5 00 30 00 00 00 |.."..... w...0...
+                                     18 00 00 00 0c 00 00 00  20 00 00 00 0c 00 00 00 |........  .......
+                                     12 00 00 00                                      |....
+[00:00:00.012,481] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 00 00 0c 00  77 00 03 01 80 00 00 00 |........ w.......
+                                     a0 00 00 00 80 00 00 00  80 00 00 00 20 00 00 00 |........ .... ...
+[00:00:00.012,542] <dbg> zboss_osif: ieee802154_init: The 802.15.4 interface initialized.
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.012,847] <inf> ZB_router_app: Router started successfully
+[00:00:00.012,878] <err> ZB_router_app: RESET
+[00:00:00.012,878] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_PIN
+
+[00:00:00.012,908] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+
+[00:00:00.012,908] <dbg> uart_app: tcu_uart_configuration: UART Interrupt configuration successful!
+
+[00:00:00.013,092] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 0d 00  90 0c 55 01 01 00 00 00 |........ ..U.....
+[00:00:00.351,226] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 0, len: 12
+[00:00:00.351,898] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 12, len: 4
+[00:00:00.352,478] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 16, len: 8
+[00:00:00.691,131] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 0, len: 12
+[00:00:00.691,802] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 12, len: 4
+[00:00:00.692,413] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 16, len: 8
+[00:00:00.693,115] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 0e 00  0b 00 8c 00             |....-... ....
+[00:00:00.693,176] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 0f 00  0b 00 3b 02             |....-... ..;.
+[00:00:00.693,267] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 24, len: 12
+[00:00:00.693,939] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 36, len: 16
+[00:00:00.694,702] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 52, len: 8
+[00:00:00.695,495] <inf> zigbee_app_utils: Production configuration is not present or invalid (status: -1)
+[00:00:00.696,014] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP
+
+[00:00:00.696,044] <inf> zigbee_app_utils: Zigbee stack initialized
+[00:00:00.697,235] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:00.698,791] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:00.700,164] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 2d 00 10 00  3e 00 5a 01 01 00 00 00 |....-... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:00:00.700,469] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 11 00  3e 00 95 01             |....-... >...
+[00:00:00.702,484] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 2d 00 12 00  3e 00 fa 01 05 00 00 00 |....-... >.......
+                                     00 00 00 00                                      |....
+[00:00:00.702,606] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START
+
+[00:00:00.702,636] <inf> zigbee_app_utils: Device started for the first time
+[00:00:00.702,636] <inf> zigbee_app_utils: Start network steering
+[00:00:00.702,667] <inf> zigbee_app_utils: Started network rejoin procedure.
+[00:00:00.702,941] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x03
+[00:00:01.717,590] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:01.718,902] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xfffe
+[00:00:01.719,238] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:01.720,642] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 70 00 13 00  3e 00 5a 01 01 00 00 00 |....p... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:00:01.720,947] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 70 00 14 00  3e 00 95 01             |....p... >...
+[00:00:01.722,137] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:01.722,412] <dbg> zboss_osif: zb_trans_set_tx_power: Function: zb_trans_set_tx_power, power: 20
+--- 9 messages dropped ---
+[00:00:02.724,395] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 13
+[00:00:03.229,095] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 14
+--- 3 messages dropped ---
+[00:00:04.743,225] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 22 messages dropped ---
+[00:00:07.773,376] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+--- 15 messages dropped ---
+[00:00:10.833,404] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 13
+--- 20 messages dropped ---
+[00:00:12.348,358] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:00:12.412,231] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 3 messages dropped ---
+[00:00:13.862,426] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+--- 24 messages dropped ---
+[00:00:17.397,338] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+--- 16 messages dropped ---
+[00:00:18.437,377] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 12
+--- 20 messages dropped ---
+[00:00:21.466,247] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:21.466,430] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+[00:00:21.971,069] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+--- 17 messages dropped ---
+[00:00:26.010,131] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+--- 20 messages dropped ---
+[00:00:27.556,152] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 14
+--- 27 messages dropped ---
+[00:00:30.585,144] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:00:30.585,266] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:30.585,449] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:00:31.090,148] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:00:31.090,270] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:31.090,454] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:00:31.595,062] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:00:31.595,184] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:31.595,367] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:00:32.100,097] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:00:32.100,219] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:32.100,402] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:00:32.605,102] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:00:32.605,224] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:32.605,377] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:00:32.609,680] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:32.609,832] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 53 08 17 00  26 01 df 03             |....S... &...
+[00:00:32.610,870] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:32.611,022] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 53 08 18 00  26 01 df 03             |....S... &...
+[00:00:33.110,076] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:00:33.110,198] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:33.110,382] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:00:33.615,081] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:33.615,203] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:33.615,386] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:00:34.119,079] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:34.119,110] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.119,201] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:34.119,232] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.119,323] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:34.119,354] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.123,168] <dbg> zboss_osif: zb_trans_src_match_tbl_drop: Function: zb_trans_src_match_tbl_drop
+[00:00:34.123,443] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:34.153,930] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:34.154,083] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 11
+[00:00:34.154,205] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.154,418] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 11
+[00:00:34.655,059] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 12
+[00:00:34.655,212] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:34.655,395] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 12
+[00:00:35.160,064] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 13
+[00:00:35.160,186] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:35.160,369] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 13
+[00:00:35.665,069] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 14
+[00:00:35.665,191] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:35.665,374] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 14
+[00:00:36.170,104] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 15
+[00:00:36.170,227] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:36.170,410] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 15
+[00:00:36.675,109] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 16
+[00:00:36.675,231] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:36.675,415] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:00:36.733,886] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.779,663] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:36.783,416] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:37.179,077] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:37.179,199] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:37.179,382] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:37.294,464] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:37.684,082] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:00:37.684,204] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:37.684,387] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+[00:00:38.189,147] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:00:38.189,239] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:38.189,453] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+[00:00:38.694,091] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:00:38.694,213] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:38.694,396] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:00:39.199,066] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:00:39.199,188] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:39.199,371] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:00:39.704,101] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:00:39.704,223] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:39.704,406] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:00:40.209,106] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:00:40.209,228] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:40.209,411] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:00:40.714,111] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:00:40.714,233] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:40.714,416] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:00:40.723,175] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:40.723,327] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 65 0a 19 00  26 01 df 03             |....e... &...
+[00:00:40.724,395] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:40.724,517] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 65 0a 1a 00  26 01 df 03             |....e... &...
+[00:00:41.219,085] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:00:41.219,207] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:41.219,390] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:00:41.724,090] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:41.724,212] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:41.724,395] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:00:42.228,118] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:42.228,149] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:42.228,240] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:42.228,271] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:42.228,363] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:42.228,393] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:42.232,116] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 c8 0a 1b 00  41 00 c9 00 06 00 00 00 |........ A.......
+[00:00:42.232,452] <dbg> zboss_osif: zb_trans_src_match_tbl_drop: Function: zb_trans_src_match_tbl_drop
+[00:00:42.233,489] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 c8 0a 1c 00  3e 00 fa 01 0a 00 00 00 |........ >.......
+                                     03 00 00 00                                      |....
+[00:00:42.233,642] <inf> zigbee_app_utils: Network steering was not successful (status: -1)
+[00:00:42.233,917] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:44.246,978] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:44.248,291] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xfffe
+[00:00:44.248,657] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:44.250,061] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 4c 0b 1d 00  3e 00 5a 01 01 00 00 00 |....L... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:00:44.250,366] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 4c 0b 1e 00  3e 00 95 01             |....L... >...
+--- 10 messages dropped ---
+[00:00:45.763,092] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 14
+[00:00:45.763,214] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:45.763,366] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 14
+[00:00:46.268,035] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 15
+[00:00:46.268,157] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:46.268,341] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 15
+[00:00:46.773,101] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 16
+[00:00:46.773,223] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:46.773,376] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:00:46.879,302] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:47.277,069] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:47.277,191] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:47.277,374] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:47.328,094] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+--- 1 messages dropped ---
+[00:00:47.377,166] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 60, len: 12
+[00:00:47.387,664] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 72, len: 16
+[00:00:47.394,714] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 88, len: 8
+[00:00:47.782,073] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:00:47.782,196] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 1 messages dropped ---
+[00:00:48.287,109] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:00:48.287,231] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+--- 1 messages dropped ---
+[00:00:48.792,053] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:00:48.792,175] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:48.792,358] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:00:49.297,088] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:00:49.297,210] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:49.297,393] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:00:49.802,032] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:00:49.802,154] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:49.802,337] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:00:50.307,098] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:00:50.307,189] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:50.307,373] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:00:50.812,042] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:00:50.812,164] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:50.812,347] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:00:51.317,077] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:00:51.317,199] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:51.317,352] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:00:51.822,113] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:51.822,235] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:51.822,418] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:00:52.326,080] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:52.326,110] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:52.326,171] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:52.326,202] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:52.329,772] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 5c 0d 1f 00  45 01 24 01 54 b7 00 00 |....\... E.$.T...
+                                     11 00 00 00 d5 5a 00 00  00 00 00 00             |.....Z.. ....
+[00:00:52.329,986] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:52.330,108] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:52.330,169] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xb754
+[00:00:52.330,200] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:52.330,352] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:52.334,259] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:52.816,223] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:52.819,763] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:52.824,462] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:52.824,584] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:52.824,737] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 7c 0d 20 00  27 01 bd 01             |....|. . '...
+[00:00:52.824,768] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xd143
+[00:00:52.825,195] <dbg> zboss_osif: zb_trans_is_receiving: Function: zb_trans_is_receiving, is receiv: 1
+[00:00:52.825,225] <dbg> zboss_osif: zb_trans_enter_sleep: Function: zb_trans_enter_sleep
+[00:00:52.825,561] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 96, len: 12
+[00:00:52.825,683] <dbg> ZB_router_app: diagnostic_zigbee_info: Zigbee application joined the network: bellow some info:
+
+[00:00:52.825,714] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee long addr:
+[00:00:52.825,714] <dbg> ZB_router_app: diagnostic_zigbee_info: f4
+[00:00:52.825,744] <dbg> ZB_router_app: diagnostic_zigbee_info: ce
+[00:00:52.825,744] <dbg> ZB_router_app: diagnostic_zigbee_info: 36
+[00:00:52.825,775] <dbg> ZB_router_app: diagnostic_zigbee_info: 77
+[00:00:52.825,805] <dbg> ZB_router_app: diagnostic_zigbee_info: 2c
+[00:00:52.825,805] <dbg> ZB_router_app: diagnostic_zigbee_info: 7f
+[00:00:52.825,836] <dbg> ZB_router_app: diagnostic_zigbee_info: bf
+[00:00:52.825,836] <dbg> ZB_router_app: diagnostic_zigbee_info: 8e
+[00:00:52.825,866] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:52.825,866] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee shrot addr:  0xd143
+
+[00:00:52.825,897] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee extended pan id:
+[00:00:52.826,232] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 112, len: 16
+[00:00:52.826,354] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:52.826,385] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:52.826,385] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:52.826,416] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:52.826,416] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:52.826,446] <dbg> ZB_router_app: diagnostic_zigbee_info: 00
+[00:00:52.826,446] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:52.826,477] <dbg> ZB_router_app: diagnostic_zigbee_info: 99
+[00:00:52.826,507] <dbg> ZB_router_app: diagnostic_zigbee_info:
+
+[00:00:52.826,507] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee role router
+
+[00:00:52.826,538] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee channel: 17
+
+[00:00:52.826,538] <dbg> ZB_router_app: get_endpoint_descriptor: Profileid 0x0004
+
+[00:00:52.826,568] <dbg> ZB_router_app: get_endpoint_descriptor: Clusterid 0x0008
+
+[00:00:52.827,087] <dbg> ZB_router_app: get_endpoint_descriptor: device_version 0x0000
+
+[00:00:52.826,965] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 128, len: 16
+[00:00:52.827,728] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 108, len: 4
+[00:00:52.828,308] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 144, len: 8
+[00:00:52.828,948] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 152, len: 12
+[00:00:52.829,620] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 168, len: 8
+[00:00:52.830,291] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 164, len: 4
+[00:00:52.830,902] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 176, len: 8
+[00:00:52.831,542] <dbg> zboss_osif: zb_trans_is_active: Function: zb_trans_is_active, is active: 0
+[00:00:52.831,573] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:52.831,970] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 7d 0d 21 00  09 00 be 02 00 00 00 00 |....}.!. ........
+                                     43 d1 00 00 00 00 00 00  11 00 00 00 00 00 00 00 |C....... ........
+[00:00:52.832,214] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 7d 0d 22 00  09 00 c0 02 99 99 00 00 |....}.". ........
+                                     00 00 00 00                                      |....
+[00:00:52.832,855] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xd143
+[00:00:52.833,007] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:52.834,045] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:52.937,377] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:52.937,500] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:52.939,788] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 184, len: 12
+[00:00:52.947,845] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 196, len: 4
+[00:00:52.954,895] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 200, len: 28
+[00:00:52.962,066] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 228, len: 8
+[00:00:52.969,696] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:52.969,970] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 86 0d 23 00  a4 09 c4 00 00 00 00 00 |......#. ........
+                                     00 00 00 00 00 00 00 00  00 00 12 34             |........ ...4
+[00:00:52.970,062] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 236, len: 12
+[00:00:52.982,696] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 248, len: 8
+[00:00:52.989,654] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 256, len: 8
+[00:00:52.998,291] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:53.029,083] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 264, len: 12
+[00:00:53.042,236] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 276, len: 8
+[00:00:53.049,255] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 284, len: 8
+[00:00:53.056,610] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:53.060,882] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:53.096,466] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:53.096,588] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:53.147,552] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:53.147,644] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:53.452,758] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:53.457,489] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 292, len: 12
+[00:00:53.466,674] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 304, len: 92
+[00:00:53.474,639] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 396, len: 8
+[00:00:53.482,299] <dbg> zboss_osif: zb_trans_set_pan_coord: Function: zb_trans_set_pan_coord, enabled: 0
+[00:00:53.482,421] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:53.482,452] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:53.482,513] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:53.482,543] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xd143
+[00:00:53.482,604] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xb754
+[00:00:53.483,154] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 a7 0d 24 00  44 01 3d 00 20 00 00 00 |......$. D.=. ...
+                                     00 00 00 00 00 00 00 00  01 00 00 00             |........ ....
+[00:00:53.483,642] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:53.484,741] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 404, len: 12
+[00:00:53.495,239] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 416, len: 92
+[00:00:53.503,143] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 508, len: 8
+[00:00:53.510,833] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:53.513,427] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:53.544,403] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:53.549,713] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:53.586,090] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:53.586,181] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:53.617,248] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:53.617,370] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:53.964,813] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:53.969,238] <inf> zigbee_app_utils: Unimplemented signal (signal: 54, status: 0)
+[00:00:53.972,015] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 c7 0d 25 00  3e 00 fa 01 0a 00 00 00 |......%. >.......
+                                     00 00 00 00                                      |....
+[00:00:53.972,167] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_STEERING
+
+[00:00:53.972,229] <dbg> ZB_router_app: start_identifying: Enter identify mode
+[00:00:53.972,412] <inf> zigbee_app_utils: Joined network successfully (Extended PAN ID: 0000000000009999, PAN ID: 0xb754)
+[00:00:53.972,442] <inf> zigbee_app_utils: Network rejoin procedure stopped.
+[00:00:53.972,686] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:00:54.679,992] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:00:54.680,145] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:01.232,238] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:01.232,360] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_ge[00:01:01.233,032] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 516, len: 12
+[00:01:01.242,126] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 528, len: 16
+[00:01:01.249,267] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 544, len: 8
+[00:01:01.257,324] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:01.261,871] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:01:01.262,481] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x01
+[00:01:01.343,170] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
+[00:01:01.343,292] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:01.344,604] <dbg> ZB_router_app: data_indication: Size of received payload is 8 bytes
+
+[00:01:01.344,635] <dbg> ZB_router_app: data_indication: Payload of input RF packet
+                                        ca 03 75 30 00 02 ce 73                          |..u0...s
+[00:01:01.344,665] <dbg> ZB_router_app: data_indication: bModbusRequestReceived via zigbee and send via UART
+
+[00:01:01.346,038] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+Input counter: 1
+Output counter: 1
+[00:01:01.359,741] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:01:01.359,924] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:01.360,137] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:01:01.360,351] <dbg> ZB_router_app: send_user_payload: send_user_payload: 9
+
+[00:01:01.360,382] <dbg> ZB_router_app: send_user_payload: Payload of output RF packet
+                                        c2 03 04 0b 2b 00 1a 9c  d8                      |....+... .
+[00:01:01.360,412] <dbg> ZB_router_app: send_user_payload: RET_OK - if transmission was successful scheduled;
+
+[00:01:01.360,443] <dbg> ZB_router_app: send_user_payload: ZB free bufid;
+
+[00:01:01.362,426] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 aa 0f 26 00  47 01 19 0d 09 00 00 00 |......&. G.......
+                                     08 00 00 00                                      |....
+[00:01:01.363,189] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 aa 0f 27 00  47 01 3e 08 09 00 00 00 |......'. G.>.....
+[00:01:01.363,616] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 aa 0f 28 00  47 01 1d 05 00 00 00 00 |......(. G.......
+[00:01:01.364,257] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 aa 0f 29 00  47 01 1d 05 00 00 00 00 |......). G.......
+[00:01:01.365,051] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:01:01.370,269] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:01:01.370,819] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 ab 0f 2a 00  60 08 4c 00 17 00 00 00 |......*. `.L.....
+                                     69 00 00 00                                      |i...
+▒[00:00:00.000,579] <err> qspi_nor: JEDEC id [00 00 00] expect [c2 28 17]
+[00:00:00.000,946] <inf> ieee802154_nrf5: nRF5 802154 radio initialized
+[00:00:00.001,007] <dbg> zboss_osif: zb_trans_set_auto_ack: Function: zb_trans_set_auto_ack, enabled: 1
+[00:00:00.011,627] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 00 00 00 00  77 00 b3 00             |........ w...
+[00:00:00.011,718] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 26 02 00 00 01 00  77 00 b7 00 08 10 00 00 |..&..... w.......
+                                     00 01 00 00 10 00 00 00  0c 03 00 00 84 02 00 00 |........ ........
+                                     98 01 00 00 68 02 00 00                          |....h...
+[00:00:00.011,779] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 02 00  77 00 c0 00 02 00 00 00 |........ w.......
+[00:00:00.011,840] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 03 00  77 00 c2 00 c0 02 00 00 |........ w.......
+[00:00:00.011,901] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 04 00  77 00 c8 00 50 04 00 00 |........ w...P...
+[00:00:00.011,962] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 05 00  77 00 cb 00 90 01 00 00 |........ w.......
+[00:00:00.012,023] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 06 00  77 00 ce 00 70 00 00 00 |........ w...p...
+[00:00:00.012,084] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 07 00  77 00 d1 00 04 00 00 00 |........ w.......
+[00:00:00.012,176] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 08 00  77 00 d8 00 30 00 00 00 |........ w...0...
+[00:00:00.012,237] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 00 00 09 00  77 00 db 00 dc 03 00 00 |........ w.......
+                                     0c 00 00 00                                      |....
+[00:00:00.012,298] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 0a 00  77 00 df 00 01 00 00 00 |........ w.......
+[00:00:00.012,390] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 22 02 00 00 0b 00  77 00 e5 00 30 00 00 00 |.."..... w...0...
+                                     18 00 00 00 0c 00 00 00  20 00 00 00 0c 00 00 00 |........  .......
+                                     12 00 00 00                                      |....
+[00:00:00.012,481] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 00 00 0c 00  77 00 03 01 80 00 00 00 |........ w.......
+                                     a0 00 00 00 80 00 00 00  80 00 00 00 20 00 00 00 |........ .... ...
+[00:00:00.012,542] <dbg> zboss_osif: ieee802154_init: The 802.15.4 interface initialized.
+*** Booting nRF Connect SDK v2.5.1 ***
+[00:00:00.012,847] <inf> ZB_router_app: Router started successfully
+[00:00:00.012,847] <err> ZB_router_app: RESET
+[00:00:00.012,878] <dbg> ZB_router_app: get_reset_reason: Reset cause is: RESET_SOFTWARE
+
+[00:00:00.012,908] <dbg> uart_app: tcu_uart_configuration: TCU UART configuration successful!
+
+[00:00:00.012,908] <dbg> uart_app: tcu_uart_configuration: UART Interrupt configuration successful!
+
+[00:00:00.013,092] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0e 02 00 00 0d 00  90 0c 55 01 01 00 00 00 |........ ..U.....
+[00:00:00.351,196] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 0, len: 12
+[00:00:00.351,867] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 12, len: 4
+[00:00:00.352,447] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 16, len: 8
+[00:00:00.691,070] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 0, len: 12
+[00:00:00.691,741] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 12, len: 4
+[00:00:00.692,352] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 1, pos: 16, len: 8
+[00:00:00.693,054] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 0e 00  0b 00 8c 00             |....-... ....
+[00:00:00.693,115] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 0f 00  0b 00 3b 02             |....-... ..;.
+[00:00:00.693,206] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 24, len: 12
+[00:00:00.693,878] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 36, len: 16
+[00:00:00.694,641] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 52, len: 8
+[00:00:00.695,434] <inf> zigbee_app_utils: Production configuration is not present or invalid (status: -1)
+[00:00:00.695,953] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP
+
+[00:00:00.695,983] <inf> zigbee_app_utils: Zigbee stack initialized
+[00:00:00.697,174] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:00.698,730] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:00.700,134] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 2d 00 10 00  3e 00 5a 01 01 00 00 00 |....-... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+[00:00:00.700,439] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 2d 00 11 00  3e 00 95 01             |....-... >...
+[00:00:00.702,423] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 12 02 2d 00 12 00  3e 00 fa 01 05 00 00 00 |....-... >.......
+                                     00 00 00 00                                      |....
+[00:00:00.702,545] <dbg> ZB_router_app: zboss_signal_handler: JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START
+
+[00:00:00.702,575] <inf> zigbee_app_utils: Device started for the first time
+[00:00:00.702,606] <inf> zigbee_app_utils: Start network steering
+[00:00:00.702,606] <inf> zigbee_app_utils: Started network rejoin procedure.
+[00:00:00.702,880] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x03
+[00:00:01.717,559] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:01.718,841] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xfffe
+[00:00:01.719,177] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:01.720,550] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1e 02 70 00 13 00  3e 00 5a 01 01 00 00 00 |....p... >.Z.....
+                                     00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 |........ ........
+--- 20 messages dropped ---
+[00:00:04.239,166] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:04.239,349] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 16
+[00:00:04.301,391] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:04.345,031] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:04.347,198] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:04.367,889] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:04.743,072] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:04.743,194] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:04.743,347] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:04.809,356] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:04.809,600] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 60, len: 12
+[00:00:04.821,136] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 72, len: 16
+[00:00:04.828,247] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 88, len: 8
+[00:00:04.847,686] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:05.248,046] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 18
+[00:00:05.248,168] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:05.248,352] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 18
+[00:00:05.753,112] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 19
+[00:00:05.753,234] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:05.753,417] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 19
+[00:00:06.258,117] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 20
+[00:00:06.258,239] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:06.258,422] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 20
+[00:00:06.763,031] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 21
+[00:00:06.763,153] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:06.763,336] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 21
+[00:00:07.268,035] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 22
+[00:00:07.268,157] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:07.268,341] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 22
+[00:00:07.773,101] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 23
+[00:00:07.773,223] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:07.773,406] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 23
+[00:00:08.278,076] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 24
+[00:00:08.278,198] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:08.278,381] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 24
+[00:00:08.283,813] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:08.283,966] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 1d 02 15 00  26 01 df 03             |........ &...
+[00:00:08.285,034] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:08.285,156] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 1d 02 16 00  26 01 df 03             |........ &...
+[00:00:08.783,081] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 25
+[00:00:08.783,203] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:08.783,386] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 25
+[00:00:09.288,085] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:09.288,208] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:09.288,391] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 26
+[00:00:09.792,083] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 26
+[00:00:09.792,114] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:09.792,175] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xffff
+[00:00:09.792,205] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:09.795,806] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 1a 02 80 02 17 00  45 01 24 01 54 b7 00 00 |........ E.$.T...
+                                     11 00 00 00 d5 5a 00 00  00 00 00 00             |.....Z.. ....
+[00:00:09.795,989] <dbg> zboss_osif: zb_trans_set_channel: Function: zb_trans_set_channel, channel number: 17
+[00:00:09.796,112] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:09.796,173] <dbg> zboss_osif: zb_trans_set_pan_id: Function: zb_trans_set_pan_id, PAN ID: 0xb754
+[00:00:09.796,234] <dbg> zboss_osif: zb_trans_set_long_addr: Function: zb_trans_set_long_addr, long addr: 0x8e
+[00:00:09.796,386] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:09.799,346] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:10.282,196] <dbg> zboss_osif: zb_trans_transmit: Function: zb_trans_transmit, channel: 17
+[00:00:10.285,369] <dbg> zboss_osif: zb_trans_buffer_free: Function: zb_trans_buffer_free
+[00:00:10.289,398] <dbg> zboss_osif: zb_trans_get_next_packet: Function: zb_trans_get_next_packet
+[00:00:10.289,520] <dbg> zboss_osif: zb_trans_enter_receive: Function: zb_trans_enter_receive
+[00:00:10.289,672] <dbg> zboss_osif: zb_trace_msg_port_do:
+                                     de ad 0a 02 a0 02 18 00  27 01 bd 01             |........ '...
+[00:00:10.289,703] <dbg> zboss_osif: zb_trans_set_short_addr: Function: zb_trans_set_short_addr, 0xd143
+[00:00:10.290,130] <dbg> zboss_osif: zb_trans_is_receiving: Function: zb_trans_is_receiving, is receiv: 1
+[00:00:10.290,161] <dbg> zboss_osif: zb_trans_enter_sleep: Function: zb_trans_enter_sleep
+[00:00:10.290,496] <dbg> zboss_osif: zb_osif_nvram_write: Function: zb_osif_nvram_write, page: 0, pos: 96, len: 12
+[00:00:10.290,618] <dbg> ZB_router_app: diagnostic_zigbee_info: Zigbee application joined the network: bellow some info:
+
+[00:00:10.290,649] <dbg> ZB_router_app: diagnostic_zigbee_info: zigbee long addr:
+[00:00:10.290,649] <dbg> ZB_router_app: diagnostic_zigbee_info: f4
+[00:00:10.290,679] <dbg> ZB_router_app: diagnostic_zigbee_info: ce
+[00:00:10.290,710] <dbg> ZB_router_app: diagnostic_zigbee_info: 36
+[00:00:10.290,710] <dbg> ZB_router_app: diagnostic_zigbee_info: 77
+[00:00:10.290,740] <dbg> ZB_router_app: diagnostic_zigbee_info: 2c
+[00:00:10.29
+[00:00:13.783,569] <dbg> zboss_osif: zigbee_event_poll: Received new Zigbee event: 0x02
