@@ -662,54 +662,61 @@ void get_endpoint_descriptor(zb_uint8_t endpoint)
 // Function for giagnostic purposes. Print zigbee info when the device joins a network
 void diagnostic_zigbee_info()
 {
-	zb_ieee_addr_t zb_long_address;
-	zb_ext_pan_id_t zb_ext_pan_id;
-	zb_uint8_t zb_channel;
-	zb_uint16_t zb_shrot_addr;
+    zb_ieee_addr_t zb_long_address;
+    zb_ext_pan_id_t zb_ext_pan_id;
+    zb_uint8_t zb_channel;
+    zb_uint16_t zb_shrot_addr;
 
-	if(zb_zdo_joined() && b_infit_info_flag == ZB_TRUE)
-	{
-		b_infit_info_flag = ZB_FALSE;
-		b_Zigbe_Connected = true;
-		LOG_DBG("Zigbee application joined the network: bellow some info: \n");
-		zb_get_long_address(zb_long_address);
-		// Log Long Address
-		LOG_DBG("zigbee long addr: ");
-		for (int i = 7; i >= 0; i--) {
-		    LOG_DBG("%02x", zb_long_address[i]);
-		}
-		LOG_DBG("\n");
-		zb_shrot_addr = zb_get_short_address();
-		LOG_DBG("zigbee shrot addr:  0x%x\n", zb_shrot_addr);
-		zb_get_extended_pan_id(zb_ext_pan_id);	
-		// Log Extended PAN ID
-		LOG_DBG("zigbee extended pan id: ");
-		for (int i = 7; i >= 0; i--) {
-		    LOG_DBG("%02x", zb_ext_pan_id[i]);
-		}
-		LOG_DBG("\n");
-		switch(zb_get_network_role())
-		{
-		case 0:
-			LOG_DBG("zigbee role coordinator\n");
-			break;
-		case 1:
-			LOG_DBG("zigbee role router\n");
-			break;
-		case 2:
-			LOG_DBG("zigbee role end device\n");
-			break;
-		default:
-			LOG_DBG("Zigbee role NOT found \n");
-			break;
-		}
-		
-	zb_channel = zb_get_current_channel();	
-	LOG_DBG("zigbee channel: %d \n", zb_channel);
+    if(zb_zdo_joined() && b_infit_info_flag == ZB_TRUE)
+    {
+        b_infit_info_flag = ZB_FALSE;
+        b_Zigbe_Connected = true;
+        LOG_DBG("Zigbee application joined the network: bellow some info: \n");
+        zb_get_long_address(zb_long_address);
+        // Display MAC address
+        {
+            uint8_t temp[8];
+            for(uint8_t i = 0; i<8; i++)
+            {
+                temp[i] = zb_long_address[7-i];
+            }
+            LOG_HEXDUMP_DBG(temp,8,"MAC address: ");
+        }
 
-	get_endpoint_descriptor(232);
+        zb_shrot_addr = zb_get_short_address();
+        LOG_DBG("zigbee shrot addr:  0x%x\n", zb_shrot_addr);
+        zb_get_extended_pan_id(zb_ext_pan_id);
+        // Display extended PAN ID
+        {
+            uint8_t temp[8];
+            for(uint8_t i = 0; i<8; i++)
+            {
+                temp[i] = zb_ext_pan_id[7-i];
+            }
+            LOG_HEXDUMP_DBG(temp,8,"Extended PAN ID: ");
+        }
+        switch(zb_get_network_role())
+        {
+        case 0:
+            LOG_DBG("zigbee role coordinator\n");
+            break;
+        case 1:
+            LOG_DBG("zigbee role router\n");
+            break;
+        case 2:
+            LOG_DBG("zigbee role end device\n");
+            break;
+        default:
+            LOG_DBG("Zigbee role NOT found \n");
+            break;
+        }
 
-	}
+    zb_channel = zb_get_current_channel();
+    LOG_DBG("zigbee channel: %d \n", zb_channel);
+
+    get_endpoint_descriptor(232);
+
+    }
 }
 
 void display_counters(void)
