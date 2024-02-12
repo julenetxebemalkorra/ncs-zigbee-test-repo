@@ -430,8 +430,15 @@ void zboss_signal_handler(zb_bufid_t bufid)
 void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 {
 	    /*Allocate OUT buffer of the default size.*/
-		zb_bufid_t bufid;
-		bufid = zb_buf_get_out();
+		static zb_bufid_t bufid = NULL;
+		if( bufid )
+        {
+            zb_buf_reuse(bufid);
+        }
+        else
+        {
+            bufid = zb_buf_get_out();
+        }
 
 		/*destination address: for the first test the network coordinator will be the destination */
 		zb_addr_u dst_addr;
@@ -455,16 +462,16 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 		    					 ZB_FALSE,
 			    				 outputPayload,
 				    			 9); */
-		zb_ret_t ret = zb_aps_send_user_payload(bufid, 
-		    					                dst_addr,
-			    				                ZB_profileid,
-				    			                ZB_clusterid,
-					    		                ZB_src_endpoint,
-						    	                ZB_dst_endpoint,
-								                ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-		    					                ZB_FALSE,
-			    				                outputPayload,
-				    			                chunk_size);
+        zb_ret_t ret = zb_aps_send_user_payload(bufid,
+                                                dst_addr,
+                                                0xC105,//ZB_profileid,
+                                                0x0011,//ZB_clusterid,
+                                                232,//ZB_src_endpoint,
+                                                232,//ZB_dst_endpoint,
+                                                ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+                                                ZB_FALSE,
+                                                outputPayload,
+                                                chunk_size);
         if(bufid)
         {
             if(ret == RET_OK) LOG_DBG("RET_OK - if transmission was successful scheduled;\n");
@@ -477,24 +484,6 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
         {
             LOG_ERR("\n\n bufid NULL error ZB not answered \n\n");
         }
-
-	/*Free packet buffer and put it into free list after payload is sent*/
-	if (bufid) 
-	{
-	    zb_buf_free(bufid);
-	}
-
-/*
-  Note: This code includes a one-second delay between Zigbee package transmissions for stability.
-
-  To adjust the delay time:
-  - Locate the 'sleep' function.
-  - Modify the argument value in 'sleep' for a different delay duration.
-  - Test the code after changing the delay to ensure proper functionality.
-  
-  Caution: Be mindful when altering the delay to prevent network congestion.
-*/
-	//k_msleep(SLEEP_TIME_MS);
 
 }
 
