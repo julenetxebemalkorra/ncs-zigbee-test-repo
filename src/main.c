@@ -31,6 +31,11 @@
 
 #include "tcu_Uart.h"
 
+#define DIGI_PROFILE_ID 0xC105
+#define DIGI_CLUSTER_ID 0x0011
+#define DIGI_SOURCE_ENDPOINT 232
+#define DIGI_DESTINATION_ENDPOINT 232
+
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
 
@@ -100,11 +105,6 @@ static volatile size_t offset = 0;
 static volatile	zb_uint8_t *pointerToBeginOfBuffer;
 
 /* Zigbee messagge info*/
-static volatile uint16_t ZB_profileid;
-static volatile uint16_t ZB_clusterid;
-static volatile uint16_t ZB_src_endpoint;
-static volatile uint16_t ZB_dst_endpoint;
-static volatile uint16_t ZB_aps_counter;
 
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
 
@@ -210,7 +210,7 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
     
     if (bufid)
 	{
-        if( (ind->clusterid == 0x0011) && ( ind->src_endpoint == 232 ) && ( ind->dst_endpoint == 232 ) )
+        if( (ind->clusterid == DIGI_CLUSTER_ID) && ( ind->src_endpoint == DIGI_SOURCE_ENDPOINT ) && ( ind->dst_endpoint == DIGI_DESTINATION_ENDPOINT ) )
         {
             zb_uint8_t *pointerToEndOfBuffer;
             zb_int32_t sizeOfPayload;
@@ -234,14 +234,6 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
                 if( !is_tcu_uart_in_command_mode() && (sizeOfPayload >= MODBUS_MIN_RX_LENGTH) )
                 {
                     if(PRINT_ZIGBEE_INFO) LOG_DBG("Payload of input RF packet sent to Tcu UART \n");
-                    // safe zigbee source endpoint info to send the asnwer
-                    ZB_profileid = ind->profileid;
-                    ZB_clusterid = ind->clusterid;
-                    ZB_src_endpoint = ind->src_endpoint;
-                    ZB_dst_endpoint = ind->dst_endpoint;
-                    ZB_aps_counter = ind->aps_counter;
-
-                    //sendFrameToTcu(&pointerToBeginOfBuffer[0], sizeOfPayload);
                     sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
  
                 }
@@ -313,62 +305,44 @@ void zboss_signal_handler(zb_bufid_t bufid)
  */
 void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 {
-	    /*Allocate OUT buffer of the default size.*/
-		static zb_bufid_t bufid = NULL;
-		if( bufid )
-        {
-            zb_buf_reuse(bufid);
-        }
-        else
-        {
-            bufid = zb_buf_get_out();
-        }
+/*  Allocate OUT buffer                                                       */
+    static zb_bufid_t bufid = NULL;
+    if( bufid ) zb_buf_reuse(bufid); // If already allocated, reuse the buffer
+    else bufid = zb_buf_get_out(); // If not allocated yet, allocate the buffer
 
-		/*destination address: for the first test the network coordinator will be the destination */
-		zb_addr_u dst_addr;
-		dst_addr.addr_short = 0x0000;
+/* If buffer could be allocated, schedule the transmission                    */
+    if( bufid )
+    {
+        zb_addr_u dst_addr;
+        dst_addr.addr_short = 0x0000; // Destination address of the coordinator
 
-		if(PRINT_UART_INFO)
-		{
-			LOG_DBG("send_user_payload: chunk_size %d\n", chunk_size);
+        if(PRINT_UART_INFO)
+        {
+            LOG_DBG("send_user_payload: chunk_size %d\n", chunk_size);
             LOG_HEXDUMP_DBG(outputPayload,chunk_size,"Payload of output RF packet");
-		}
+        }
 
-	    //zb_uint8_t outputCustomPayload[255] = {0xC2, 0x04, 0x04, 0x00, 0x4A, 0x75, 0x6C, 0x65, 0x6E, 0x4A, 0x75, 0x6C, 0x65, 0x6E};
-
-		/*zb_aps_send_user_payload(bufid, 
-		    					 dst_addr,
-			    				 0xc105,
-				    			 0X0011,
-					    		 232,
-						    	 232,
-								 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-		    					 ZB_FALSE,
-			    				 outputPayload,
-				    			 9); */
         zb_ret_t ret = zb_aps_send_user_payload(bufid,
                                                 dst_addr,
-                                                0xC105,//ZB_profileid,
-                                                0x0011,//ZB_clusterid,
-                                                232,//ZB_src_endpoint,
-                                                232,//ZB_dst_endpoint,
+                                                DIGI_PROFILE_ID,
+                                                DIGI_CLUSTER_ID,
+                                                DIGI_SOURCE_ENDPOINT,
+                                                DIGI_DESTINATION_ENDPOINT,
                                                 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-                                                ZB_FALSE,
+                                                ZB_FALSE, //No Ack
                                                 outputPayload,
                                                 chunk_size);
-        if(bufid)
-        {
-            if(ret == RET_OK) LOG_DBG("RET_OK - if transmission was successful scheduled;\n");
-		    else if(ret == RET_INVALID_PARAMETER_1) LOG_ERR("RET_INVALID_PARAMETER_1 - if the buffer is invalid\n");
-		    else if(ret == RET_INVALID_PARAMETER_2) LOG_ERR("RET_INVALID_PARAMETER_2 - if the payload_ptr parameter is invalid;\n");
-		    else if(ret == RET_INVALID_PARAMETER_3) LOG_ERR("RET_INVALID_PARAMETER_3 - if the payload_size parameter is too large;\n");
-		    else LOG_ERR("Unkown error zb_aps_send_user_payload ;\n");
-        }
-        else
-        {
-            LOG_ERR("\n\n bufid NULL error ZB not answered \n\n");
-        }
 
+        if(ret == RET_OK) LOG_DBG("Transmission was successful scheduled");
+        else if(ret == RET_INVALID_PARAMETER_1) LOG_ERR("Transmission could not be scheduled: The buffer is invalid");
+        else if(ret == RET_INVALID_PARAMETER_2) LOG_ERR("Transmission could not be scheduled: The payload_ptr parameter is invalid");
+        else if(ret == RET_INVALID_PARAMETER_3) LOG_ERR("Transmission could not be scheduled: The payload_size parameter is too large");
+        else LOG_ERR("Unkown error zb_aps_send_user_payload");
+    }
+    else
+    {
+        LOG_ERR("Transmission could not be scheduled: Out buffer not allocated");
+    }
 }
 
 //------------------------------------------------------------------------------
