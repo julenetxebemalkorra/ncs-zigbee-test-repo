@@ -198,53 +198,6 @@ void get_reset_reason(void)
     }
 }
 
-
-/**@brief Function for initializing all clusters attributes. */
-static void app_clusters_attr_init(void)
-{
-	/* Basic cluster attributes data */
-	dev_ctx.basic_attr.zcl_version = ZB_ZCL_VERSION;
-	dev_ctx.basic_attr.power_source = TEMPLATE_INIT_BASIC_POWER_SOURCE;
-
-	/* Identify cluster attributes data. */
-	dev_ctx.identify_attr.identify_time =
-		ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE;
-}
-
-/**@brief Starts identifying the device.
- *
- * @param  bufid  Unused parameter, required by ZBOSS scheduler API.
- */
-static void start_identifying(zb_bufid_t bufid)
-{
-	ZVUNUSED(bufid);
-
-	if (ZB_JOINED()) {
-		/* Check if endpoint is in identifying mode,
-		 * if not put desired endpoint in identifying mode.
-		 */
-		if (dev_ctx.identify_attr.identify_time ==
-		ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE) {
-
-			zb_ret_t zb_err_code = zb_bdb_finding_binding_target(
-				APP_TEMPLATE_ENDPOINT);
-
-			if (zb_err_code == RET_OK) {
-				LOG_DBG("Enter identify mode");
-			} else if (zb_err_code == RET_INVALID_STATE) {
-				LOG_ERR("RET_INVALID_STATE - Cannot enter identify mode");
-			} else {
-				ZB_ERROR_CHECK(zb_err_code);
-			}
-		} else {
-			LOG_INF("Cancel identify mode");
-			zb_bdb_finding_binding_target_cancel();
-		}
-	} else {
-		LOG_ERR("Device not in a network - cannot enter identify mode");
-	}
-}
-
 //------------------------------------------------------------------------------
 /**@brief Callback to call when AF got APS packet.
  *
@@ -532,7 +485,7 @@ void zigbee_configuration()
 	}
 
 	/* Register device context (endpoints). */
-	ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
+	//ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
 
 	// Define a distributed key (assuming key size of 16 bytes, you might need to adjust based on documentation)
     zb_uint8_t distributed_key[16] = {0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 
@@ -545,9 +498,6 @@ void zigbee_configuration()
 
 	//TRUE to disable trust center, legacy support for
 	zb_bdb_set_legacy_device_support(ZB_TRUE);
-
-	//Call Function for initializing all clusters attributes
-	app_clusters_attr_init();
 }
 
 // Function for giagnostic purposes. toogle the diagnostic led every second to be sure HW is OK and app is running
@@ -557,31 +507,6 @@ void diagnostic_toogle_pin()
     {
         debug_led_ms_x10 = 0;
         gpio_pin_toggle_dt(&led);
-    }
-}
-
-// Function to join the Zigbee network
-void get_endpoint_descriptor(zb_uint8_t endpoint) 
-{
-	
-	// After successful joining, get the endpoint descriptor for a specific endpoint ID
-    zb_af_endpoint_desc_t *endpoint_desc = zb_af_get_endpoint_desc(endpoint);
-
-    // Check if the endpoint descriptor is found
-    if (endpoint_desc != NULL) {
-        // Successfully obtained the endpoint descriptor
-        // Access endpoint descriptor fields as needed
-        zb_uint8_t profile_id = endpoint_desc->simple_desc->app_profile_id;
-        zb_uint16_t device_id = endpoint_desc->simple_desc->app_device_id;
-		zb_uint16_t device_version = endpoint_desc->simple_desc->app_device_version;
-		
-		LOG_DBG("Profileid 0x%04x \n", profile_id);
-    	LOG_DBG("Clusterid 0x%04x \n", device_id);
-		LOG_DBG("device_version 0x%04x \n", device_version);
-
-    } else 
-	{
-    	LOG_ERR("endpoint descriptor not available\n");
     }
 }
 
@@ -639,8 +564,6 @@ void diagnostic_zigbee_info()
 
     zb_channel = zb_get_current_channel();
     LOG_DBG("zigbee channel: %d \n", zb_channel);
-
-    get_endpoint_descriptor(232);
 
     }
 }
