@@ -315,103 +315,33 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	zb_zdo_app_signal_hdr_t *sg_p = NULL;
 	zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
 
- 	if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
- 	{
-
-		switch (sig) {
-		case ZB_ZDO_SIGNAL_DEFAULT_START:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "Zigbee Device STARTED OK\n");
- 		break;
-		case ZB_ZDO_SIGNAL_SKIP_STARTUP:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_SKIP_STARTUP\n");
-		break;
-		case ZB_ZDO_SIGNAL_DEVICE_ANNCE:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_DEVICE_ANNCE\n");
-		break;
-		case ZB_ZDO_SIGNAL_LEAVE:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_LEAVE\n");
-		break;
-		case ZB_ZDO_SIGNAL_ERROR:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_ERROR\n");
-		break;
-		case ZB_BDB_SIGNAL_DEVICE_FIRST_START:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_DEVICE_FIRST_START\n");
-		break;
-		case ZB_BDB_SIGNAL_DEVICE_REBOOT:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_DEVICE_REBOOT\n");
-		break;
-		case ZB_BDB_SIGNAL_STEERING:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_STEERING\n");
-			start_identifying(bufid);
-		break;
-		case ZB_BDB_SIGNAL_FORMATION:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_FORMATION\n");
-		break;
-		case ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_TARGET_FINISHED\n");
-		break;
-		case ZB_BDB_SIGNAL_FINDING_AND_BINDING_INITIATOR_FINISHED:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_FINDING_AND_BINDING_INITIATOR_FINISHED\n");
-		break;
-		case ZB_NWK_SIGNAL_DEVICE_ASSOCIATED:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_NWK_SIGNAL_DEVICE_ASSOCIATED\n");
-		break;
-		case ZB_ZDO_SIGNAL_LEAVE_INDICATION:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_LEAVE_INDICATION\n");
-		break;
-		case ZB_BDB_SIGNAL_WWAH_REJOIN_STARTED:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_WWAH_REJOIN_STARTED\n");
-		break;
-		case ZB_ZGP_SIGNAL_COMMISSIONING:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZGP_SIGNAL_COMMISSIONING\n");
-		break;
-		case ZB_COMMON_SIGNAL_CAN_SLEEP:
-			//LOG_DBG( "JULEN ZB_COMMON_SIGNAL_CAN_SLEEP\n");
-		break;
-		case ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY\n");
-		break;
-		case ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT\n");
-		break;
-		case ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED\n");
-		break;
-		case ZB_ZDO_SIGNAL_DEVICE_UPDATE:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_ZDO_SIGNAL_DEVICE_UPDATE\n");
-		break;
-		case ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED\n");
-		break;
-		case ZB_NLME_STATUS_INDICATION:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_NLME_STATUS_INDICATION\n");
-		break;
-		case ZB_TCSWAP_DB_BACKUP_REQUIRED_SIGNAL:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_TCSWAP_DB_BACKUP_REQUIRED_SIGNAL\n");
-		break;
-		case ZB_BDB_SIGNAL_TC_REJOIN_DONE:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_TC_REJOIN_DONE\n");
-		break;
-		case ZB_BDB_SIGNAL_STEERING_CANCELLED:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_STEERING_CANCELLED\n");
-		break;
-		case ZB_BDB_SIGNAL_FORMATION_CANCELLED:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_BDB_SIGNAL_FORMATION_CANCELLED\n");
-		break;
-		case ZB_SIGNAL_READY_TO_SHUT:
-			if(PRINT_ZIGBEE_INFO) LOG_DBG( "JULEN ZB_SIGNAL_READY_TO_SHUT\n");
-		break;
- 		default:
-			//LOG_DBG( "JULEN Unknown signal\n");
-			zb_af_set_data_indication(data_indication);
- 		break;
- 		}
-	}
+    if( PRINT_ZIGBEE_INFO )
+    {
+        if( sig != ZB_COMMON_SIGNAL_CAN_SLEEP ) // Do not show information about this one, it happens too often!
+        {
+			if( sig == ZB_BDB_SIGNAL_DEVICE_FIRST_START ) LOG_WRN( "SIGNAL 5: Device started for the first time after the NVRAM erase");
+            else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
+			else if( sig == ZB_BDB_SIGNAL_STEERING ) LOG_WRN( "SIGNAL 10: BDB network steering completed");
+			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
+            else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
+			else
+			{
+                if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
+                {
+                    LOG_WRN( "SIGNAL %d , state OK",sig);
+                }
+                else
+                {
+                    LOG_WRN( "SIGNAL %d , state not OK",sig);
+                }
+			}
+        }
+    }
 
 	/* No application-specific behavior is required.
 	 * Call default signal handler.
 	 */
-	ZB_ERROR_CHECK(zigbee_default_signal_handler(bufid));
+    ZB_ERROR_CHECK(zigbee_default_signal_handler(bufid));
 
 	/* All callbacks should either reuse or free passed buffers.
 	 * If bufid == 0, the buffer is invalid (not passed).
@@ -613,9 +543,9 @@ void zigbee_configuration()
 
 	zb_set_extended_pan_id(ptr_ext_pan_id);
 
-	//TRUE to disable trust center, legacy support for 
+	//TRUE to disable trust center, legacy support for
 	zb_bdb_set_legacy_device_support(ZB_TRUE);
-	
+
 	//Call Function for initializing all clusters attributes
 	app_clusters_attr_init();
 }
@@ -732,31 +662,30 @@ void display_counters(void)
 
 int main(void)
 {
-	LOG_INF("Router started successfully");
-	int ret = 0;
+    LOG_INF("Router started successfully");
+    int ret = 0;
 
     get_reset_reason();
 
-	ret = tcu_uart_init();
+    ret = tcu_uart_init();
     if( ret < 0)
     {
-		LOG_ERR("tcu_uart_init error %d", ret);
+        LOG_ERR("tcu_uart_init error %d", ret);
     }
     
-	// Initialize TIMER1
-	timer1_init();
-	ret = gpio_init();
+    // Initialize TIMER1
+    timer1_init();
 
-	if( ret < 0)
-	{
-		LOG_ERR("gpio_init error %d", ret);
-	}
+    // Initialize GPIO
+    ret = gpio_init();
+    if( ret < 0)
+    {
+        LOG_ERR("gpio_init error %d", ret);
+    }
 
-	zigbee_configuration();
-
-	/* Start Zigbee default thread */
-	zigbee_enable();
-
+    zigbee_configuration(); //Zigbee configuration
+    zigbee_enable(); // Start Zigbee default thread
+    zb_af_set_data_indication(data_indication); // Set call back function for APS frame received
     while(1)
     {
         // run diagnostic functions
