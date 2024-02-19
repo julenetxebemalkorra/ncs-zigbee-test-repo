@@ -43,8 +43,9 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 /* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO             	ZB_TRUE
-#define PRINT_UART_INFO             	ZB_TRUE
+#define PRINT_ZIGBEE_INFO				ZB_TRUE
+#define PRINT_UART_INFO					ZB_TRUE
+#define CRYPTO_ENABLE					ZB_TRUE
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
@@ -593,6 +594,12 @@ void zigbee_configuration()
 {
 	/* disable NVRAM erasing on every application startup*/
 	zb_set_nvram_erase_at_start(ZB_TRUE);
+
+	if(!CRYPTO_ENABLE)
+	{
+		zb_disable_nwk_security();
+		zb_nwk_set_ieee_policy(ZB_FALSE);
+	}
 
 	/* Register device context (endpoints). */
 	ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
