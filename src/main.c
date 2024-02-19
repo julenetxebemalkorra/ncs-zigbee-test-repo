@@ -48,9 +48,9 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 /* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO				ZB_TRUE
-#define PRINT_UART_INFO					ZB_TRUE
-#define CRYPTO_ENABLE					ZB_TRUE
+#define PRINT_ZIGBEE_INFO                ZB_TRUE
+#define PRINT_UART_INFO                  ZB_TRUE
+#define CRYPTO_ENABLE                    ZB_FALSE
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
@@ -61,15 +61,6 @@
 /*UART Modbus and zigbee buffer size definitions*/
 #define MODBUS_MIN_RX_LENGTH             8   // if the messagge has 8 bytes we consider it a modbus frame
 #define MAX_ZIGBEE_PAYLOAD_SIZE 		 82 // Maximum payload size that can be sent at once via zigbee
-
-/*Zigbee NWK configuration
-Note: This part was added to wireshark encription issues
-*/
-//#define ZB_ZGP_DEFAULT_SHARED_SECURITY_KEY_TYPE ZB_ZGP_SEC_KEY_TYPE_NWK
-//#define ZB_ZGP_DEFAULT_SECURITY_LEVEL ZB_ZGP_SEC_LEVEL_FULL_WITH_ENC
-//#define ZB_STANDARD_TC_KEY { 0x81, 0x42, < rest of key > };
-//#define ZB_DISTRIBUTED_GLOBAL_KEY { 0x81, 0x42, , < rest of key > };
-//#define ZB_TOUCHLINK_PRECONFIGURED_KEY { 0x81, 0x42, < rest of key > };
 
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
