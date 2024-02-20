@@ -5,14 +5,13 @@
 
 #ifndef DIGI_AT_COMMANDS_H_
 #define DIGI_AT_COMMANDS_H_
-/* Enumerative with the supported Xbee AT commands                            */
-enum {
-    AT_CN, // Exit from command mode
-    AT_VR, // Read the Xbee's FW version 
-    AT_HV, // Read the Xbee's HW version 
+/* Enumerative with the supported Xbee AT commands used to read/write parameters */
+enum parameter_at_command_e{
+    AT_VR, // Read the Xbee's FW version
+    AT_HV, // Read the Xbee's HW version
     AT_SH, // Read the high part of the MAC address
     AT_SL, // Read the low part of the MAC address
-    AT_JV, // Read / write the "join verification" parameter [JV]
+    AT_JV, // Read / write the "coordinator join verification" parameter [JV]
     AT_NJ, // Read / write the "node join time" parameter [NJ]
     AT_NW, // Read / write the "network watchdog" parameter [NW]
     AT_ID, // Read / write the "extended pan id" parameter [ID]
@@ -24,9 +23,7 @@ enum {
     AT_ZS, // Read / write the "Zigbee stack profile" parameter [ZS]
     AT_BD, // Read / write the "baud rate" parameter [BD]
     AT_NB, // Read / write the "parity" parameter [BD]
-    AT_AC, // Apply changes
-    AT_WR, // Write changes in NVM
-    AT_NR0 // Reset network (local)
+    NUMBER_OF_PARAMETER_AT_COMMANDS
 };
 
 /* Xbee parameters                                                            */
@@ -35,7 +32,7 @@ struct xbee_parameters_t {
     uint16_t at_hv; // Xbee's HW version (read only)
     uint32_t at_sh; // High part of the MAC address (read only)
     uint32_t at_sl; // Low part of the MAC address (read only)
-    uint8_t at_jv;  // Node join verification parameter
+    uint8_t at_jv;  // Coordinator join verification parameter
     uint8_t at_nj;  // Node join time parameter
     uint16_t at_nw; // Network watchdog parameter
     uint64_t at_id; // Extended pan id parameter
@@ -49,13 +46,23 @@ struct xbee_parameters_t {
     uint8_t at_ni[33];   // Node identifier string parameter
 };
 
+ struct xbee_parameter_comando_at_t {
+    uint8_t first_char;        // First char of AT command
+    uint8_t second_char;       // Second char of AT command
+    uint8_t *data;             // Pointer to data associated to that command
+    uint8_t size_of_data;      // Size of data (number of bytes)
+    bool    b_numeric_data;    // If true, data is a numeric value. If false, is a string of characters.
+    bool    b_read_only;       // If true, it is a read only parameter. If false, it can be written.
+};
+
 /* Function prototypes                                                        */
+void digi_at_init(void);
 void digi_at_init_xbee_parameters(void);
+void digi_at_init_xbee_parameter_command(void);
 void digi_at_reply_ok(void);
 void digi_at_reply_error(void);
-void digi_at_reply_read_ni(void);
 void digi_at_reply_read_command(uint8_t at_command);
-int8_t digi_at_extract_command(uint8_t *input_data, uint16_t size_input_data);
+int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_input_data);
 
 #endif /* DIGI_AT_COMMANDS_H_ */
 

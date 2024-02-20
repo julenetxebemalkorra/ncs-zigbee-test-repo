@@ -30,6 +30,7 @@
 #include <zephyr/drivers/hwinfo.h>
 
 #include "tcu_Uart.h"
+#include "Digi_At_commands.h"
 
 #define DIGI_PROFILE_ID 0xC105
 #define DIGI_CLUSTER_ID 0x0011
@@ -555,12 +556,14 @@ int main(void)
 
     get_reset_reason();
 
+    digi_at_init();
+
     ret = tcu_uart_init();
     if( ret < 0)
     {
         LOG_ERR("tcu_uart_init error %d", ret);
     }
-    
+
     // Initialize TIMER1
     timer1_init();
 

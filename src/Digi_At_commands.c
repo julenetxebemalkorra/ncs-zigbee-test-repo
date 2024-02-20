@@ -23,6 +23,16 @@
 #include "tcu_Uart.h"
 
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
+static struct xbee_parameter_comando_at_t xbee_parameter_comando_at[NUMBER_OF_PARAMETER_AT_COMMANDS];
+
+/**@brief This function initializes the Digi_At_commands firmware module
+ *
+ */
+void digi_at_init(void)
+{
+    digi_at_init_xbee_parameters();
+    digi_at_init_xbee_parameter_command();
+}
 
 /**@brief This function initializes with default values the Xbee parameters
  * 
@@ -44,7 +54,141 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
     xbee_parameters.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
     xbee_parameters.at_nb = 1;     // Xbee's UART parity
-    sprintf(xbee_parameters.at_ni, "NORDIC\r"); // Node identifier string
+    sprintf(xbee_parameters.at_ni, "NORDIC"); // Node identifier string
+}
+
+/**@brief This function initializes the structure used to handle the AT commands
+ * used to read/write parameters
+ */
+void digi_at_init_xbee_parameter_command(void)
+{
+    // Xbee's FW version
+    xbee_parameter_comando_at[AT_VR].first_char = 'V';
+    xbee_parameter_comando_at[AT_VR].second_char = 'R';
+    xbee_parameter_comando_at[AT_VR].data = (uint8_t*)&xbee_parameters.at_vr;
+    xbee_parameter_comando_at[AT_VR].size_of_data = 2;
+    xbee_parameter_comando_at[AT_VR].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_VR].b_read_only = true;
+
+    // Xbee's HW version
+    xbee_parameter_comando_at[AT_HV].first_char = 'H';
+    xbee_parameter_comando_at[AT_HV].second_char = 'V';
+    xbee_parameter_comando_at[AT_HV].data = (uint8_t*)&xbee_parameters.at_hv;
+    xbee_parameter_comando_at[AT_HV].size_of_data = 2;
+    xbee_parameter_comando_at[AT_HV].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_HV].b_read_only = true;
+
+    // High part of the MAC address
+    xbee_parameter_comando_at[AT_SH].first_char = 'S';
+    xbee_parameter_comando_at[AT_SH].second_char = 'H';
+    xbee_parameter_comando_at[AT_SH].data = (uint8_t*)&xbee_parameters.at_sh;
+    xbee_parameter_comando_at[AT_SH].size_of_data = 4;
+    xbee_parameter_comando_at[AT_SH].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_SH].b_read_only = true;
+
+    // Low part of the MAC address
+    xbee_parameter_comando_at[AT_SL].first_char = 'S';
+    xbee_parameter_comando_at[AT_SL].second_char = 'L';
+    xbee_parameter_comando_at[AT_SL].data = (uint8_t*)&xbee_parameters.at_sl;
+    xbee_parameter_comando_at[AT_SL].size_of_data = 4;
+    xbee_parameter_comando_at[AT_SL].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_SL].b_read_only = true;
+
+    // "Coordinator join verification" parameter
+    xbee_parameter_comando_at[AT_JV].first_char = 'J';
+    xbee_parameter_comando_at[AT_JV].second_char = 'V';
+    xbee_parameter_comando_at[AT_JV].data = (uint8_t*)&xbee_parameters.at_jv;
+    xbee_parameter_comando_at[AT_JV].size_of_data = 1;
+    xbee_parameter_comando_at[AT_JV].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_JV].b_read_only = false;
+
+    // "node join time" parameter
+    xbee_parameter_comando_at[AT_NJ].first_char = 'N';
+    xbee_parameter_comando_at[AT_NJ].second_char = 'J';
+    xbee_parameter_comando_at[AT_NJ].data = (uint8_t*)&xbee_parameters.at_nj;
+    xbee_parameter_comando_at[AT_NJ].size_of_data = 1;
+    xbee_parameter_comando_at[AT_NJ].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_NJ].b_read_only = false;
+
+    // "Network watchdog" parameter
+    xbee_parameter_comando_at[AT_NW].first_char = 'N';
+    xbee_parameter_comando_at[AT_NW].second_char = 'W';
+    xbee_parameter_comando_at[AT_NW].data = (uint8_t*)&xbee_parameters.at_nw;
+    xbee_parameter_comando_at[AT_NW].size_of_data = 2;
+    xbee_parameter_comando_at[AT_NW].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_NW].b_read_only = false;
+
+    // "Extended pan id" parameter
+    xbee_parameter_comando_at[AT_ID].first_char = 'I';
+    xbee_parameter_comando_at[AT_ID].second_char = 'D';
+    xbee_parameter_comando_at[AT_ID].data = (uint8_t*)&xbee_parameters.at_id;
+    xbee_parameter_comando_at[AT_ID].size_of_data = 8;
+    xbee_parameter_comando_at[AT_ID].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_ID].b_read_only = false;
+
+    // "Node identifier string" parameter
+    xbee_parameter_comando_at[AT_NI].first_char = 'N';
+    xbee_parameter_comando_at[AT_NI].second_char = 'I';
+    xbee_parameter_comando_at[AT_NI].data = (uint8_t*)&xbee_parameters.at_ni;
+    xbee_parameter_comando_at[AT_NI].size_of_data = 32;
+    xbee_parameter_comando_at[AT_NI].b_numeric_data = false;
+    xbee_parameter_comando_at[AT_NI].b_read_only = false;
+
+    // "Coordinator enabled" parameter
+    xbee_parameter_comando_at[AT_CE].first_char = 'C';
+    xbee_parameter_comando_at[AT_CE].second_char = 'E';
+    xbee_parameter_comando_at[AT_CE].data = (uint8_t*)&xbee_parameters.at_ce;
+    xbee_parameter_comando_at[AT_CE].size_of_data = 1;
+    xbee_parameter_comando_at[AT_CE].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_CE].b_read_only = false;
+
+    // "Association indication" parameter
+    xbee_parameter_comando_at[AT_AI].first_char = 'A';
+    xbee_parameter_comando_at[AT_AI].second_char = 'I';
+    xbee_parameter_comando_at[AT_AI].data = (uint8_t*)&xbee_parameters.at_ai;
+    xbee_parameter_comando_at[AT_AI].size_of_data = 1;
+    xbee_parameter_comando_at[AT_AI].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_AI].b_read_only = true;
+
+    // "Operation channel" parameter
+    xbee_parameter_comando_at[AT_CH].first_char = 'C';
+    xbee_parameter_comando_at[AT_CH].second_char = 'H';
+    xbee_parameter_comando_at[AT_CH].data = (uint8_t*)&xbee_parameters.at_ch;
+    xbee_parameter_comando_at[AT_CH].size_of_data = 1;
+    xbee_parameter_comando_at[AT_CH].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_CH].b_read_only = true;
+
+    // "Short address" parameter
+    xbee_parameter_comando_at[AT_MY].first_char = 'M';
+    xbee_parameter_comando_at[AT_MY].second_char = 'Y';
+    xbee_parameter_comando_at[AT_MY].data = (uint8_t*)&xbee_parameters.at_my;
+    xbee_parameter_comando_at[AT_MY].size_of_data = 2;
+    xbee_parameter_comando_at[AT_MY].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_MY].b_read_only = true;
+
+    // "Zigbee stack profile" parameter
+    xbee_parameter_comando_at[AT_ZS].first_char = 'Z';
+    xbee_parameter_comando_at[AT_ZS].second_char = 'S';
+    xbee_parameter_comando_at[AT_ZS].data = (uint8_t*)&xbee_parameters.at_zs;
+    xbee_parameter_comando_at[AT_ZS].size_of_data = 1;
+    xbee_parameter_comando_at[AT_ZS].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_ZS].b_read_only = false;
+
+    // "baud rate" parameter
+    xbee_parameter_comando_at[AT_BD].first_char = 'B';
+    xbee_parameter_comando_at[AT_BD].second_char = 'D';
+    xbee_parameter_comando_at[AT_BD].data = (uint8_t*)&xbee_parameters.at_bd;
+    xbee_parameter_comando_at[AT_BD].size_of_data = 2;
+    xbee_parameter_comando_at[AT_BD].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_BD].b_read_only = false;
+
+    // "Parity" parameter
+    xbee_parameter_comando_at[AT_NB].first_char = 'N';
+    xbee_parameter_comando_at[AT_NB].second_char = 'B';
+    xbee_parameter_comando_at[AT_NB].data = (uint8_t*)&xbee_parameters.at_nb;
+    xbee_parameter_comando_at[AT_NB].size_of_data = 1;
+    xbee_parameter_comando_at[AT_NB].b_numeric_data = true;
+    xbee_parameter_comando_at[AT_NB].b_read_only = false;
 }
 
 /**@brief This function sends an 'OK\r' string through the TCU UART
@@ -65,38 +209,31 @@ void digi_at_reply_error(void)
     sendFrameToTcu(reply, 6);
 }
 
-/**@brief This function sends the node identifier string through the TCU UART
+/**@brief This function places the node identifier string into a buffer
  * We have considered that the maximum size of the identifier is 32 characters
  */
-void digi_at_reply_read_ni(void)
+int8_t digi_at_read_ni(uint8_t* buffer)
 {
-    uint8_t reply[33]; //32 Characters + '\r'
     uint8_t i = 0;
-    bool b_null_found = false;
     
     for(i=0; i<33; i++)
     {
-        if( (xbee_parameters.at_ni[i] == 0) || (xbee_parameters.at_ni[i] == '\r') )
+        if( xbee_parameters.at_ni[i] == 0 )
         {
-            b_null_found = true;
-            reply[i] = '\r';
             break;
         }
         else
         {
-            reply[i] = xbee_parameters.at_ni[i];
+            buffer[i] = xbee_parameters.at_ni[i];
         }
     }
-    if( b_null_found )
-    {
-        sendFrameToTcu(reply, i+1);
-    }
-    else
-    {
-        reply[0] = '\r';
-        sendFrameToTcu(reply, 1);        
-    }
+
+    buffer[i] = '\r';
+    buffer[i+1] = 0;
+
+    return(i+1);
 }
+
 
 /**@brief This function sends the reply to a read AT command through the TCU UART
  *
@@ -104,7 +241,7 @@ void digi_at_reply_read_ni(void)
  */
 void digi_at_reply_read_command(uint8_t at_command)
 {
-    uint8_t reply[18]; //16 Characters + \r + null
+    uint8_t reply[34]; // 32 Characters + '\r' + null
     int8_t reply_size = 0;
     int8_t itemp;
     switch (at_command)
@@ -131,16 +268,20 @@ void digi_at_reply_read_command(uint8_t at_command)
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_nw);
         break;
      case AT_ID:
-        itemp = sprintf(reply, "%x\r", (uint32_t)(xbee_parameters.at_id>>32));
-        if(itemp > 0)
+        itemp = sprintf(reply, "%x", (uint32_t)(xbee_parameters.at_id>>32));
+        if(itemp > 1)
         {
             reply_size = sprintf(&reply[itemp], "%08x\r", (uint32_t)(xbee_parameters.at_id));
             if(reply_size > 0) reply_size = reply_size+itemp;
         }
+        else
+        {
+            reply_size = sprintf(reply, "%x\r", (uint32_t)(xbee_parameters.at_id));
+        }
         break;
      case AT_NI:
-        digi_at_reply_read_ni();
-        return;       
+        reply_size = digi_at_read_ni(reply);
+        break;
      case AT_CE:
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_ce);
         break;
@@ -163,10 +304,17 @@ void digi_at_reply_read_command(uint8_t at_command)
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_nb);
         break;
      default:
-        digi_at_reply_error(); // Read command not supported
-        return;      
+        break;
     }
-    if(reply_size > 0) sendFrameToTcu(reply, reply_size);
+
+    if(reply_size > 0)
+    {
+        sendFrameToTcu(reply, reply_size);
+    }
+    else
+    {
+        digi_at_reply_error(); // Read command not supported
+    }
 }
 
 /**@brief This function analizes a buffer containing the last frame
@@ -179,121 +327,112 @@ void digi_at_reply_read_command(uint8_t at_command)
  * @retval Negative value Error code.
  * @retval 0 OK
  */
-int8_t digi_at_extract_command(uint8_t *input_data, uint16_t size_input_data)
+int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_input_data)
 {
-    if( ( size_input_data == 3 ) && ( input_data[0] == '+' ) && ( input_data[1] == '+' ) && ( input_data[2] == '+' ) )
+    if( input_data[0] >= 'a' ) input_data[0] = input_data[0] - 'a' + 'A'; // If lowcase, convert to upcase
+    if( input_data[1] >= 'a' ) input_data[1] = input_data[1] - 'a' + 'A'; // If lowcase, convert to upcase
+    if( input_data[2] >= 'a' ) input_data[2] = input_data[2] - 'a' + 'A'; // If lowcase, convert to upcase
+    if( input_data[3] >= 'a' ) input_data[3] = input_data[3] - 'a' + 'A'; // If lowcase, convert to upcase
+
+    if( ( size_input_data < 4 ) || ( input_data[0] != 'A' ) || ( input_data[1] != 'T' ) )
     {
-        digi_at_reply_ok();
-        return 0;
+        digi_at_reply_error();
+        return -2; // It is not an AT command
     }
 
-    if( input_data[size_input_data-1] == '\r' )
+    if( size_input_data == 4 ) // Read command or action command
     {
-        if( ( size_input_data < 5 ) || ( input_data[0] != 'A' ) || ( input_data[1] != 'T' ) )
+        if( ( input_data[2] == 'V' ) && ( input_data[3] == 'R' ) ) // ATVR
         {
-            digi_at_reply_error();
-            return -2; // It is not an AT command
+            digi_at_reply_read_command(AT_VR);
+            return 0;
         }
-        
-        if( size_input_data == 5 ) // Read command or action command
+        if( ( input_data[2] == 'H' ) && ( input_data[3] == 'V' ) ) // ATHV
         {
-            if( ( input_data[2] == 'V' ) && ( input_data[3] == 'R' ) ) // ATVR
-            {
-                digi_at_reply_read_command(AT_VR);
-                return 0;
-            }
-            if( ( input_data[2] == 'H' ) && ( input_data[3] == 'V' ) ) // ATHV
-            {
-                digi_at_reply_read_command(AT_HV);
-                return 0;
-            }
-            if( ( input_data[2] == 'S' ) && ( input_data[3] == 'H' ) ) // ATSH
-            {
-                digi_at_reply_read_command(AT_SH);
-                return 0;
-            } 
-            if( ( input_data[2] == 'S' ) && ( input_data[3] == 'L' ) ) // ATSL
-            {
-                digi_at_reply_read_command(AT_SL);
-                return 0;
-            } 
-            if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
-            {
-                digi_at_reply_read_command(AT_JV);
-                return 0;
-            } 
-            if( ( input_data[2] == 'N' ) && ( input_data[3] == 'J' ) ) // ATNJ
-            {
-                digi_at_reply_read_command(AT_NJ);
-                return 0;
-            } 
-            if( ( input_data[2] == 'N' ) && ( input_data[3] == 'W' ) ) // ATNW
-            {
-                digi_at_reply_read_command(AT_NW);
-                return 0;
-            } 
-            if( ( input_data[2] == 'I' ) && ( input_data[3] == 'D' ) ) // ATID
-            {
-                digi_at_reply_read_command(AT_ID);
-                return 0;
-            } 
-            if( ( input_data[2] == 'N' ) && ( input_data[3] == 'I' ) ) // ATNI
-            {
-                digi_at_reply_read_command(AT_NI);
-                return 0;
-            } 
-            if( ( input_data[2] == 'C' ) && ( input_data[3] == 'E' ) ) // ATCE
-            {
-                digi_at_reply_read_command(AT_CE);
-                return 0;
-            } 
-            if( ( input_data[2] == 'A' ) && ( input_data[3] == 'I' ) ) // ATAI
-            {
-                digi_at_reply_read_command(AT_AI);
-                return 0;
-            } 
-            if( ( input_data[2] == 'C' ) && ( input_data[3] == 'H' ) ) // ATCH
-            {
-                digi_at_reply_read_command(AT_CH);
-                return 0;
-            } 
-            if( ( input_data[2] == 'M' ) && ( input_data[3] == 'Y' ) ) // ATMY
-            {
-                digi_at_reply_read_command(AT_MY);
-                return 0;
-            } 
-            if( ( input_data[2] == 'Z' ) && ( input_data[3] == 'S' ) ) // ATZS
-            {
-                digi_at_reply_read_command(AT_ZS);
-                return 0;
-            }
-            if( ( input_data[2] == 'B' ) && ( input_data[3] == 'D' ) ) // ATBD
-            {
-                digi_at_reply_read_command(AT_BD);
-                return 0;
-            }
-            if( ( input_data[2] == 'N' ) && ( input_data[3] == 'B' ) ) // ATNB
-            {
-                digi_at_reply_read_command(AT_NB);
-                return 0;
-            }
-            else
-            {
-                digi_at_reply_error();
-                return -3; // It is not a supported AT command
-            }
+            digi_at_reply_read_command(AT_HV);
+            return 0;
+        }
+        if( ( input_data[2] == 'S' ) && ( input_data[3] == 'H' ) ) // ATSH
+        {
+            digi_at_reply_read_command(AT_SH);
+            return 0;
+        }
+        if( ( input_data[2] == 'S' ) && ( input_data[3] == 'L' ) ) // ATSL
+        {
+            digi_at_reply_read_command(AT_SL);
+            return 0;
+        }
+        if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
+        {
+            digi_at_reply_read_command(AT_JV);
+            return 0;
+        }
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'J' ) ) // ATNJ
+        {
+            digi_at_reply_read_command(AT_NJ);
+            return 0;
+        }
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'W' ) ) // ATNW
+        {
+            digi_at_reply_read_command(AT_NW);
+            return 0;
+        }
+        if( ( input_data[2] == 'I' ) && ( input_data[3] == 'D' ) ) // ATID
+        {
+            digi_at_reply_read_command(AT_ID);
+            return 0;
+        }
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'I' ) ) // ATNI
+        {
+            digi_at_reply_read_command(AT_NI);
+            return 0;
+        }
+        if( ( input_data[2] == 'C' ) && ( input_data[3] == 'E' ) ) // ATCE
+        {
+            digi_at_reply_read_command(AT_CE);
+            return 0;
+        }
+        if( ( input_data[2] == 'A' ) && ( input_data[3] == 'I' ) ) // ATAI
+        {
+            digi_at_reply_read_command(AT_AI);
+            return 0;
+        }
+        if( ( input_data[2] == 'C' ) && ( input_data[3] == 'H' ) ) // ATCH
+        {
+            digi_at_reply_read_command(AT_CH);
+            return 0;
+        }
+        if( ( input_data[2] == 'M' ) && ( input_data[3] == 'Y' ) ) // ATMY
+        {
+            digi_at_reply_read_command(AT_MY);
+            return 0;
+        }
+        if( ( input_data[2] == 'Z' ) && ( input_data[3] == 'S' ) ) // ATZS
+        {
+            digi_at_reply_read_command(AT_ZS);
+            return 0;
+        }
+        if( ( input_data[2] == 'B' ) && ( input_data[3] == 'D' ) ) // ATBD
+        {
+            digi_at_reply_read_command(AT_BD);
+            return 0;
+        }
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'B' ) ) // ATNB
+        {
+            digi_at_reply_read_command(AT_NB);
+            return 0;
         }
         else
         {
-            return -4; // TODO, meter comandos de escritura
+            digi_at_reply_error();
+            return -3; // It is not a supported AT command
         }
     }
     else
     {
-        return -1;  // Error code. No detected '\r' at the end of the string
+        return -4; // TODO, meter comandos de escritura
     }
 }
-
 
 //-----------------------------------------------------------------------------------------------------------------------
 // Continuar con lo siguiente:
@@ -318,4 +457,3 @@ int8_t digi_at_extract_command(uint8_t *input_data, uint16_t size_input_data)
 //     Definiriamos un array de elementos de esa estructura. Ese array contiene los comandos soportados
 //     Al recibir un comando recorreriamos ese array, hasta encontrar el comando específico
 //-----------------------------------------------------------------------------------------------------------------------
- 

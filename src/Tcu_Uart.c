@@ -202,6 +202,9 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
 
     if(input_byte == '\r') // End of frame
     {
+        digi_at_analyze_and_reply_to_command(UART_rx_buffer, UART_rx_buffer_index);
+        UART_rx_buffer_index = 0;
+        b_UART_overflow = false;
     }
     else if(!b_UART_overflow)
     {
