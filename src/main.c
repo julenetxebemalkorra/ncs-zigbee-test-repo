@@ -75,8 +75,6 @@ static const zb_uint8_t ext_pan_id[8] = {0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x0
 const zb_uint8_t * ptr_ext_pan_id = ext_pan_id;
 
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
-
-uint8_t tcu_transmitted_frames_counter = 0;
 	
 /*
  * A build error on this line means your board is unsupported.
@@ -151,6 +149,7 @@ ZBOSS_DECLARE_DEVICE_CTX_1_EP(
 	app_template_ctx,
 	app_template_ep);
 
+
 /*----------------------------------------------------------------------------*/
 /*                           FUNCTION DEFINITIONS                             */
 /*----------------------------------------------------------------------------*/
@@ -187,6 +186,20 @@ void get_reset_reason(void)
     } else 
 	{
 		LOG_ERR("\n\n negative value on driver specific errors\n\n");
+    }
+}
+
+//------------------------------------------------------------------------------
+/**@brief Callback function to read status of last APS frame transmission.
+ *
+ * @param[in]   bufid   Reference to the Zigbee stack buffer used to transmit the APS frame
+ *
+ */
+void user_data_tx_status(zb_bufid_t bufid)
+{
+    if( bufid )
+    {
+        zb_buf_free(bufid);
     }
 }
 
@@ -298,9 +311,11 @@ void zboss_signal_handler(zb_bufid_t bufid)
 void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
 {
 /*  Allocate OUT buffer                                                       */
-    static zb_bufid_t bufid = NULL;
-    if( bufid ) zb_buf_reuse(bufid); // If already allocated, reuse the buffer
-    else bufid = zb_buf_get_out(); // If not allocated yet, allocate the buffer
+    //static zb_bufid_t bufid = NULL;
+    //if( bufid ) zb_buf_reuse(bufid); // If already allocated, reuse the buffer
+    //else bufid = zb_buf_get_out(); // If not allocated yet, allocate the buffer
+
+    zb_bufid_t bufid = zb_buf_get_out();
 
 /* If buffer could be allocated, schedule the transmission                    */
     if( bufid )
@@ -577,6 +592,7 @@ int main(void)
     zigbee_configuration(); //Zigbee configuration
     zigbee_enable(); // Start Zigbee default thread
     zb_af_set_data_indication(data_indication); // Set call back function for APS frame received
+    zb_aps_set_user_data_tx_cb(user_data_tx_status); // Set call back function for APS frame transmitted
     while(1)
     {
         // run diagnostic functions
