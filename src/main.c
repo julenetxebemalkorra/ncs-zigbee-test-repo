@@ -321,7 +321,7 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
                                                 DIGI_SOURCE_ENDPOINT,
                                                 DIGI_DESTINATION_ENDPOINT,
                                                 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-                                                ZB_FALSE, //No Ack
+                                                ZB_TRUE,
                                                 outputPayload,
                                                 chunk_size);
 
