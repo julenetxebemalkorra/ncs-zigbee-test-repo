@@ -30,12 +30,9 @@
 #include <zephyr/drivers/hwinfo.h>
 
 #include "tcu_Uart.h"
+#include "Digi_profile.h"
 #include "Digi_At_commands.h"
-
-#define DIGI_PROFILE_ID 0xC105
-#define DIGI_CLUSTER_ID 0x0011
-#define DIGI_SOURCE_ENDPOINT 232
-#define DIGI_DESTINATION_ENDPOINT 232
+#include "Digi_node_discovery.h"
 
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
@@ -212,10 +209,12 @@ void user_data_tx_status(zb_bufid_t bufid)
 zb_uint8_t data_indication(zb_bufid_t bufid)
 {
  	zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
-    
+
     if (bufid)
 	{
-        if( (ind->clusterid == DIGI_CLUSTER_ID) && ( ind->src_endpoint == DIGI_SOURCE_ENDPOINT ) && ( ind->dst_endpoint == DIGI_DESTINATION_ENDPOINT ) )
+        if( (ind->clusterid == DIGI_BINARY_VALUE_CLUSTER) &&
+            ( ind->src_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_BINARY_VALUE_DESTINATION_ENDPOINT ) )
         {
             zb_uint8_t *pointerToEndOfBuffer;
             zb_int32_t sizeOfPayload;
@@ -240,10 +239,23 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
                 {
                     if(PRINT_ZIGBEE_INFO) LOG_DBG("Payload of input RF packet sent to Tcu UART \n");
                     sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
- 
                 }
             }
+        }
 
+        if( ( ind->clusterid == DIGI_COMMISSIONING_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_COMMISSIONING_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_COMMISSIONING_DESTINATION_ENDPOINT ) )
+        {
+            zb_uint8_t *pointerToEndOfBuffer;
+            zb_int32_t sizeOfPayload;
+            pointerToBeginOfBuffer = zb_buf_begin(bufid);
+            pointerToEndOfBuffer = zb_buf_end(bufid);
+            sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
+            if( is_a_digi_node_discovery_request((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            {
+                LOG_DBG("Xbee Node Discovery Device Request");
+            }
         }
 	}
 
@@ -332,9 +344,9 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
         zb_ret_t ret = zb_aps_send_user_payload(bufid,
                                                 dst_addr,
                                                 DIGI_PROFILE_ID,
-                                                DIGI_CLUSTER_ID,
-                                                DIGI_SOURCE_ENDPOINT,
-                                                DIGI_DESTINATION_ENDPOINT,
+                                                DIGI_BINARY_VALUE_CLUSTER,
+                                                DIGI_BINARY_VALUE_SOURCE_ENDPOINT,
+                                                DIGI_BINARY_VALUE_DESTINATION_ENDPOINT,
                                                 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
                                                 ZB_TRUE,
                                                 outputPayload,
@@ -572,6 +584,7 @@ int main(void)
     get_reset_reason();
 
     digi_at_init();
+    digi_node_discovery_init();
 
     ret = tcu_uart_init();
     if( ret < 0)
@@ -609,6 +622,9 @@ int main(void)
             UART_rx_buffer_index = 0;
             offset=0;
         }
+
+        digi_node_discovery_request_manager();
+
         k_sleep(K_MSEC(5));
     }
 
