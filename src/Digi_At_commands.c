@@ -21,6 +21,7 @@
 #include <zephyr/kernel.h>
 #include "Digi_At_commands.h"
 #include "tcu_Uart.h"
+#include "nvram.h"
 
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 static struct xbee_parameter_comando_at_t xbee_parameter_comando_at[NUMBER_OF_PARAMETER_AT_COMMANDS];

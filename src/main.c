@@ -32,6 +32,7 @@
 #include "tcu_Uart.h"
 #include "Digi_profile.h"
 #include "Digi_At_commands.h"
+#include "nvram.h"
 #include "Digi_node_discovery.h"
 
 /* Device endpoint, used to receive ZCL commands. */
@@ -70,6 +71,7 @@ uint16_t tcu_uart_frames_received_counter_old = 0;
 //
 static const zb_uint8_t ext_pan_id[8] = {0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 const zb_uint8_t * ptr_ext_pan_id = ext_pan_id;
+
 
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 	
@@ -276,6 +278,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	//Read signal description out of memory buffer. */
 	zb_zdo_app_signal_hdr_t *sg_p = NULL;
 	zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
+    zb_ret_t status = ZB_GET_APP_SIGNAL_STATUS(bufid);
 
     if( PRINT_ZIGBEE_INFO )
     {
@@ -288,7 +291,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
             else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
 			else
 			{
-                if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
+                if (status == 0)
                 {
                     LOG_WRN( "SIGNAL %d , state OK",sig);
                 }
@@ -300,10 +303,40 @@ void zboss_signal_handler(zb_bufid_t bufid)
         }
     }
 
+    switch(sig)
+    {
+    case ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY:
+    if (status != RET_OK)
+    {
+    /* Production config is not present or invalid */
+        LOG_INF("Production configuration is not present or invalid (status: %d)", status);
+    }
+    else
+    {
+        LOG_INF("Production configuration successfully loaded");
+        zb_uint32_t app_data_length = zb_buf_len(bufid) - sizeof(zb_zdo_app_signal_hdr_t);
+        if (app_data_length != 0)
+        {
+        //zb_nvram_register_app1_read_cb(xbee_nvram_read_app_data);
+
+        //example_application_config_t * ex_cfg = ZB_ZDO_SIGNAL_GET_PARAMS(sg_p, example_application_config_t);
+        //process_example_application_config(ex_cfg);
+        }
+    }
+    if (bufid) 
+    {
+	zb_buf_free(bufid);
+	}
+    break;
+    }
+
 	/* No application-specific behavior is required.
 	 * Call default signal handler.
 	 */
-    ZB_ERROR_CHECK(zigbee_default_signal_handler(bufid));
+    if(bufid)
+    {
+        ZB_ERROR_CHECK(zigbee_default_signal_handler(bufid));
+    }
 
 	/* All callbacks should either reuse or free passed buffers.
 	 * If bufid == 0, the buffer is invalid (not passed).
@@ -604,8 +637,13 @@ int main(void)
 
     zigbee_configuration(); //Zigbee configuration
     zigbee_enable(); // Start Zigbee default thread
+
     zb_af_set_data_indication(data_indication); // Set call back function for APS frame received
     zb_aps_set_user_data_tx_cb(user_data_tx_status); // Set call back function for APS frame transmitted
+
+    // Register NVRAM callback functions
+    //zb_nvram_register_app1_write_cb(xbee_nvram_write_app_data, xbee_get_nvram_data_size);
+
     while(1)
     {
         // run diagnostic functions
