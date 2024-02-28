@@ -43,8 +43,8 @@ void digi_node_discovery_init(void)
     node_discovery_reply.at_ni[6] = 'L';
     node_discovery_reply.at_ni[7] = '_';
     node_discovery_reply.at_ni[8] = '1';
-    node_discovery_reply.at_ni[9] = '3';
-    node_discovery_reply.at_ni[10] = '5';
+    node_discovery_reply.at_ni[9] = '9';
+    node_discovery_reply.at_ni[10] = '8';
     node_discovery_reply.at_ni[11] = 0;
 }
 
