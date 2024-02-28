@@ -285,10 +285,45 @@ void zboss_signal_handler(zb_bufid_t bufid)
         if( sig != ZB_COMMON_SIGNAL_CAN_SLEEP ) // Do not show information about this one, it happens too often!
         {
 			if( sig == ZB_BDB_SIGNAL_DEVICE_FIRST_START ) LOG_WRN( "SIGNAL 5: Device started for the first time after the NVRAM erase");
-            else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
-			else if( sig == ZB_BDB_SIGNAL_STEERING ) LOG_WRN( "SIGNAL 10: BDB network steering completed");
+            else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) 
+            {
+                if (status == 0)
+                {
+                    LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
+                    zb_uint32_t app_data_length = zb_buf_len(bufid) - sizeof(zb_zdo_app_signal_hdr_t);
+                    if (app_data_length != 0)
+                    {
+                        LOG_WRN("app_data_length loaded %d", app_data_length);
+                        //example_application_config_t * ex_cfg = ZB_ZDO_SIGNAL_GET_PARAMS(sg_p, example_application_config_t);
+                        //process_example_application_config(ex_cfg);
+                    }  
+                }
+                else
+                {
+                    LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents, but the NVRAM contents are invalid");
+                }
+            }
+            else if( sig == ZB_BDB_SIGNAL_STEERING ) LOG_WRN( "SIGNAL 10: BDB network steering completed");
 			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
             else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
+            else if( sig == ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY) 
+            {
+                if (status == 0)
+                {
+                    LOG_WRN("Production configuration successfully loaded");
+                    zb_uint32_t app_data_length = zb_buf_len(bufid) - sizeof(zb_zdo_app_signal_hdr_t);
+                    if (app_data_length != 0)
+                    {
+                        LOG_WRN("app_data_length loaded %d", app_data_length);
+                        //example_application_config_t * ex_cfg = ZB_ZDO_SIGNAL_GET_PARAMS(sg_p, example_application_config_t);
+                        //process_example_application_config(ex_cfg);
+                    }                
+                }
+                else
+                {
+                    LOG_WRN("Production configuration is not present or invalid (status: %d)", status);
+                }
+            }
 			else
 			{
                 if (status == 0)
@@ -301,33 +336,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
                 }
 			}
         }
-    }
-
-    switch(sig)
-    {
-    case ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY:
-    if (status != RET_OK)
-    {
-    /* Production config is not present or invalid */
-        LOG_INF("Production configuration is not present or invalid (status: %d)", status);
-    }
-    else
-    {
-        LOG_INF("Production configuration successfully loaded");
-        zb_uint32_t app_data_length = zb_buf_len(bufid) - sizeof(zb_zdo_app_signal_hdr_t);
-        if (app_data_length != 0)
-        {
-        //zb_nvram_register_app1_read_cb(xbee_nvram_read_app_data);
-
-        //example_application_config_t * ex_cfg = ZB_ZDO_SIGNAL_GET_PARAMS(sg_p, example_application_config_t);
-        //process_example_application_config(ex_cfg);
-        }
-    }
-    if (bufid) 
-    {
-	zb_buf_free(bufid);
-	}
-    break;
     }
 
 	/* No application-specific behavior is required.
@@ -502,7 +510,7 @@ static int8_t gpio_init(void)
 void zigbee_configuration()
 {
 	/* disable NVRAM erasing on every application startup*/
-	zb_set_nvram_erase_at_start(ZB_TRUE);
+	zb_set_nvram_erase_at_start(ZB_FALSE);
 
 	if(!CRYPTO_ENABLE)
 	{
@@ -641,8 +649,12 @@ int main(void)
     zb_af_set_data_indication(data_indication); // Set call back function for APS frame received
     zb_aps_set_user_data_tx_cb(user_data_tx_status); // Set call back function for APS frame transmitted
 
-    // Register NVRAM callback functions
-    //zb_nvram_register_app1_write_cb(xbee_nvram_write_app_data, xbee_get_nvram_data_size);
+        /* Register application callback for writing application data to NVRAM */
+    zb_nvram_register_app1_write_cb(xbee_nvram_write_app_data, xbee_get_nvram_data_size);
+    /* Register application callback for reading application data from NVRAM */
+    zb_nvram_register_app1_read_cb(xbee_nvram_read_app_data);
+
+    zb_nvram_write_dataset(ZB_NVRAM_APP_DATA1); // Write the application data to NVRAM
 
     while(1)
     {

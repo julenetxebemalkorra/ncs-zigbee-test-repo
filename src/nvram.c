@@ -22,45 +22,49 @@
 #include "nvram.h"
 
 static struct xbee_parameters_t xbee_parameters_nvram; // Xbee's parameters
-static struct xbee_parameters_t ds; // Xbee's parameters
+
+/* Application dataset for persisting into nvram */
+typedef ZB_PACKED_PRE struct nvram_dataset_s
+{
+ zb_uint8_t at_vr;
+ zb_uint8_t at_hv;
+  /* Size of the structure in bytes must be divisible by 4 */
+ zb_uint8_t reserved[2];
+} ZB_PACKED_STRUCT
+nvram_dataset_t;
 
 LOG_MODULE_REGISTER(nvram_app, LOG_LEVEL_DBG);
 
+/* Application callback for writing application data to NVRAM */
 uint8_t xbee_nvram_write_app_data(uint8_t page, uint32_t pos)
 {
-    LOG_DBG("xbee_nvram_write_app_data\n");
+    LOG_WRN("xbee_nvram_write_app_data. page: %d pos: %d\n", page, pos);
+
     uint8_t ret;
+    nvram_dataset_t ds;
 
     // Populate 'ds' with your XBee parameters
     // Example: ds.at_vr = xbee_parameters.at_vr;
 
-    ret = ZB_DEFAULT_MANUFACTURER_CODE;
-
     ds.at_vr = 1;     // Xbee's FW version
-    ds.at_hv = 1;     // Xbee's HW version
-    ds.at_sh = 0;     // High part of the MAC address
-    ds.at_sl = 1;     // Low part of the MAC address
-    ds.at_jv = 1;     // Node join verification
-    ds.at_nj = 0xFF;  // Node join time
-    ds.at_nw = 10;    // Network watchdog
-    ds.at_id = 0;     // Extended pan id
-    ds.at_ce = 0;     // Coordinator enabled
-    ds.at_ai = 0xFF;  // Association indication
-    ds.at_ch = 0;     // Operation channel
-    ds.at_my = 0;     // Short address
-    ds.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
-    ds.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
-    ds.at_nb = 1;     // Xbee's UART parity
-    sprintf(ds.at_ni, "NORDIC"); // Node identifier string
+    ds.at_hv = 2;     // Xbee's HW version
+    ds.reserved[0] = 3;
+    ds.reserved[1] = 4;
 
     ret = zb_nvram_write_data(page, pos, (zb_uint8_t*)&ds, sizeof(ds));
     return ret;
 }
 
+/* Application callback for reading application data from NVRAM */
 void xbee_nvram_read_app_data(uint8_t page, uint32_t pos, uint16_t payload_length)
 {
     LOG_DBG("xbee_nvram_read_app_data\n");
     zb_ret_t ret;
+
+    nvram_dataset_t ds;
+
+    /* [trace_msg] */
+    ZB_ASSERT(payload_length == sizeof(ds));
 
     ret = zb_nvram_read_data(page, pos, (zb_uint8_t*)&ds, sizeof(ds));
 
@@ -69,45 +73,20 @@ void xbee_nvram_read_app_data(uint8_t page, uint32_t pos, uint16_t payload_lengt
         // Example: xbee_parameters.at_vr = ds.at_vr;
         xbee_parameters_nvram.at_vr = ds.at_vr;
         xbee_parameters_nvram.at_hv = ds.at_hv;
-        xbee_parameters_nvram.at_sh = ds.at_sh;
-        xbee_parameters_nvram.at_sl = ds.at_sl;
-        xbee_parameters_nvram.at_jv = ds.at_jv;
-        xbee_parameters_nvram.at_nj = ds.at_nj;
-        xbee_parameters_nvram.at_nw = ds.at_nw;
-        xbee_parameters_nvram.at_id = ds.at_id;
-        xbee_parameters_nvram.at_ce = ds.at_ce;
-        xbee_parameters_nvram.at_ai = ds.at_ai;
-        xbee_parameters_nvram.at_ch = ds.at_ch;
-        xbee_parameters_nvram.at_my = ds.at_my;
-        xbee_parameters_nvram.at_zs = ds.at_zs;
-        xbee_parameters_nvram.at_bd = ds.at_bd;
-        xbee_parameters_nvram.at_nb = ds.at_nb;
-        memcpy(xbee_parameters_nvram.at_ni, ds.at_ni, sizeof(xbee_parameters_nvram.at_ni));
+        xbee_parameters_nvram.at_ni[0] = ds.reserved[0];
+        xbee_parameters_nvram.at_ni[1] = ds.reserved[1];
 
         LOG_DBG("xbee_parameters_nvram.at_vr = %d\n", xbee_parameters_nvram.at_vr);
         LOG_DBG("xbee_parameters_nvram.at_hv = %d\n", xbee_parameters_nvram.at_hv);
-        LOG_DBG("xbee_parameters_nvram.at_sh = %d\n", xbee_parameters_nvram.at_sh);
-        LOG_DBG("xbee_parameters_nvram.at_sl = %d\n", xbee_parameters_nvram.at_sl);
-        LOG_DBG("xbee_parameters_nvram.at_jv = %d\n", xbee_parameters_nvram.at_jv);
-        LOG_DBG("xbee_parameters_nvram.at_nj = %d\n", xbee_parameters_nvram.at_nj);
-        LOG_DBG("xbee_parameters_nvram.at_nw = %d\n", xbee_parameters_nvram.at_nw);
-        LOG_DBG("xbee_parameters_nvram.at_id = %d\n", xbee_parameters_nvram.at_id);
-        LOG_DBG("xbee_parameters_nvram.at_ce = %d\n", xbee_parameters_nvram.at_ce);
-        LOG_DBG("xbee_parameters_nvram.at_ai = %d\n", xbee_parameters_nvram.at_ai);
-        LOG_DBG("xbee_parameters_nvram.at_ch = %d\n", xbee_parameters_nvram.at_ch);
-        LOG_DBG("xbee_parameters_nvram.at_my = %d\n", xbee_parameters_nvram.at_my);
-        LOG_DBG("xbee_parameters_nvram.at_zs = %d\n", xbee_parameters_nvram.at_zs);
-        LOG_DBG("xbee_parameters_nvram.at_bd = %d\n", xbee_parameters_nvram.at_bd);
-        LOG_DBG("xbee_parameters_nvram.at_nb = %d\n", xbee_parameters_nvram.at_nb);
-        for(int i = 0; i < sizeof(xbee_parameters_nvram.at_ni); i++) {
-            LOG_DBG("xbee_parameters_nvram.at_ni[%d] = %c\n", i, xbee_parameters_nvram.at_ni[i]);
-        }
+        LOG_DBG("xbee_parameters_nvram.reserved[0] = %d\n", xbee_parameters_nvram.at_ni[0]);
+        LOG_DBG("xbee_parameters_nvram.reserved[1] = %d\n", xbee_parameters_nvram.at_ni[1]);
     }
 }
 
+/* Application callback to determine application NVRAM stored dataset size */
 uint16_t xbee_get_nvram_data_size()
 {
     LOG_DBG("xbee_get_nvram_data_size\n");
-    return sizeof(xbee_parameters_nvram);
+    return sizeof(nvram_dataset_t);
 }
 
