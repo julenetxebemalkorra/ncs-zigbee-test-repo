@@ -290,6 +290,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
                 if (status == 0)
                 {
                     LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
+                    //zb_osif_nvram_read(); // Read the NVRAM contents
                     zb_uint32_t app_data_length = zb_buf_len(bufid) - sizeof(zb_zdo_app_signal_hdr_t);
                     if (app_data_length != 0)
                     {
@@ -622,12 +623,14 @@ int main(void)
     LOG_INF("Router started successfully");
     int ret = 0;
 
-    get_reset_reason();
+    get_reset_reason(); // Get the reset reason
 
-    digi_at_init();
-    digi_node_discovery_init();
+    nvram_configuration(); // NVRAM configuration
 
-    ret = tcu_uart_init();
+    digi_at_init(); // AT commands configuration
+    digi_node_discovery_init(); // Node discovery configuration
+
+    ret = tcu_uart_init(); // UART configuration
     if( ret < 0)
     {
         LOG_ERR("tcu_uart_init error %d", ret);
@@ -648,13 +651,6 @@ int main(void)
 
     zb_af_set_data_indication(data_indication); // Set call back function for APS frame received
     zb_aps_set_user_data_tx_cb(user_data_tx_status); // Set call back function for APS frame transmitted
-
-        /* Register application callback for writing application data to NVRAM */
-    zb_nvram_register_app1_write_cb(xbee_nvram_write_app_data, xbee_get_nvram_data_size);
-    /* Register application callback for reading application data from NVRAM */
-    zb_nvram_register_app1_read_cb(xbee_nvram_read_app_data);
-
-    zb_nvram_write_dataset(ZB_NVRAM_APP_DATA1); // Write the application data to NVRAM
 
     while(1)
     {
