@@ -52,13 +52,21 @@ uint8_t xbee_nvram_write_app_data(uint8_t page, uint32_t pos)
     ds.reserved[1] = 4;
 
     ret = zb_nvram_write_data(page, pos, (zb_uint8_t*)&ds, sizeof(ds));
+
+    if (xbee_get_nvram_data_size() == sizeof(ds)) {
+        LOG_DBG("xbee_get_nvram_data_size() == sizeof(ds)\n");
+        LOG_DBG("zb_nvram_write_data ret valuse %d\n", ret);
+    } else {
+        LOG_ERR("xbee_get_nvram_data_size() != sizeof(ds)\n");
+        LOG_ERR("zb_nvram_write_data ret valuse %d\n", ret);
+    }    
     return ret;
 }
 
 /* Application callback for reading application data from NVRAM */
 void xbee_nvram_read_app_data(uint8_t page, uint32_t pos, uint16_t payload_length)
 {
-    LOG_DBG("xbee_nvram_read_app_data\n");
+    LOG_WRN("xbee_nvram_read_app_data\n");
     zb_ret_t ret;
 
     nvram_dataset_t ds;
@@ -86,7 +94,7 @@ void xbee_nvram_read_app_data(uint8_t page, uint32_t pos, uint16_t payload_lengt
 /* Application callback to determine application NVRAM stored dataset size */
 uint16_t xbee_get_nvram_data_size()
 {
-    LOG_DBG("xbee_get_nvram_data_size\n");
+    LOG_DBG("%d\n", sizeof(nvram_dataset_t));
     return sizeof(nvram_dataset_t);
 }
 
