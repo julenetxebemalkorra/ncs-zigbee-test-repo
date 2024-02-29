@@ -307,24 +307,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
             else if( sig == ZB_BDB_SIGNAL_STEERING ) LOG_WRN( "SIGNAL 10: BDB network steering completed");
 			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
             else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
-            else if( sig == ZB_ZDO_SIGNAL_PRODUCTION_CONFIG_READY) 
-            {
-                if (status == 0)
-                {
-                    LOG_WRN("Production configuration successfully loaded");
-                    zb_uint32_t app_data_length = zb_buf_len(bufid) - sizeof(zb_zdo_app_signal_hdr_t);
-                    if (app_data_length != 0)
-                    {
-                        LOG_WRN("app_data_length loaded %d", app_data_length);
-                        //example_application_config_t * ex_cfg = ZB_ZDO_SIGNAL_GET_PARAMS(sg_p, example_application_config_t);
-                        //process_example_application_config(ex_cfg);
-                    }                
-                }
-                else
-                {
-                    LOG_WRN("Production configuration is not present or invalid (status: %d)", status);
-                }
-            }
 			else
 			{
                 if (status == 0)
