@@ -1,0 +1,75 @@
+Frame 4663: 127 bytes on wire (1016 bits), 125 bytes captured (1000 bits) on interface \\.\pipe\zboss_sniffer_COM16, id 0
+    Section number: 1
+    Interface id: 0 (\\.\pipe\zboss_sniffer_COM16)
+    Encapsulation type: IEEE 802.15.4 Wireless PAN (104)
+    Arrival Time: Mar  1, 2024 13:37:18.323370000 Hora estándar romance
+    UTC Arrival Time: Mar  1, 2024 12:37:18.323370000 UTC
+    Epoch Arrival Time: 1709296638.323370000
+    [Time shift for this packet: 0.000000000 seconds]
+    [Time delta from previous captured frame: 2.458384000 seconds]
+    [Time delta from previous displayed frame: 2.458384000 seconds]
+    [Time since reference or first frame: 4291.009370000 seconds]
+    Frame Number: 4663
+    Frame Length: 127 bytes (1016 bits)
+    Capture Length: 125 bytes (1000 bits)
+    [Frame is marked: False]
+    [Frame is ignored: False]
+    [Protocols in frame: wpan:zbee_nwk:zbee_aps:zbee_zcl:data]
+IEEE 802.15.4 Data, Dst: 0x0000, Src: 0xc6d2
+    Frame Control Field: 0x8861, Frame Type: Data, Acknowledge Request, PAN ID Compression, Destination Addressing Mode: Short/16-bit, Frame Version: IEEE Std 802.15.4-2003, Source Addressing Mode: Short/16-bit
+        .... .... .... .001 = Frame Type: Data (0x1)
+        .... .... .... 0... = Security Enabled: False
+        .... .... ...0 .... = Frame Pending: False
+        .... .... ..1. .... = Acknowledge Request: True
+        .... .... .1.. .... = PAN ID Compression: True
+        .... .... 0... .... = Reserved: False
+        .... ...0 .... .... = Sequence Number Suppression: False
+        .... ..0. .... .... = Information Elements Present: False
+        .... 10.. .... .... = Destination Addressing Mode: Short/16-bit (0x2)
+        ..00 .... .... .... = Frame Version: IEEE Std 802.15.4-2003 (0)
+        10.. .... .... .... = Source Addressing Mode: Short/16-bit (0x2)
+    Sequence Number: 79
+    Destination PAN: 0x1cba
+    Destination: 0x0000
+    Source: 0xc6d2
+    [Extended Source: MaxStream_00:41:e0:b3:7d (00:13:a2:00:41:e0:b3:7d)]
+    [Origin: 6]
+ZigBee Network Layer Data, Dst: 0x0f91, Src: 0xc6d2
+    Frame Control Field: 0x1848, Frame Type: Data, Discover Route: Enable, Destination, Extended Source Data
+        .... .... .... ..00 = Frame Type: Data (0x0)
+        .... .... ..00 10.. = Protocol Version: 2
+        .... .... 01.. .... = Discover Route: Enable (0x1)
+        .... ...0 .... .... = Multicast: False
+        .... ..0. .... .... = Security: False
+        .... .0.. .... .... = Source Route: False
+        .... 1... .... .... = Destination: True
+        ...1 .... .... .... = Extended Source: True
+        ..0. .... .... .... = End Device Initiator: False
+    Destination: 0x0f91
+    Source: 0xc6d2
+    Radius: 30
+    Sequence Number: 109
+    Destination: NordicSemico_45:86:1c:55:97 (f4:ce:36:45:86:1c:55:97)
+    Extended Source: MaxStream_00:41:e0:b3:7d (00:13:a2:00:41:e0:b3:7d)
+ZigBee Application Support Layer Data, Dst Endpt: 232, Src Endpt: 232
+    Frame Control Field: Data (0x40)
+        .... ..00 = Frame Type: Data (0x0)
+        .... 00.. = Delivery Mode: Unicast (0x0)
+        ..0. .... = Security: False
+        .1.. .... = Acknowledgement Request: True
+        0... .... = Extended Header: False
+    Destination Endpoint: 232
+    Cluster: Binary Value (Basic) (0x0011)
+    Profile: Maxstream (0xc105)
+    Source Endpoint: 232
+    Counter: 58
+ZigBee Cluster Library Frame
+    Frame Control Field: Unknown (0xca)
+        .... ..10 = Frame Type: Unknown (0x2)
+        .... .0.. = Manufacturer Specific: False
+        .... 1... = Direction: Server to Client
+        ...0 .... = Disable Default Response: False
+    Sequence Number: 3
+Data (84 bytes)
+    Data: ca0375300002ce73ca0375300002ce73ca0375300002ce73ca0375300002ce73ca0375300002ce73ca0375300002ce73ca0375300002ce73ca0375300002ce73ca0375300002ce73ca0375300002ce73ca037530
+    [Length: 84]

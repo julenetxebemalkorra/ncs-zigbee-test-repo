@@ -126,7 +126,7 @@ void read_nvram_PAN_ID(void)
 
     rc = nvs_read(&fs, ZB_EXT_PANID, &temp, sizeof(temp));
     if (rc > 0) {
-        LOG_WRN("Id: %d, PAN_ID: ", ZB_EXT_PANID);
+        LOG_INF("Id: %d, PAN_ID: ", ZB_EXT_PANID);
         for (int n = 0; n < 8; n++) {
             LOG_INF("[%d]: 0x%02x ", n, temp[n]);
         }
