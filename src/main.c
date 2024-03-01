@@ -223,7 +223,9 @@ void user_data_tx_status_cb(zb_bufid_t bufid)
             aps_counter = pointerToBeginOfBuffer[24];
             LOG_DBG("Transmission completed, MAC seq = %d, NWK seq = %d, APS counter = %d", mac_sequence_number, nwk_sequence_number, aps_counter);
         }
+        zb_osif_disable_all_inter();
         zb_buf_free(bufid);
+        zb_osif_enable_all_inter();
     }
 }
 
@@ -288,8 +290,10 @@ zb_uint8_t data_indication(zb_bufid_t bufid)
 
     if (bufid)
     {
-		zb_buf_free(bufid); // TODO: Should we free the buffer always? Or only in the cases where is processed as above?
-		return ZB_TRUE;
+        zb_osif_disable_all_inter();
+        zb_buf_free(bufid);
+        zb_osif_enable_all_inter();
+    	return ZB_TRUE;
 	}
 	return ZB_FALSE;
 }
@@ -335,9 +339,14 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	/* All callbacks should either reuse or free passed buffers.
 	 * If bufid == 0, the buffer is invalid (not passed).
 	 */
-	if (bufid) {
-		zb_buf_free(bufid);
-	}
+	if (bufid) 
+    {
+        zb_osif_disable_all_inter();
+        zb_buf_free(bufid);
+        zb_osif_enable_all_inter();	
+    }
+}
+
 }
 
 //------------------------------------------------------------------------------
