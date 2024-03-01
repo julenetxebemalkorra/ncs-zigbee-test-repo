@@ -110,41 +110,41 @@ bool bTimeToSendFrame = false;
 /* Main application customizable context.
  * Stores all settings and static values.
  */
-struct zb_device_ctx {
+/*struct zb_device_ctx {
 	zb_zcl_basic_attrs_t basic_attr;
 	zb_zcl_identify_attrs_t identify_attr;
-};
+};*/
 
 /* Zigbee device application context storage. */
-static struct zb_device_ctx dev_ctx;
+//static struct zb_device_ctx dev_ctx;
 
 /*Declare attribute list for Identify cluster*/
-ZB_ZCL_DECLARE_IDENTIFY_ATTRIB_LIST(
+/*ZB_ZCL_DECLARE_IDENTIFY_ATTRIB_LIST(
 	identify_attr_list,
-	&dev_ctx.identify_attr.identify_time);
+	&dev_ctx.identify_attr.identify_time);*/
 
 /*Declare Basic attribute list*/
-ZB_ZCL_DECLARE_BASIC_ATTRIB_LIST(
+/*ZB_ZCL_DECLARE_BASIC_ATTRIB_LIST(
 	basic_attr_list,
 	&dev_ctx.basic_attr.zcl_version,
-	&dev_ctx.basic_attr.power_source);
+	&dev_ctx.basic_attr.power_source);*/
 
 /*Declare cluster list for Range extender device*/
-ZB_DECLARE_RANGE_EXTENDER_CLUSTER_LIST(
+/*ZB_DECLARE_RANGE_EXTENDER_CLUSTER_LIST(
 	app_template_clusters,
 	basic_attr_list,
-	identify_attr_list);
+	identify_attr_list);*/
 
 /*Declare endpoint for Range extender device*/
-ZB_DECLARE_RANGE_EXTENDER_EP(
+/*ZB_DECLARE_RANGE_EXTENDER_EP(
 	app_template_ep,
 	APP_TEMPLATE_ENDPOINT,
-	app_template_clusters);
+	app_template_clusters);*/
 
 /*Declare application's device context for single-endpoint device*/
-ZBOSS_DECLARE_DEVICE_CTX_1_EP(
+/*ZBOSS_DECLARE_DEVICE_CTX_1_EP(
 	app_template_ctx,
-	app_template_ep);
+	app_template_ep);*/
 
 
 /*----------------------------------------------------------------------------*/
