@@ -60,6 +60,13 @@
 #define MODBUS_MIN_RX_LENGTH             8   // if the messagge has 8 bytes we consider it a modbus frame
 #define MAX_ZIGBEE_PAYLOAD_SIZE 		 82 // Maximum payload size that can be sent at once via zigbee
 
+
+static bool b_buffer_for_output_rx_packet_is_free = true;
+static zb_uint8_t buffer_for_output_rx_packet[MAX_ZIGBEE_PAYLOAD_SIZE];
+static size_t buffer_for_output_rx_packet_size = 0;
+
+
+
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
 uint16_t aps_frames_received_total_counter = 0;
@@ -88,8 +95,6 @@ static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 volatile char UART_rx_buffer[UART_RX_BUFFER_SIZE];
 volatile uint16_t UART_rx_buffer_index;
 volatile uint16_t UART_rx_buffer_index_max;
-
-static volatile size_t offset = 0;
 
 /* Zigbee messagge info*/
 
@@ -346,26 +351,14 @@ void zboss_signal_handler(zb_bufid_t bufid)
  * @param[in]   chunk_size   payload size to send
  *
  */
-void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
+void send_user_payload(zb_uint8_t param)
 {
-/*  Allocate OUT buffer                                                       */
-    //static zb_bufid_t bufid = NULL;
-    //if( bufid ) zb_buf_reuse(bufid); // If already allocated, reuse the buffer
-    //else bufid = zb_buf_get_out(); // If not allocated yet, allocate the buffer
-
     zb_bufid_t bufid = zb_buf_get_out();
 
-/* If buffer could be allocated, schedule the transmission                    */
-    if( bufid )
+    if( bufid ) /* If buffer could be allocated, schedule the transmission */
     {
         zb_addr_u dst_addr;
         dst_addr.addr_short = 0x0000; // Destination address of the coordinator
-
-        /*if(PRINT_UART_INFO)
-        {
-            LOG_DBG("send_user_payload: chunk_size %d\n", chunk_size);
-            LOG_HEXDUMP_DBG(outputPayload,chunk_size,"Payload of output RF packet");
-        }*/
 
         zb_ret_t ret = zb_aps_send_user_payload(bufid,
                                                 dst_addr,
@@ -375,14 +368,14 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
                                                 DIGI_BINARY_VALUE_DESTINATION_ENDPOINT,
                                                 ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
                                                 ZB_TRUE,
-                                                outputPayload,
-                                                chunk_size);
+                                                buffer_for_output_rx_packet,
+                                                buffer_for_output_rx_packet_size);
 
         if(PRINT_ZIGBEE_INFO)
         {
             if(ret == RET_OK)
             {
-                LOG_DBG("Scheduled APS Frame with cluster 0x%x and payload %d bytes", DIGI_BINARY_VALUE_CLUSTER, (uint16_t)chunk_size);
+                LOG_DBG("Scheduled APS Frame with cluster 0x%x and payload %d bytes", DIGI_BINARY_VALUE_CLUSTER, (uint16_t)buffer_for_output_rx_packet_size);
             }
             else if(ret == RET_INVALID_PARAMETER_1) LOG_ERR("Transmission could not be scheduled: The buffer is invalid");
             else if(ret == RET_INVALID_PARAMETER_2) LOG_ERR("Transmission could not be scheduled: The payload_ptr parameter is invalid");
@@ -394,6 +387,9 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
     {
         LOG_ERR("Transmission could not be scheduled: Out buffer not allocated");
     }
+
+    b_buffer_for_output_rx_packet_is_free = true;
+
 }
 
 //------------------------------------------------------------------------------
@@ -403,30 +399,12 @@ void send_user_payload(zb_uint8_t *outputPayload ,size_t chunk_size)
  */
 void send_zigbee_modbus_answer(void)
 {
-	zb_uint8_t outputPayload[MAX_ZIGBEE_PAYLOAD_SIZE];
-
-	size_t remaining_length = UART_rx_buffer_index_max +1;
-
-    // Transmit the modified payload in chunks via Zigbee
-	while(remaining_length > 0) 
-	{
-    	size_t chunk_size = MIN(remaining_length, MAX_ZIGBEE_PAYLOAD_SIZE);
-
-		memcpy(outputPayload, &UART_rx_buffer[offset], chunk_size);
-/**
-		for (uint8_t i = 0; i < chunk_size; i++)
-		{
-		LOG_DBG("%c- ", outputPayload[i]);
-		}
-*/
-		//send_user_payload(&outputPayload, chunk_size);
-        send_user_payload(outputPayload, chunk_size);
-
-		// Update offset and remaining length for the next chunk
-    	offset += chunk_size;
-    	remaining_length -= chunk_size;
-	}
-
+   if( !b_buffer_for_output_rx_packet_is_free ) return; // Do not do anything if transmission of last packet has not been scheduled
+   buffer_for_output_rx_packet_size = UART_rx_buffer_index_max +1;
+   if( buffer_for_output_rx_packet_size > MAX_ZIGBEE_PAYLOAD_SIZE ) return; // Do not do anything if size of message exceeds the maximum allowed payload size.
+   b_buffer_for_output_rx_packet_is_free = false;
+   memcpy(buffer_for_output_rx_packet, &UART_rx_buffer[0], buffer_for_output_rx_packet_size);
+   ZB_SCHEDULE_APP_CALLBACK(send_user_payload, 0);
 }
 
 // Interrupt handler for the timer
@@ -680,7 +658,6 @@ int main(void)
             send_zigbee_modbus_answer();
             b_Modbus_Ready_to_send = false;
             UART_rx_buffer_index = 0;
-            offset=0;
         }
 
         digi_node_discovery_request_manager();
