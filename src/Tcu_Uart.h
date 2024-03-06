@@ -29,6 +29,7 @@ enum
 
 /* Function prototypes                                                        */
 int8_t tcu_uart_init(void);
+void tcu_uart_rx_buffer_init(void);
 int8_t tcu_uart_configuration(void);
 void tcu_uart_timers_10kHz(void);
 void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte);
@@ -39,13 +40,10 @@ void switch_tcu_uart_to_command_mode(void);
 void switch_tcu_uart_out_of_command_mode(void);
 bool is_tcu_uart_in_command_mode(void);
 void check_input_sequence_for_entering_in_command_mode(uint8_t input_byte);
+bool tcu_uart_send_received_frame_through_zigbee(void);
+void tcu_uart_transparent_mode_manager(void);
 
-
-extern volatile char UART_rx_buffer[UART_RX_BUFFER_SIZE];
-extern volatile uint16_t UART_rx_buffer_index;
-extern volatile uint16_t UART_rx_buffer_index_max;
 extern uint8_t tcu_transmitted_frames_counter;
-extern volatile bool b_Modbus_Ready_to_send;
 #endif /* TCU_UART_H_ */
 
 

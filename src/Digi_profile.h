@@ -20,5 +20,7 @@
 #define PRODUCT_TYPE     0x00000001 // I will assign that value as product type of the Fanstel BT840E
 #define MANUFACTURED_ID  0x0001     // I will assign that value as manufactured ID of the Fanstel BT840E
 
+#define COORDINATOR_SHORT_ADDRESS 0x0000
+
 #endif /* DIGI_PROFILE_H_ */
 

@@ -9,6 +9,8 @@
  */
 
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
+#include <zboss_api.h>
 
 // UART async includes
 #include <zephyr/device.h>
@@ -18,10 +20,13 @@
 #include <zephyr/drivers/uart.h>
 #include <string.h>
 
-#include <zephyr/logging/log.h>
+#include "Digi_profile.h"
+#include "zigbee_aps.h"
+#include "Digi_At_commands.h"
 
 #include "tcu_Uart.h"
-#include "Digi_At_commands.h"
+
+extern uint16_t tcu_uart_frames_received_counter;
 
 LOG_MODULE_REGISTER(uart_app, LOG_LEVEL_DBG);
 
@@ -37,16 +42,19 @@ static uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
 static uint8_t tcu_transmission_buffer_index = 0;
 static uint8_t tcu_transmission_size = 0;
 static bool    tcu_transmission_running = false;
-static uint8_t tcuTransmittedFramesCounter = 0;
-static volatile bool b_tcu_uart_receiving_frame = false;
-static volatile uint16_t tcu_uart_ticks_since_last_byte;
+
+static volatile uint8_t tcu_uart_rx_buffer[UART_RX_BUFFER_SIZE] = {0};
+static volatile uint16_t tcu_uart_rx_buffer_index = 0;
+static volatile uint16_t tcu_uart_rx_buffer_frame_size = 0;
+static volatile bool b_tcu_uart_rx_buffer_overflow = false;
+static volatile bool b_tcu_uart_rx_buffer_busy = false;
+static volatile bool b_tcu_uart_rx_receiving_frame = false;
+static volatile bool b_tcu_uart_rx_complete_frame_received = false;
+static volatile bool b_tcu_uart_rx_corrupted_frame = false;
+static volatile uint16_t tcu_uart_rx_time_since_last_byte_ms = 0;
 
 /* Get the device pointer of the UART hardware */
 static const struct device *dev_tcu_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
-	
-
-/* UART configuration variables*/
-static volatile bool b_UART_overflow;
 
 // Create a configuration structure for the UART used to communicate with the TCU
 static struct uart_config tcu_uart_config = {
@@ -67,12 +75,23 @@ int8_t tcu_uart_init(void)
 {
     int8_t ret = tcu_uart_configuration();
     b_zigbee_module_in_command_mode = false;
-    b_tcu_uart_receiving_frame = false;
-    tcu_uart_ticks_since_last_byte = 0;
-	b_UART_overflow = false;
-	UART_rx_buffer_index = 0;
-	UART_rx_buffer_index_max = 0;
+    tcu_uart_rx_buffer_init();
     return ret;
+}
+
+/**@brief Initialization of the TCU UART RX buffer
+ *
+ */
+void tcu_uart_rx_buffer_init(void)
+{
+    tcu_uart_rx_buffer_index = 0;
+    tcu_uart_rx_buffer_frame_size = 0;
+    b_tcu_uart_rx_buffer_overflow = false;
+    b_tcu_uart_rx_buffer_busy = false;
+    b_tcu_uart_rx_receiving_frame = false;
+    b_tcu_uart_rx_complete_frame_received = false;
+    b_tcu_uart_rx_corrupted_frame = false;
+    tcu_uart_rx_time_since_last_byte_ms = 0;
 }
 
 /**@brief Configuration and initialization of the UART used to communicate with the TCU
@@ -133,26 +152,37 @@ void tcu_uart_timers_10kHz(void)
 {
     static uint8_t one_ms_counter = 0;
 
-    if(one_ms_counter < 10) one_ms_counter++;
+    if( one_ms_counter < 10 ) one_ms_counter++;
     else
     {
         one_ms_counter = 0;
 /*      Verify the 10 ms silence needed to consider that the RX frame is complete    */
         if( !b_zigbee_module_in_command_mode )
         {
-            if( b_tcu_uart_receiving_frame )
+            if( b_tcu_uart_rx_receiving_frame )
             {
-                tcu_uart_ticks_since_last_byte++;
-                if( tcu_uart_ticks_since_last_byte > TICKS_TO_CONSIDER_FRAME_COMPLETED )
+                tcu_uart_rx_time_since_last_byte_ms++;
+                if( tcu_uart_rx_time_since_last_byte_ms > TICKS_TO_CONSIDER_FRAME_COMPLETED )
                 {
-                    b_tcu_uart_receiving_frame = false;
-                    tcu_uart_ticks_since_last_byte = 0;
-                    b_Modbus_Ready_to_send = true;
+                    if( b_tcu_uart_rx_buffer_overflow || b_tcu_uart_rx_corrupted_frame ) // Discard frame if rx buffer overflow or frame corrupted
+                    {
+                        b_tcu_uart_rx_buffer_overflow = false;
+                        b_tcu_uart_rx_corrupted_frame = false;
+                    }
+                    else
+                    {
+                        b_tcu_uart_rx_complete_frame_received = true;
+                        tcu_uart_rx_buffer_frame_size = tcu_uart_rx_buffer_index;
+                        b_tcu_uart_rx_buffer_busy = true; // Do not accept new characters until received frame is processed
+                    }
+                    b_tcu_uart_rx_receiving_frame = false;
+                    tcu_uart_rx_time_since_last_byte_ms = 0;
+                    tcu_uart_rx_buffer_index = 0;
                 }
             }
             else
             {
-                tcu_uart_ticks_since_last_byte = 0;
+                tcu_uart_rx_time_since_last_byte_ms = 0;
             }
         }
 /*      Verify the 500 ms silences needed to accept the "+++" sequence        */
@@ -202,20 +232,20 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
 
     if(input_byte == '\r') // End of frame
     {
-        digi_at_analyze_and_reply_to_command(UART_rx_buffer, UART_rx_buffer_index);
-        UART_rx_buffer_index = 0;
-        b_UART_overflow = false;
+        digi_at_analyze_and_reply_to_command(tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
+        tcu_uart_rx_buffer_index = 0;
+        b_tcu_uart_rx_buffer_overflow = false;
     }
-    else if(!b_UART_overflow)
+    else if(!b_tcu_uart_rx_buffer_overflow)
     {
-        if( UART_rx_buffer_index >= UART_RX_BUFFER_SIZE )
+        if( tcu_uart_rx_buffer_index >= UART_RX_BUFFER_SIZE )
         {
-            b_UART_overflow = true;
+            b_tcu_uart_rx_buffer_overflow = true;
         }
         else
         {
-            UART_rx_buffer[UART_rx_buffer_index] = input_byte;
-            UART_rx_buffer_index++;
+            tcu_uart_rx_buffer[tcu_uart_rx_buffer_index] = input_byte;
+            tcu_uart_rx_buffer_index++;
         }
     }
 }
@@ -226,35 +256,43 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
  */
 void tcu_uart_process_byte_received_in_transparent_mode(uint8_t input_byte)
 {
-    tcu_uart_ticks_since_last_byte = 0; //Reset timer used to detect end of frame
+    tcu_uart_rx_time_since_last_byte_ms = 0; //Reset timer used to detect end of frame
 
     check_input_sequence_for_entering_in_command_mode(input_byte);
 
-    if( b_tcu_uart_receiving_frame )
+    if( b_tcu_uart_rx_receiving_frame )
     {
-        if( !b_UART_overflow )
+        if( !b_tcu_uart_rx_corrupted_frame )
         {
-            if( UART_rx_buffer_index >= UART_RX_BUFFER_SIZE )
+            if( !b_tcu_uart_rx_buffer_overflow )
             {
-                b_UART_overflow = true;
-            }
-            else
-            {
-                UART_rx_buffer[UART_rx_buffer_index] = input_byte;
-                UART_rx_buffer_index_max = UART_rx_buffer_index;
-                UART_rx_buffer_index++;
+                if( tcu_uart_rx_buffer_index >= UART_RX_BUFFER_SIZE )
+                {
+                    b_tcu_uart_rx_buffer_overflow = true;
+                }
+                else
+                {
+                    tcu_uart_rx_buffer[tcu_uart_rx_buffer_index] = input_byte;
+                    tcu_uart_rx_buffer_index++;
+                }
             }
         }
     }
     else
     {
-        if(input_byte != '+') // Do not consider inout frames starting by '+'
-        {
-            b_tcu_uart_receiving_frame = true;
-            b_UART_overflow = false;
-            UART_rx_buffer[0] = input_byte;
-            UART_rx_buffer_index = 1;
-            UART_rx_buffer_index_max = UART_rx_buffer_index;
+        if(input_byte != '+') // Do not consider input frames starting by '+'
+        {            
+            b_tcu_uart_rx_receiving_frame = true;
+            b_tcu_uart_rx_buffer_overflow = false;
+            if( b_tcu_uart_rx_buffer_busy ) // Ignore new characters if we are still processing the last received frame.
+            {
+                b_tcu_uart_rx_corrupted_frame  = true;
+            }
+            else
+            {
+                tcu_uart_rx_buffer[0] = input_byte;
+                tcu_uart_rx_buffer_index = 1;
+            }
         }
     }
 }
@@ -268,30 +306,31 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
 	uint8_t uart_rx_hw_fifo[SIZE_OF_RX_FIFO_OF_NRF52840_UART];
     uint8_t uart_rx_hw_fifo_index = 0;
 
-	if (!uart_irq_update(dev_tcu_uart)) {
+	if( !uart_irq_update(dev_tcu_uart) )
+    {
 		return;
 	}
 
-	if (uart_irq_rx_ready(dev_tcu_uart)) // Check if the UART interruption was triggered because a new character was received
+	if( uart_irq_rx_ready(dev_tcu_uart) ) // Check if the UART interruption was triggered because a new character was received
     {
     /*  read until FIFO empty  */
         int number_of_bytes_available;
-        number_of_bytes_available = uart_fifo_read(dev_tcu_uart, &uart_rx_hw_fifo, SIZE_OF_RX_FIFO_OF_NRF52840_UART);
-        while(number_of_bytes_available > 0)
+        number_of_bytes_available = uart_fifo_read(dev_tcu_uart, uart_rx_hw_fifo, SIZE_OF_RX_FIFO_OF_NRF52840_UART);
+        while( number_of_bytes_available > 0 )
         {
             number_of_bytes_available--;
             if( b_zigbee_module_in_command_mode )
             {
                 tcu_uart_process_byte_received_in_command_mode(uart_rx_hw_fifo[uart_rx_hw_fifo_index]);
-                uart_rx_hw_fifo_index++;
             }
             else
             {
                 tcu_uart_process_byte_received_in_transparent_mode(uart_rx_hw_fifo[uart_rx_hw_fifo_index]);
-                uart_rx_hw_fifo_index++;
             }
-        }		
+            uart_rx_hw_fifo_index++;
+        }
 	}
+
 	if (uart_irq_tx_ready(dev_tcu_uart)) // Check if the UART interruption was triggered because the transmission buffer got empty
     {
         int ret;
@@ -344,7 +383,7 @@ void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
  */
 void switch_tcu_uart_to_command_mode(void)
 {
-    UART_rx_buffer_index = 0;
+    tcu_uart_rx_buffer_index = 0;
     leave_cmd_mode_silence_timer_ms = 0;
     b_zigbee_module_in_command_mode = true;
 }
@@ -355,8 +394,7 @@ void switch_tcu_uart_to_command_mode(void)
  */
 void switch_tcu_uart_out_of_command_mode(void)
 {
-    UART_rx_buffer_index = 0;
-    tcu_uart_ticks_since_last_byte = 0;
+    tcu_uart_rx_buffer_init();
     b_zigbee_module_in_command_mode = false;
 }
 
@@ -402,4 +440,48 @@ void check_input_sequence_for_entering_in_command_mode(uint8_t input_byte)
         pre_silence_timer_ms = 0;
         enter_cmd_mode_sequence_st = ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_INITIAL_SILENCE_ST;
     }
+}
+
+/**@brief This function places in the APS output frame queue a frame received through
+*         the TCU UART when the zigbee module is in transparent mode.
+*/
+bool tcu_uart_send_received_frame_through_zigbee(void)
+{
+    bool b_return = false;
+
+    if( zigbee_aps_get_output_frame_buffer_free_space() )
+    {
+        aps_output_frame_t element;
+
+        element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.cluster_id = DIGI_BINARY_VALUE_CLUSTER;
+        element.src_endpoint = DIGI_BINARY_VALUE_SOURCE_ENDPOINT;
+        element.dst_endpoint = DIGI_BINARY_VALUE_DESTINATION_ENDPOINT;
+        element.payload_size = tcu_uart_rx_buffer_frame_size;
+
+        if( element.payload_size > APS_UNENCRYPTED_PAYLOAD_MAX ) element.payload_size = APS_UNENCRYPTED_PAYLOAD_MAX; //TODO, we should divide the received frame in two pieces.
+
+        memcpy(element.payload, &tcu_uart_rx_buffer[0], element.payload_size);
+
+        if( enqueue_aps_frame(&element) ) b_return = true;
+    }
+
+    if( !b_return ) LOG_ERR("Not free space of aps output frame queue");
+
+    return b_return;
+}
+
+/**@brief If a complete frame has been received from the TCU UART when the module is
+ *        i transparente mode, place it in the APS output frame queue.
+ *
+ */
+void tcu_uart_transparent_mode_manager(void)
+{
+    if( b_tcu_uart_rx_complete_frame_received )
+    {
+        tcu_uart_frames_received_counter++;
+        tcu_uart_send_received_frame_through_zigbee();
+        b_tcu_uart_rx_complete_frame_received = false;
+        b_tcu_uart_rx_buffer_busy = false;
+    }   
 }

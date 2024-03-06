@@ -21,7 +21,7 @@ struct node_discovery_reply_t {
 void digi_node_discovery_init(void);
 bool is_a_digi_node_discovery_request(uint8_t* input_data, int16_t size_of_input_data);
 bool digi_node_discovery_reply(void);
-bool digi_node_discovery_request_manager(void);
+void digi_node_discovery_request_manager(void);
 
 #endif /* DIGI_NODE_DISCOVERY_H_ */
 

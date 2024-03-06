@@ -31,6 +31,7 @@
 
 #include "tcu_Uart.h"
 #include "Digi_profile.h"
+#include "zigbee_aps.h"
 #include "Digi_At_commands.h"
 #include "Digi_node_discovery.h"
 
@@ -58,14 +59,6 @@
 
 /*UART Modbus and zigbee buffer size definitions*/
 #define MODBUS_MIN_RX_LENGTH             8   // if the messagge has 8 bytes we consider it a modbus frame
-#define MAX_ZIGBEE_PAYLOAD_SIZE 		 82 // Maximum payload size that can be sent at once via zigbee
-
-
-static bool b_buffer_for_output_rx_packet_is_free = true;
-static zb_uint8_t buffer_for_output_rx_packet[MAX_ZIGBEE_PAYLOAD_SIZE];
-static size_t buffer_for_output_rx_packet_size = 0;
-
-
 
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
@@ -91,66 +84,15 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 // Get a reference to the TIMER1 instance
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
-/* UART configuration variables*/
-volatile char UART_rx_buffer[UART_RX_BUFFER_SIZE];
-volatile uint16_t UART_rx_buffer_index;
-volatile uint16_t UART_rx_buffer_index_max;
-
 /* Zigbee messagge info*/
 
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
 
-/*  This macro normally must be used after including <zephyr/logging/log.h> to
- * complete the initialization of the module. 
- 
- Note: it may be removed
- */
-LOG_MODULE_REGISTER(ZB_router_app, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 
 // boolean flags for detecting modbus request handling
-volatile bool b_Modbus_Ready_to_send = false;
 bool b_Zigbe_Connected = false;
 bool bTimeToSendFrame = false;
-
-/* Main application customizable context.
- * Stores all settings and static values.
- */
-/*struct zb_device_ctx {
-	zb_zcl_basic_attrs_t basic_attr;
-	zb_zcl_identify_attrs_t identify_attr;
-};*/
-
-/* Zigbee device application context storage. */
-//static struct zb_device_ctx dev_ctx;
-
-/*Declare attribute list for Identify cluster*/
-/*ZB_ZCL_DECLARE_IDENTIFY_ATTRIB_LIST(
-	identify_attr_list,
-	&dev_ctx.identify_attr.identify_time);*/
-
-/*Declare Basic attribute list*/
-/*ZB_ZCL_DECLARE_BASIC_ATTRIB_LIST(
-	basic_attr_list,
-	&dev_ctx.basic_attr.zcl_version,
-	&dev_ctx.basic_attr.power_source);*/
-
-/*Declare cluster list for Range extender device*/
-/*ZB_DECLARE_RANGE_EXTENDER_CLUSTER_LIST(
-	app_template_clusters,
-	basic_attr_list,
-	identify_attr_list);*/
-
-/*Declare endpoint for Range extender device*/
-/*ZB_DECLARE_RANGE_EXTENDER_EP(
-	app_template_ep,
-	APP_TEMPLATE_ENDPOINT,
-	app_template_clusters);*/
-
-/*Declare application's device context for single-endpoint device*/
-/*ZBOSS_DECLARE_DEVICE_CTX_1_EP(
-	app_template_ctx,
-	app_template_ep);*/
-
 
 /*----------------------------------------------------------------------------*/
 /*                           FUNCTION DEFINITIONS                             */
@@ -192,52 +134,12 @@ void get_reset_reason(void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Callback function executed when APS frame transmission is completed.
- *
- * @details A log message showing APS, NWK and MAC counters is printed.
- *          The buffer is released.
- *
- * @param   bufid   Reference to the Zigbee stack buffer used to transmit the APS frame
- *
- * @note The callback function will be executed when the transmission process is considered completed,
- *       even if it was not succesful.
- *       The transmission process is considered completed when the APS ACK is received (transmission succesful)
- *       or when the maximum number of attempts has been reached.
- *       If there is not ACK at APS layer it will retransmit once, and if there is not ACK at MAC level,
- *       it will retransmit up to three times. But the callback function is not executed on every attempt,
- *       it is executed only when the process is considered completed.
- *
- */
-void user_data_tx_status_cb(zb_bufid_t bufid)
-{
-    if( bufid )
-    {
-        zb_uint8_t *pointerToBeginOfBuffer;
-        zb_uint8_t aps_counter;
-        zb_uint8_t nwk_sequence_number;
-        zb_uint8_t mac_sequence_number;
-
-        pointerToBeginOfBuffer = zb_buf_begin(bufid);
-        pointerToBeginOfBuffer = pointerToBeginOfBuffer - 17;
-
-        if(PRINT_ZIGBEE_INFO)
-        {
-            mac_sequence_number = pointerToBeginOfBuffer[2];
-            nwk_sequence_number = pointerToBeginOfBuffer[16];
-            aps_counter = pointerToBeginOfBuffer[24];
-            LOG_DBG("Transmission completed, MAC seq = %d, NWK seq = %d, APS counter = %d", mac_sequence_number, nwk_sequence_number, aps_counter);
-        }
-        zb_buf_free(bufid);
-    }
-}
-
-//------------------------------------------------------------------------------
 /**@brief Callback function excuted when AF gets APS packet.
  *
  * @param[in]   bufid   Reference to the Zigbee stack buffer used to pass signal.
  *
  */
-zb_uint8_t data_indication(zb_bufid_t bufid)
+zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 {
     if (bufid)
 	{
@@ -342,69 +244,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	if (bufid) {
 		zb_buf_free(bufid);
 	}
-}
-
-//------------------------------------------------------------------------------
-/**@brief Zigbee helper function  to send user payload
- *
- * @param[in]   outputPayload   Reference to the user payload
- * @param[in]   chunk_size   payload size to send
- *
- */
-void send_user_payload(zb_uint8_t param)
-{
-    zb_bufid_t bufid = zb_buf_get_out();
-
-    if( bufid ) /* If buffer could be allocated, schedule the transmission */
-    {
-        zb_addr_u dst_addr;
-        dst_addr.addr_short = 0x0000; // Destination address of the coordinator
-
-        zb_ret_t ret = zb_aps_send_user_payload(bufid,
-                                                dst_addr,
-                                                DIGI_PROFILE_ID,
-                                                DIGI_BINARY_VALUE_CLUSTER,
-                                                DIGI_BINARY_VALUE_SOURCE_ENDPOINT,
-                                                DIGI_BINARY_VALUE_DESTINATION_ENDPOINT,
-                                                ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-                                                ZB_TRUE,
-                                                buffer_for_output_rx_packet,
-                                                buffer_for_output_rx_packet_size);
-
-        if(PRINT_ZIGBEE_INFO)
-        {
-            if(ret == RET_OK)
-            {
-                LOG_DBG("Scheduled APS Frame with cluster 0x%x and payload %d bytes", DIGI_BINARY_VALUE_CLUSTER, (uint16_t)buffer_for_output_rx_packet_size);
-            }
-            else if(ret == RET_INVALID_PARAMETER_1) LOG_ERR("Transmission could not be scheduled: The buffer is invalid");
-            else if(ret == RET_INVALID_PARAMETER_2) LOG_ERR("Transmission could not be scheduled: The payload_ptr parameter is invalid");
-            else if(ret == RET_INVALID_PARAMETER_3) LOG_ERR("Transmission could not be scheduled: The payload_size parameter is too large");
-            else LOG_ERR("Unkown error zb_aps_send_user_payload");
-        }
-    }
-    else
-    {
-        LOG_ERR("Transmission could not be scheduled: Out buffer not allocated");
-    }
-
-    b_buffer_for_output_rx_packet_is_free = true;
-
-}
-
-//------------------------------------------------------------------------------
-/**@brief Function to send the received modbus answer. Logic to split the messages in MAX_ZIGBEE_PAYLOAD_SIZE
- *
- *
- */
-void send_zigbee_modbus_answer(void)
-{
-   if( !b_buffer_for_output_rx_packet_is_free ) return; // Do not do anything if transmission of last packet has not been scheduled
-   buffer_for_output_rx_packet_size = UART_rx_buffer_index_max +1;
-   if( buffer_for_output_rx_packet_size > MAX_ZIGBEE_PAYLOAD_SIZE ) return; // Do not do anything if size of message exceeds the maximum allowed payload size.
-   b_buffer_for_output_rx_packet_is_free = false;
-   memcpy(buffer_for_output_rx_packet, &UART_rx_buffer[0], buffer_for_output_rx_packet_size);
-   ZB_SCHEDULE_APP_CALLBACK(send_user_payload, 0);
 }
 
 // Interrupt handler for the timer
@@ -621,6 +460,7 @@ int main(void)
 
     get_reset_reason();
 
+    zigbee_aps_init();
     digi_at_init();
     digi_node_discovery_init();
 
@@ -642,8 +482,8 @@ int main(void)
 
     zigbee_configuration(); //Zigbee configuration
     zigbee_enable(); // Start Zigbee default thread
-    zb_af_set_data_indication(data_indication); // Set call back function for APS frame received
-    zb_aps_set_user_data_tx_cb(user_data_tx_status_cb); // Set call back function for APS frame transmitted
+    zb_af_set_data_indication(data_indication_cb); // Set call back function for APS frame received
+    zb_aps_set_user_data_tx_cb(zigbee_aps_user_data_tx_cb); // Set call back function for APS frame transmitted
     while(1)
     {
         // run diagnostic functions
@@ -651,18 +491,11 @@ int main(void)
         diagnostic_zigbee_info();
         display_counters();
 
-        // when modbus answer is ready send the answer
-        if(b_Modbus_Ready_to_send)
-        {
-            tcu_uart_frames_received_counter++;
-            send_zigbee_modbus_answer();
-            b_Modbus_Ready_to_send = false;
-            UART_rx_buffer_index = 0;
-        }
+        tcu_uart_transparent_mode_manager();   // Manage the frames received from the TCU uart when module is in transparent mode
+        digi_node_discovery_request_manager(); // Manage the device discovery requests
+        zigbee_aps_manager();                  // Manage the aps output frame queue
 
-        digi_node_discovery_request_manager();
-
-        k_sleep(K_MSEC(5));
+        k_sleep(K_MSEC(5));                    // Required to see log messages on console
     }
 
     return 0;
