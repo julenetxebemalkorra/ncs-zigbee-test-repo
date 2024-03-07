@@ -5,6 +5,11 @@
 
 #ifndef DIGI_AT_COMMANDS_H_
 #define DIGI_AT_COMMANDS_H_
+
+#define MINIMUM_SIZE_AT_COMMAND 4
+#define MAXIMUM_SIZE_AT_COMMAND 20 //Write command with a data of 16 bytes
+#define MAXIMUM_SIZE_NODE_IDENTIFIER 16
+
 /* Enumerative with the supported Xbee AT commands used to read/write parameters */
 enum parameter_at_command_e{
     AT_VR, // Read the Xbee's FW version
@@ -43,7 +48,7 @@ struct xbee_parameters_t {
     uint8_t at_zs;   // Xbee's Zigbee stack profile parameter
     uint8_t at_bd;   // Xbee's UART baud rate parameter
     uint8_t at_nb;   // Xbee's UART parity parameter
-    uint8_t at_ni[33];   // Node identifier string parameter
+    uint8_t at_ni[MAXIMUM_SIZE_NODE_IDENTIFIER + 1];   // Node identifier string parameter (plus one to include the '\0')
 };
 
  struct xbee_parameter_comando_at_t {
@@ -55,13 +60,18 @@ struct xbee_parameters_t {
     bool    b_read_only;       // If true, it is a read only parameter. If false, it can be written.
 };
 
-/* Function prototypes                                                        */
-void digi_at_init(void);
+/* Function prototypes used only internally                                   */
 void digi_at_init_xbee_parameters(void);
 void digi_at_init_xbee_parameter_command(void);
+int8_t digi_at_read_ni(uint8_t* buffer);
+void digi_at_reply_read_command(uint8_t at_command);
+bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_string, uint8_t string_size);
+bool convert_hex_string_to_uint64(const char *hex_string, uint8_t string_size, uint64_t *output_result);
+
+/* Function prototypes used externally                                        */
+void digi_at_init(void);
 void digi_at_reply_ok(void);
 void digi_at_reply_error(void);
-void digi_at_reply_read_command(uint8_t at_command);
 int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_input_data);
 
 #endif /* DIGI_AT_COMMANDS_H_ */

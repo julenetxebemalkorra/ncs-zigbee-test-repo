@@ -54,13 +54,13 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
     xbee_parameters.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
     xbee_parameters.at_nb = 1;     // Xbee's UART parity
-    sprintf(xbee_parameters.at_ni, "NORDIC"); // Node identifier string
+    xbee_parameters.at_ni[0] = '\0';  // Node identifier (null string).
 }
 
 /**@brief This function initializes the structure used to handle the AT commands
  * used to read/write parameters
  */
-void digi_at_init_xbee_parameter_command(void)
+void digi_at_init_xbee_parameter_command(void) // TODO This structure currently is not used. It was part of a major change that eventually I did not implement
 {
     // Xbee's FW version
     xbee_parameter_comando_at[AT_VR].first_char = 'V';
@@ -304,7 +304,7 @@ void digi_at_reply_read_command(uint8_t at_command)
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_nb);
         break;
      default:
-        break;
+        break; //It should never happen
     }
 
     if(reply_size > 0)
@@ -313,8 +313,88 @@ void digi_at_reply_read_command(uint8_t at_command)
     }
     else
     {
-        digi_at_reply_error(); // Read command not supported
+        digi_at_reply_error(); // Read command not supported (It should never happen)
     }
+}
+
+/**@brief This function updates the at parameter structure with the new value
+ *        sent with an AT write command.
+ *        It also generates the "OK" or "ERROR" reply to the command
+ *
+ * @param  at_command  Enum value representing a write AT command.
+ * @param  command_data  Data to be written
+ *
+ * @retval True if the new value was accepted
+ * @retval False if the new value was not accepted (out of ramge)
+ */
+bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_string, uint8_t string_size)
+{
+    bool return_value = false;
+
+    if( at_command == AT_NI ) // The data for that command is a string
+    {
+        if( string_size <= MAXIMUM_SIZE_NODE_IDENTIFIER )
+        {
+            uint8_t i;
+            for(i = 0; i<string_size; i++)
+            {
+                xbee_parameters.at_ni[i] = command_data_string[i];
+            }
+            xbee_parameters.at_ni[i] = '\0'; //End of string
+            return_value = true;
+        }
+    }
+    else //The data for the rest of the commands is a number
+    {
+        uint64_t command_data;
+        if( convert_hex_string_to_uint64(command_data_string, string_size, &command_data) )
+        {
+            switch (at_command)
+            {
+             case AT_JV:
+                if( command_data == 1 ) return_value = true; // Only accepted value with the current firmware
+                break;
+             case AT_NJ:
+                if( command_data == 0xFF ) return_value = true; // Only accepted value with the current firmware
+                break;
+             case AT_NW: // Valid range is [0, 0x64FF]
+                if( command_data < 0x64FF )
+                {
+                    xbee_parameters.at_nw = command_data;
+                    return_value = true; 
+                }
+                break;
+             case AT_ID: // Valid range is [0, 0xFFFFFFFFFFFFFFFF]
+                xbee_parameters.at_id = command_data;
+                return_value = true; 
+                break;
+             case AT_CE:
+                if( command_data == 0 ) return_value = true; // Only accepted value with the current firmware
+                break;
+             case AT_ZS:
+                if( command_data == 2 ) return_value = true; // Only accepted value with the current firmware (Zigbee Pro stack)
+                break;
+             case AT_BD:
+                if( command_data == 4 ) return_value = true; // Only accepted value with the current firmware (19200 bps)
+                break;
+             case AT_NB:
+                if( command_data == 1 ) return_value = true; // Only accepted value with the current firmware (no parity)
+                break;
+             default:
+                break; //It should never happen
+            }
+        }         
+    }
+
+    if( return_value )
+    {
+        digi_at_reply_ok();
+    }
+    else
+    {
+        digi_at_reply_error();
+    }
+    return return_value;
 }
 
 /**@brief This function analizes a buffer containing the last frame
@@ -329,18 +409,24 @@ void digi_at_reply_read_command(uint8_t at_command)
  */
 int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_input_data)
 {
-    if( input_data[0] >= 'a' ) input_data[0] = input_data[0] - 'a' + 'A'; // If lowcase, convert to upcase
-    if( input_data[1] >= 'a' ) input_data[1] = input_data[1] - 'a' + 'A'; // If lowcase, convert to upcase
-    if( input_data[2] >= 'a' ) input_data[2] = input_data[2] - 'a' + 'A'; // If lowcase, convert to upcase
-    if( input_data[3] >= 'a' ) input_data[3] = input_data[3] - 'a' + 'A'; // If lowcase, convert to upcase
-
-    if( ( size_input_data < 4 ) || ( input_data[0] != 'A' ) || ( input_data[1] != 'T' ) )
+    if( ( size_input_data < MINIMUM_SIZE_AT_COMMAND ) || ( size_input_data > MAXIMUM_SIZE_AT_COMMAND ) )
     {
         digi_at_reply_error();
         return -2; // It is not an AT command
     }
 
-    if( size_input_data == 4 ) // Read command or action command
+    if( input_data[0] >= 'a' ) input_data[0] = input_data[0] - 'a' + 'A'; // If lowcase, convert to upcase
+    if( input_data[1] >= 'a' ) input_data[1] = input_data[1] - 'a' + 'A'; // If lowcase, convert to upcase
+    if( input_data[2] >= 'a' ) input_data[2] = input_data[2] - 'a' + 'A'; // If lowcase, convert to upcase
+    if( input_data[3] >= 'a' ) input_data[3] = input_data[3] - 'a' + 'A'; // If lowcase, convert to upcase
+
+    if( ( input_data[0] != 'A' ) || ( input_data[1] != 'T' ) )
+    {
+        digi_at_reply_error();
+        return -2; // It is not an AT command
+    }
+
+    if( size_input_data == 4 ) // Four bytes --> It is a read command or action command
     {
         if( ( input_data[2] == 'V' ) && ( input_data[3] == 'R' ) ) // ATVR
         {
@@ -425,35 +511,113 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
         else
         {
             digi_at_reply_error();
-            return -3; // It is not a supported AT command
+            return -3; // It is a not supported read AT command
         }
     }
-    else
+    else // More than 4 characters --> It is a write command
     {
-        return -4; // TODO, meter comandos de escritura
+        uint8_t command_data_size = (uint8_t)size_input_data - 4;
+
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'I' ) )
+        {
+            if( digi_at_reply_write_command(AT_NI, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }        
+        if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
+        {
+            if( digi_at_reply_write_command(AT_JV, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'J' ) ) // ATNJ
+        {
+            if( digi_at_reply_write_command(AT_NJ, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'W' ) ) // ATNW
+        {
+            if( digi_at_reply_write_command(AT_NW, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }
+        if( ( input_data[2] == 'I' ) && ( input_data[3] == 'D' ) ) // ATID
+        {
+            if( digi_at_reply_write_command(AT_ID, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }
+        if( ( input_data[2] == 'C' ) && ( input_data[3] == 'E' ) ) // ATCE
+        {
+            if( digi_at_reply_write_command(AT_CE, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }
+        if( ( input_data[2] == 'Z' ) && ( input_data[3] == 'S' ) ) // ATZS
+        {
+            if( digi_at_reply_write_command(AT_ZS, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }
+        if( ( input_data[2] == 'B' ) && ( input_data[3] == 'D' ) ) // ATBD
+        {
+            if( digi_at_reply_write_command(AT_BD, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'B' ) ) // ATNB
+        {
+            if( digi_at_reply_write_command(AT_NB, &input_data[4], command_data_size) ) return 0;
+            else return -4;
+        }
+        else
+        {
+            digi_at_reply_error();
+            return -5; // It is not a supported write AT command
+        }
     }
 }
 
-//-----------------------------------------------------------------------------------------------------------------------
-// Continuar con lo siguiente:
-//     En principio, para considerar que se ha recibido una trama en modo comando, no hay que esperar a que pasen x ms sin
-//     recibir caracter. Lo que hay que esperar es a la recepcion de un '\r' que indicará el fin de trama. 
-//     Así que habría que diferenciar en cómo se considera el fin de trama cuando se está en modo Modbus, y como se considera
-//     el fin de trama cuando se está en modo comando.
-//     De hecho parte del analisis de la recepcion de trama en modo comando se realizará durante la rececpión de la trama
-//         Si el primer caracter no es 'A', da igual lo que venga despues, la trama es incorrecta
-//         Si el segundo caracter no es 'T', da igual lo que venga despues, la trama es incorrecta
-//         Si el tamaño de la trama es menor que 5 (incluyendo el '\r'), la trama es incorrecta
-//
-//     Podríamos definir una estructura de datos para almacenar comandos AT con los siguientes campos
-//         Campo 1: Primer caracter del comando
-//         Campo 2: Segundo caracter del comando
-//         Campo 3: Tipo de dato (numerico o array de caracteres)
-//         Campo 4: Puntero a primer byte de la variable que contiene el dato que se quiere leer
-//         Campo 5: Tamaño del dato
-//     
-//         O, en vez de los campos 3, 4, y 5, podría haber un puntero a la función que se debería ejecutar al recibir ese comando
-//
-//     Definiriamos un array de elementos de esa estructura. Ese array contiene los comandos soportados
-//     Al recibir un comando recorreriamos ese array, hasta encontrar el comando específico
-//-----------------------------------------------------------------------------------------------------------------------
+/**@brief This auxiliary function converts an string containing a number in hexadecimal format
+ *  in the numeric value
+ * 
+ * @param  hex_string  Pointer to buffer
+ * @param  string_size Size of string
+ * @param  output_result Pointer to the variable where the result is stored.
+ *
+ * @retval True if string contained an hexadecimal number
+ * @retval False if the string did not contain an hexadecimal number
+ */
+bool convert_hex_string_to_uint64(const char *hex_string, uint8_t string_size, uint64_t *output_result)
+{
+    uint64_t result = 0;
+    if( ( hex_string == NULL ) || ( string_size == 0 ) || ( string_size > 16 ) || ( output_result == NULL ) )
+    {
+        return false; // Verify the input parameters are valid
+    }
+
+    result = 0; // Initialize result
+
+    for( uint8_t i = 0; i < string_size; ++i )
+    {
+        uint8_t current_byte = hex_string[i];
+        // Verify if it is an hexadecimal character
+
+        if( ( current_byte >= '0' ) && ( current_byte <= '9' ) )
+        {
+            current_byte = current_byte - '0';
+        }
+        else if( ( current_byte >= 'a' ) && ( current_byte <= 'f' ) )
+        {
+            current_byte = current_byte - 'a' + 10;
+        }
+        else if( ( current_byte >= 'A' ) && ( current_byte <= 'F' ) )
+        {
+            current_byte = current_byte - 'A' + 10;
+        }
+        else
+        {
+            return false;
+        }
+
+        //Add contribution of current byte
+        result = ( result << 4 ) + (uint64_t)(current_byte);
+    }
+
+    *output_result = result;
+    return true;
+}
+

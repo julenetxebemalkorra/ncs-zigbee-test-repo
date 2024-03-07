@@ -232,7 +232,14 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
 
     if(input_byte == '\r') // End of frame
     {
-        digi_at_analyze_and_reply_to_command(tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
+        if( b_tcu_uart_rx_buffer_overflow )
+        {
+            digi_at_reply_error();
+        }
+        else
+        {
+            digi_at_analyze_and_reply_to_command(tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
+        }
         tcu_uart_rx_buffer_index = 0;
         b_tcu_uart_rx_buffer_overflow = false;
     }
