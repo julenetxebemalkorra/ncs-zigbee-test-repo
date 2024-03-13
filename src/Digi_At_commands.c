@@ -61,7 +61,7 @@ void digi_at_init_xbee_parameters(void)
  * used to read/write parameters
  */
 void digi_at_init_xbee_parameter_command(void) // TODO This structure currently is not used. It was part of a major change that eventually I did not implement
-{
+{                                              // TODO We should either use it, or delete it.
     // Xbee's FW version
     xbee_parameter_comando_at[AT_VR].first_char = 'V';
     xbee_parameter_comando_at[AT_VR].second_char = 'R';
@@ -317,6 +317,30 @@ void digi_at_reply_read_command(uint8_t at_command)
     }
 }
 
+/**@brief This function reacts to an action AT command and sends the reply through the TCU UART
+ *
+ * @param  at_command  Enum value representing an AT command.
+ *
+ */
+void digi_at_reply_action_command(uint8_t at_command)
+{
+    switch (at_command)
+    {
+     case AT_AC: //Apply changes and leave command mode
+        digi_at_reply_ok();
+        break;
+     case AT_WR: //Write in flash memory and leave command mode
+        digi_at_reply_ok();
+        break;
+     case AT_CN: //Leave command mode
+        digi_at_reply_ok();
+        break;
+     default:
+        digi_at_reply_error(); // Command not supported (It should never happen)
+        break; //It should never happen
+    }
+}
+
 /**@brief This function updates the at parameter structure with the new value
  *        sent with an AT write command.
  *        It also generates the "OK" or "ERROR" reply to the command
@@ -325,7 +349,7 @@ void digi_at_reply_read_command(uint8_t at_command)
  * @param  command_data  Data to be written
  *
  * @retval True if the new value was accepted
- * @retval False if the new value was not accepted (out of ramge)
+ * @retval False if the new value was not accepted (out of range)
  */
 bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_string, uint8_t string_size)
 {
@@ -405,14 +429,21 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
  * @param  size_input_data  Size of input data(bytes)
  *
  * @retval Negative value Error code.
- * @retval 0 OK
+ * @retval 0 OK. Command accepted and we should stay in command mode
+ * @retval 1 OK. Command accepted and we should leave command mode
  */
 int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_input_data)
 {
-    if( ( size_input_data < MINIMUM_SIZE_AT_COMMAND ) || ( size_input_data > MAXIMUM_SIZE_AT_COMMAND ) )
+    if( size_input_data < MINIMUM_SIZE_AT_COMMAND )
     {
         digi_at_reply_error();
-        return -2; // It is not an AT command
+        return AT_CMD_ERROR_TOO_SHORT;
+    }
+
+    if( size_input_data > MAXIMUM_SIZE_AT_COMMAND )
+    {
+        digi_at_reply_error();
+        return AT_CMD_ERROR_TOO_LONG;
     }
 
     if( input_data[0] >= 'a' ) input_data[0] = input_data[0] - 'a' + 'A'; // If lowcase, convert to upcase
@@ -423,96 +454,108 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
     if( ( input_data[0] != 'A' ) || ( input_data[1] != 'T' ) )
     {
         digi_at_reply_error();
-        return -2; // It is not an AT command
+        return AT_CMD_ERROR_WRONG_PREFIX;
     }
 
-    if( size_input_data == 4 ) // Four bytes --> It is a read command or action command
+    if( size_input_data == 4 ) // Four bytes --> It is a read command or an action command
     {
         if( ( input_data[2] == 'V' ) && ( input_data[3] == 'R' ) ) // ATVR
         {
             digi_at_reply_read_command(AT_VR);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'H' ) && ( input_data[3] == 'V' ) ) // ATHV
         {
             digi_at_reply_read_command(AT_HV);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'S' ) && ( input_data[3] == 'H' ) ) // ATSH
         {
             digi_at_reply_read_command(AT_SH);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'S' ) && ( input_data[3] == 'L' ) ) // ATSL
         {
             digi_at_reply_read_command(AT_SL);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
         {
             digi_at_reply_read_command(AT_JV);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'J' ) ) // ATNJ
         {
             digi_at_reply_read_command(AT_NJ);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'W' ) ) // ATNW
         {
             digi_at_reply_read_command(AT_NW);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'I' ) && ( input_data[3] == 'D' ) ) // ATID
         {
             digi_at_reply_read_command(AT_ID);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'I' ) ) // ATNI
         {
             digi_at_reply_read_command(AT_NI);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'C' ) && ( input_data[3] == 'E' ) ) // ATCE
         {
             digi_at_reply_read_command(AT_CE);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'A' ) && ( input_data[3] == 'I' ) ) // ATAI
         {
             digi_at_reply_read_command(AT_AI);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'C' ) && ( input_data[3] == 'H' ) ) // ATCH
         {
             digi_at_reply_read_command(AT_CH);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'M' ) && ( input_data[3] == 'Y' ) ) // ATMY
         {
             digi_at_reply_read_command(AT_MY);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'Z' ) && ( input_data[3] == 'S' ) ) // ATZS
         {
             digi_at_reply_read_command(AT_ZS);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'B' ) && ( input_data[3] == 'D' ) ) // ATBD
         {
             digi_at_reply_read_command(AT_BD);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'B' ) ) // ATNB
         {
             digi_at_reply_read_command(AT_NB);
-            return 0;
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
-        else
+        if( ( input_data[2] == 'A' ) && ( input_data[3] == 'C' ) ) // ATAC
         {
-            digi_at_reply_error();
-            return -3; // It is a not supported read AT command
+            digi_at_reply_action_command(AT_AC);
+            return AT_CMD_OK_LEAVE_CMD_MODE;
         }
+        if( ( input_data[2] == 'W' ) && ( input_data[3] == 'R' ) ) // ATWR
+        {
+            digi_at_reply_action_command(AT_WR);
+            return AT_CMD_OK_LEAVE_CMD_MODE;
+        }
+        if( ( input_data[2] == 'C' ) && ( input_data[3] == 'N' ) ) // ATCN
+        {
+            digi_at_reply_action_command(AT_CN);
+            return AT_CMD_OK_LEAVE_CMD_MODE;
+        }
+        digi_at_reply_error();
+        return AT_CMD_ERROR_NOT_SUPPORTED_READ_CMD;
     }
     else // More than 4 characters --> It is a write command
     {
@@ -520,54 +563,51 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
 
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'I' ) )
         {
-            if( digi_at_reply_write_command(AT_NI, &input_data[4], command_data_size) ) return 0;
-            else return -4;
-        }        
+            if( digi_at_reply_write_command(AT_NI, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+        }
         if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
         {
-            if( digi_at_reply_write_command(AT_JV, &input_data[4], command_data_size) ) return 0;
-            else return -4;
+            if( digi_at_reply_write_command(AT_JV, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'J' ) ) // ATNJ
         {
-            if( digi_at_reply_write_command(AT_NJ, &input_data[4], command_data_size) ) return 0;
-            else return -4;
+            if( digi_at_reply_write_command(AT_NJ, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'W' ) ) // ATNW
         {
-            if( digi_at_reply_write_command(AT_NW, &input_data[4], command_data_size) ) return 0;
-            else return -4;
+            if( digi_at_reply_write_command(AT_NW, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
         if( ( input_data[2] == 'I' ) && ( input_data[3] == 'D' ) ) // ATID
         {
-            if( digi_at_reply_write_command(AT_ID, &input_data[4], command_data_size) ) return 0;
-            else return -4;
+            if( digi_at_reply_write_command(AT_ID, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
         if( ( input_data[2] == 'C' ) && ( input_data[3] == 'E' ) ) // ATCE
         {
-            if( digi_at_reply_write_command(AT_CE, &input_data[4], command_data_size) ) return 0;
-            else return -4;
+            if( digi_at_reply_write_command(AT_CE, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
         if( ( input_data[2] == 'Z' ) && ( input_data[3] == 'S' ) ) // ATZS
         {
-            if( digi_at_reply_write_command(AT_ZS, &input_data[4], command_data_size) ) return 0;
-            else return -4;
+            if( digi_at_reply_write_command(AT_ZS, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
         if( ( input_data[2] == 'B' ) && ( input_data[3] == 'D' ) ) // ATBD
         {
-            if( digi_at_reply_write_command(AT_BD, &input_data[4], command_data_size) ) return 0;
-            else return -4;
+            if( digi_at_reply_write_command(AT_BD, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'B' ) ) // ATNB
         {
-            if( digi_at_reply_write_command(AT_NB, &input_data[4], command_data_size) ) return 0;
-            else return -4;
+            if( digi_at_reply_write_command(AT_NB, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
-        else
-        {
-            digi_at_reply_error();
-            return -5; // It is not a supported write AT command
-        }
+        digi_at_reply_error();
+        return AT_CMD_ERROR_NOT_SUPPORTED_WRITE_CMD; // It is not a supported write AT command
     }
 }
 

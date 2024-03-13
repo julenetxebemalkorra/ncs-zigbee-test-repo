@@ -28,7 +28,22 @@ enum parameter_at_command_e{
     AT_ZS, // Read / write the "Zigbee stack profile" parameter [ZS]
     AT_BD, // Read / write the "baud rate" parameter [BD]
     AT_NB, // Read / write the "parity" parameter [BD]
+    AT_AC, // Apply changes and leave command mode
+    AT_WR, // Write in flash memory and leave command mode
+    AT_CN, // Leave command mode
     NUMBER_OF_PARAMETER_AT_COMMANDS
+};
+
+/* Enumerative with the error codes generated when analyzing an AT command    */
+enum at_command_analysis_error_code_e{
+    AT_CMD_ERROR_TOO_SHORT = -6,
+    AT_CMD_ERROR_TOO_LONG = -5,
+    AT_CMD_ERROR_WRONG_PREFIX = -4,
+    AT_CMD_ERROR_NOT_SUPPORTED_READ_CMD = -3,
+    AT_CMD_ERROR_WRITE_DATA_NOT_VALID = -2,
+    AT_CMD_ERROR_NOT_SUPPORTED_WRITE_CMD = -1,
+    AT_CMD_OK_STAY_IN_CMD_MODE = 0,
+    AT_CMD_OK_LEAVE_CMD_MODE = 1
 };
 
 /* Xbee parameters                                                            */
@@ -65,6 +80,7 @@ void digi_at_init_xbee_parameters(void);
 void digi_at_init_xbee_parameter_command(void);
 int8_t digi_at_read_ni(uint8_t* buffer);
 void digi_at_reply_read_command(uint8_t at_command);
+void digi_at_reply_action_command(uint8_t at_command);
 bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_string, uint8_t string_size);
 bool convert_hex_string_to_uint64(const char *hex_string, uint8_t string_size, uint64_t *output_result);
 

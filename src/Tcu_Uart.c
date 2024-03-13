@@ -201,10 +201,7 @@ void tcu_uart_timers_10kHz(void)
             else
             {
                 post_silence_timer_ms = 0;
-                if( !b_zigbee_module_in_command_mode )
-                {
-                    switch_tcu_uart_to_command_mode();
-                }
+                switch_tcu_uart_to_command_mode();
                 digi_at_reply_ok();
                 enter_cmd_mode_sequence_st = ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_INITIAL_SILENCE_ST;
             }
@@ -232,22 +229,44 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
 
     if(input_byte == '\r') // End of frame
     {
+        if( tcu_uart_rx_buffer_index == 0 ) return; //Ignore empty commands
+
         if( b_tcu_uart_rx_buffer_overflow )
         {
             digi_at_reply_error();
         }
         else
         {
-            digi_at_analyze_and_reply_to_command(tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
+            int8_t command_analysis_result = digi_at_analyze_and_reply_to_command(tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
+            if( command_analysis_result == AT_CMD_OK_LEAVE_CMD_MODE ) //As a result of the command, we should leave command mode
+            {
+                switch_tcu_uart_out_of_command_mode();
+            }
+            else if( command_analysis_result < 0 ) //Command not accepted
+            {
+                LOG_ERR("Wrong AT command. Error code: %d", command_analysis_result);
+                for(uint8_t kk=0; kk<tcu_uart_rx_buffer_index; kk++)
+                {
+                    LOG_WRN("%d", tcu_uart_rx_buffer[kk]);
+                }
+            }
         }
         tcu_uart_rx_buffer_index = 0;
         b_tcu_uart_rx_buffer_overflow = false;
     }
-    else if(!b_tcu_uart_rx_buffer_overflow)
+    else if( !b_tcu_uart_rx_buffer_overflow )
     {
         if( tcu_uart_rx_buffer_index >= UART_RX_BUFFER_SIZE )
         {
             b_tcu_uart_rx_buffer_overflow = true;
+        }
+        else if( tcu_uart_rx_buffer_index == 0 )
+        {
+            if( (input_byte == 'A') || (input_byte == 'a') ) //Ignore received characters until the first 'A' or 'a' is received
+            {
+                tcu_uart_rx_buffer[tcu_uart_rx_buffer_index] = input_byte;
+                tcu_uart_rx_buffer_index++;
+            }
         }
         else
         {
@@ -392,7 +411,11 @@ void switch_tcu_uart_to_command_mode(void)
 {
     tcu_uart_rx_buffer_index = 0;
     leave_cmd_mode_silence_timer_ms = 0;
-    b_zigbee_module_in_command_mode = true;
+    if( !b_zigbee_module_in_command_mode )
+    {
+        b_zigbee_module_in_command_mode = true;
+        LOG_DBG("Enter in command mode");
+    }
 }
 
 /**@brief Switch the TCU uart out of command mode
@@ -403,6 +426,7 @@ void switch_tcu_uart_out_of_command_mode(void)
 {
     tcu_uart_rx_buffer_init();
     b_zigbee_module_in_command_mode = false;
+    LOG_DBG("Leave command mode");
 }
 
 /**@brief Indicate if the TCU UART is in command mode
