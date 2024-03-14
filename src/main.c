@@ -92,6 +92,8 @@ volatile uint16_t UART_rx_buffer_index_max;
 
 static volatile size_t offset = 0;
 
+static volatile int count;
+
 /* Zigbee messagge info*/
 
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
@@ -388,7 +390,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
         zb_buf_free(bufid);
         zb_osif_enable_all_inter();	
     }
-}
 
 }
 
