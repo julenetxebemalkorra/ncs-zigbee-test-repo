@@ -314,10 +314,29 @@ void zboss_signal_handler(zb_bufid_t bufid)
         {
 			if( sig == ZB_BDB_SIGNAL_DEVICE_FIRST_START ) LOG_WRN( "SIGNAL 5: Device started for the first time after the NVRAM erase");
             else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
-			else if( sig == ZB_BDB_SIGNAL_STEERING ) LOG_WRN( "SIGNAL 10: BDB network steering completed");
+			else if( sig == ZB_BDB_SIGNAL_STEERING ) LOG_WRN( "SIGNAL 10: BDB network steering");
 			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
             else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
-			else
+            else if( sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT ) LOG_WRN( "SIGNAL 24: This signal informs the application that all links to otherrouters has expired. In such situation, the node can communicate only with its children.");
+			else if( sig == ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED)
+            {
+		            /* This signal informs the Router and Coordinator that conflict
+		             * PAN ID has been detected and needs to be resolved. In order
+		             * to do that *zb_start_pan_id_conflict_resolution* is called.
+		             */
+                    LOG_WRN("SIGNAL 49 ZB_NWK_SIGNAL_PANID_CONFLICT_DETECTED zigbee_default_signal_handler only handles this if the device is End Device. The application should handle this signal.");
+		            zb_bufid_t buf_copy = zb_buf_get_out();
+
+		            if (buf_copy) {
+		            	zb_buf_copy(buf_copy, bufid);
+		            	ZVUNUSED(ZB_ZDO_SIGNAL_CUT_HEADER(buf_copy));
+
+		            	zb_start_pan_id_conflict_resolution(buf_copy);
+		            } else {
+		            	LOG_ERR("No free buffer available, skipping conflict resolving this time.");
+		            }
+            } 
+            else
 			{
                 if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
                 {
