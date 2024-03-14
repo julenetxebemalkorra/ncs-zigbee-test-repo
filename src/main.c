@@ -350,6 +350,30 @@ void zboss_signal_handler(zb_bufid_t bufid)
         }
     }
 
+    if(sig == ZB_BDB_SIGNAL_STEERING || sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT)
+    {
+        count++;
+        LOG_ERR( "count  ZB_BDB_SIGNAL_STEERING %d",count);
+        if (count >=5)
+        {
+            /* Do not allow to call factory_reset before the ZBOSS stack is started. */
+	        if (!zigbee_is_stack_started()) {
+		    LOG_ERR("Stack not started");
+		    return -ENOEXEC;
+	        }
+
+            zb_uint16_t parnet_node = zb_nwk_get_parent();
+            LOG_WRN( "parnet_node 0x%04x",parnet_node);
+
+            ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
+
+            LOG_ERR( "reset  zb_bdb_reset_via_local_action %d",count);
+
+            count = 0;
+
+        }
+    }
+
 	/* No application-specific behavior is required.
 	 * Call default signal handler.
 	 */
@@ -529,7 +553,7 @@ static int8_t gpio_init(void)
 void zigbee_configuration()
 {
 	/* disable NVRAM erasing on every application startup*/
-	zb_set_nvram_erase_at_start(ZB_TRUE);
+	zb_set_nvram_erase_at_start(ZB_FALSE);
 
 	if(!CRYPTO_ENABLE)
 	{
