@@ -90,6 +90,8 @@ void digi_at_init(void);
 void digi_at_reply_ok(void);
 void digi_at_reply_error(void);
 int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_input_data);
+uint64_t digi_at_get_parameter_id(void);
+void digi_at_get_parameter_ni(uint8_t *ni);
 
 #endif /* DIGI_AT_COMMANDS_H_ */
 

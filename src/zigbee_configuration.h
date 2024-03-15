@@ -18,6 +18,7 @@ struct zb_user_conf_t {
 /* Function prototypes (used externally)                                      */
 void zb_conf_read_from_nvram (void);
 void zb_conf_copy_to_nvram (void);
+void zb_conf_update (void);
 uint64_t zb_conf_get_extended_pan_id (void);
 void zb_conf_get_extended_node_identifier (uint8_t *ni);
 

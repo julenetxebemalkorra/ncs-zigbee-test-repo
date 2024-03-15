@@ -58,6 +58,32 @@ void digi_at_init_xbee_parameters(void)
     zb_conf_get_extended_node_identifier(&xbee_parameters.at_ni[0]);// Node identifier; It is user configurable, get it from NVRAM
 }
 
+/**@brief This function returns the value of the  ATID
+ *
+ * @retval Value of ATID parameter [uint64_t]
+ */
+uint64_t digi_at_get_parameter_id(void)
+{
+    return(xbee_parameters.at_id);
+}
+
+//------------------------------------------------------------------------------
+/**@brief Get the value of the ATNI parameter
+ *        It gets stored in the buffer passed as argument
+ *
+ * @param  ni  Pointer to buffer where the node identifier will be stored.
+ */
+void digi_at_get_parameter_ni(uint8_t *ni)
+{
+    uint8_t i;
+    for(i=0; i < MAXIMUM_SIZE_NODE_IDENTIFIER; i++)
+    {
+        ni[i] = xbee_parameters.at_ni[i];
+        if( ni[i] == '\0' ) break;
+    }
+    if( ni[i] != '\0' ) ni[i+1] = '\0';
+}
+
 /**@brief This function initializes the structure used to handle the AT commands
  * used to read/write parameters
  */

@@ -12,6 +12,7 @@
 #include <zboss_api.h>
 
 #include "zigbee_configuration.h"
+#include "Digi_At_commands.h"
 
 LOG_MODULE_REGISTER(zb_conf, LOG_LEVEL_DBG);
 /* Local variables                                                            */
@@ -43,7 +44,18 @@ void zb_conf_copy_to_nvram (void) // TODO
 }
 
 //------------------------------------------------------------------------------
-/**@brief Ger the used configurable parameter "extended pan id"
+/**@brief Update the zigbee user configuration structure with the last values 
+ *        introduced by the user.
+ *
+ */
+void zb_conf_update (void)
+{
+    zb_user_conf.extended_pan_id = digi_at_get_parameter_id();
+    digi_at_get_parameter_ni(&zb_user_conf.at_ni[0]);
+}
+
+//------------------------------------------------------------------------------
+/**@brief Get the used configurable parameter "extended pan id"
  *
  * @retval User configured extended pan id
  */
