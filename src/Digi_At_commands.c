@@ -19,6 +19,7 @@
 //#include <string.h>
 
 #include <zephyr/kernel.h>
+#include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
 #include "tcu_Uart.h"
 
@@ -46,7 +47,7 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_jv = 1;     // Node join verification
     xbee_parameters.at_nj = 0xFF;  // Node join time
     xbee_parameters.at_nw = 10;    // Network watchdog
-    xbee_parameters.at_id = 0;     // Extended pan id
+    xbee_parameters.at_id = zb_conf_get_extended_pan_id();   // Extended pan id; It is user configurable, get it from NVRAM
     xbee_parameters.at_ce = 0;     // Coordinator enabled
     xbee_parameters.at_ai = 0xFF;  // Association indication
     xbee_parameters.at_ch = 0;     // Operation channel
@@ -54,8 +55,7 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
     xbee_parameters.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
     xbee_parameters.at_nb = 0;     // Xbee's UART parity (0 = None)
-    xbee_parameters.at_ni[0] = ' ';  // Node identifier (Blank)
-    xbee_parameters.at_ni[1] = '\0';  // Node identifier (null string).
+    zb_conf_get_extended_node_identifier(&xbee_parameters.at_ni[0]);// Node identifier; It is user configurable, get it from NVRAM
 }
 
 /**@brief This function initializes the structure used to handle the AT commands

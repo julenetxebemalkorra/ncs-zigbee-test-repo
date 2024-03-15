@@ -29,6 +29,8 @@
 #include <nrfx_timer.h>
 #include <zephyr/drivers/hwinfo.h>
 
+#include "global_defines.h"
+#include "zigbee_configuration.h"
 #include "tcu_Uart.h"
 #include "Digi_profile.h"
 #include "zigbee_aps.h"
@@ -69,12 +71,8 @@ uint16_t aps_frames_received_commissioning_cluster_counter = 0;
 uint16_t tcu_uart_frames_transmitted_counter = 0;
 uint16_t tcu_uart_frames_received_counter = 0;
 
-//
-static const zb_uint8_t ext_pan_id[8] = {0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-const zb_uint8_t * ptr_ext_pan_id = ext_pan_id;
-
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
-	
+
 /*
  * A build error on this line means your board is unsupported.
  * See the sample documentation for information on how to fix this.
@@ -313,6 +311,20 @@ static int8_t gpio_init(void)
     return 0;
 }
 
+void set_extended_pan_id_in_stack(void)
+{
+    zb_uint8_t extended_pan_id[8] = {0};
+    uint64_t ui_temp = zb_conf_get_extended_pan_id();
+
+    for(uint8_t i=0; i<8; i++)
+    {
+        extended_pan_id[i] = (zb_uint8_t)(ui_temp & 0x00000000000000FF);
+        ui_temp = ui_temp>>8;
+    }
+
+	zb_set_extended_pan_id(extended_pan_id);
+}
+
 // Function for initializing the Zigbee configuration
 void zigbee_configuration()
 {
@@ -335,7 +347,7 @@ void zigbee_configuration()
     // Set the network key
 	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
 
-	zb_set_extended_pan_id(ptr_ext_pan_id);
+    set_extended_pan_id_in_stack();
 
 	//TRUE to disable trust center, legacy support for
 	zb_bdb_set_legacy_device_support(ZB_TRUE);
@@ -458,8 +470,8 @@ int main(void)
     LOG_INF("Router started successfully");
     int ret = 0;
 
-    get_reset_reason();
-
+    get_reset_reason();        // Read last reset reason
+    zb_conf_read_from_nvram(); // Read user configurable zigbee parameters from NVRAM
     zigbee_aps_init();
     digi_at_init();
     digi_node_discovery_init();

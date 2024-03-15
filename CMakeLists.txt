@@ -15,6 +15,7 @@ target_sources(app PRIVATE
   src/main.c
   src/Tcu_Uart.c
   src/zigbee_aps.c
+  src/zigbee_configuration.c
   src/Digi_node_discovery.c
   src/Digi_At_commands.c
 )
