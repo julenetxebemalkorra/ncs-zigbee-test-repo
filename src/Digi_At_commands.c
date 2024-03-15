@@ -53,8 +53,9 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_my = 0;     // Short address
     xbee_parameters.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
     xbee_parameters.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
-    xbee_parameters.at_nb = 1;     // Xbee's UART parity
-    xbee_parameters.at_ni[0] = '\0';  // Node identifier (null string).
+    xbee_parameters.at_nb = 0;     // Xbee's UART parity (0 = None)
+    xbee_parameters.at_ni[0] = ' ';  // Node identifier (Blank)
+    xbee_parameters.at_ni[1] = '\0';  // Node identifier (null string).
 }
 
 /**@brief This function initializes the structure used to handle the AT commands

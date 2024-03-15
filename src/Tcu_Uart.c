@@ -59,7 +59,7 @@ static const struct device *dev_tcu_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
 // Create a configuration structure for the UART used to communicate with the TCU
 static struct uart_config tcu_uart_config = {
     .baudrate = 19200,
-    .parity = UART_CFG_PARITY_EVEN,
+    .parity = UART_CFG_PARITY_NONE,
     .stop_bits = UART_CFG_STOP_BITS_1,
     .data_bits = UART_CFG_DATA_BITS_8,
     .flow_ctrl = UART_CFG_FLOW_CTRL_NONE

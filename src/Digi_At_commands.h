@@ -7,8 +7,8 @@
 #define DIGI_AT_COMMANDS_H_
 
 #define MINIMUM_SIZE_AT_COMMAND 4
-#define MAXIMUM_SIZE_AT_COMMAND 20 //Write command with a data of 16 bytes
-#define MAXIMUM_SIZE_NODE_IDENTIFIER 16
+#define MAXIMUM_SIZE_AT_COMMAND 25 //Write command + blank + data of 20 bytes
+#define MAXIMUM_SIZE_NODE_IDENTIFIER 20
 
 /* Enumerative with the supported Xbee AT commands used to read/write parameters */
 enum parameter_at_command_e{
