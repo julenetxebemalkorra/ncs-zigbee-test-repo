@@ -28,6 +28,7 @@
 
 #include <nrfx_timer.h>
 #include <zephyr/drivers/hwinfo.h>
+#include <zephyr/sys/reboot.h>
 
 #include "global_defines.h"
 #include "zigbee_configuration.h"
@@ -60,7 +61,10 @@
 #define LED0_NODE DT_ALIAS(led0)
 
 /*UART Modbus and zigbee buffer size definitions*/
-#define MODBUS_MIN_RX_LENGTH             8   // if the messagge has 8 bytes we consider it a modbus frame
+#define MODBUS_MIN_RX_LENGTH                8   // if the messagge has 8 bytes we consider it a modbus frame
+
+#define SIGNAL_STEERING_ATEMP_COUNT_MAX     3  // Number of steering attempts before local reset
+#define RESTART_ATEMP_COUNT_MAX             3  // Number of restart attempts before hardware reset
 
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
@@ -70,6 +74,9 @@ uint16_t aps_frames_received_commissioning_cluster_counter = 0;
 
 uint16_t tcu_uart_frames_transmitted_counter = 0;
 uint16_t tcu_uart_frames_received_counter = 0;
+
+uint8_t soft_reset_counter = 0;
+uint8_t hard_reset_counter = 0;
 
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
@@ -214,7 +221,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
         {
 			if( sig == ZB_BDB_SIGNAL_DEVICE_FIRST_START ) LOG_WRN( "SIGNAL 5: Device started for the first time after the NVRAM erase");
             else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
-			else if( sig == ZB_BDB_SIGNAL_STEERING ) LOG_WRN( "SIGNAL 10: BDB network steering completed");
 			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
             else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
 			else
@@ -228,6 +234,42 @@ void zboss_signal_handler(zb_bufid_t bufid)
                     LOG_WRN( "SIGNAL %d , state not OK",sig);
                 }
 			}
+        }
+    }
+
+    if(sig == ZB_BDB_SIGNAL_STEERING || sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT)
+    {
+        soft_reset_counter++;
+        LOG_WRN("Device is encountering issues during steering.");
+        if (soft_reset_counter >= SIGNAL_STEERING_ATEMP_COUNT_MAX)
+        {
+ 			if(PRINT_ZIGBEE_INFO)
+ 			{	
+            	zb_uint16_t parnet_node = zb_nwk_get_parent();
+                if(parnet_node != 0xffff)
+                {
+                    LOG_WRN("Device has joined a coordinator, but there might be an issue. Parent Node: 0x%04x", parnet_node);
+                }
+                else
+                {
+                    LOG_WRN( "device has not joined a coordinator.");
+                }
+        	}	
+
+            ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
+
+            LOG_WRN( "The device will perform the NLME leave and clean all Zigbee persistent data except the outgoing NWK frame counter and application datasets");
+
+            soft_reset_counter = 0;
+            hard_reset_counter++;
+        }
+        if(hard_reset_counter >= RESTART_ATEMP_COUNT_MAX)
+        {
+            LOG_ERR( "device restarted since it is not able to join any network");
+            
+            // Reboot the device
+		    sys_reboot(0);
+            hard_reset_counter = 0;
         }
     }
 
