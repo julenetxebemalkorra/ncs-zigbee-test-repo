@@ -199,8 +199,11 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 
     if (bufid)
     {
-		zb_buf_free(bufid); // TODO: Should we free the buffer always? Or only in the cases where is processed as above?
-		return ZB_TRUE;
+    	// safe way to free buffer
+        zb_osif_disable_all_inter();
+        zb_buf_free(bufid);
+        zb_osif_enable_all_inter();
+    	return ZB_TRUE;
 	}
 	return ZB_FALSE;
 }
@@ -281,9 +284,14 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	/* All callbacks should either reuse or free passed buffers.
 	 * If bufid == 0, the buffer is invalid (not passed).
 	 */
-	if (bufid) {
-		zb_buf_free(bufid);
-	}
+	if (bufid)
+	{
+		// safe way to free buffer
+        zb_osif_disable_all_inter();
+        zb_buf_free(bufid);
+        zb_osif_enable_all_inter();	
+    }
+	
 }
 
 // Interrupt handler for the timer
