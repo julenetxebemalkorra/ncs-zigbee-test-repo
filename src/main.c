@@ -226,11 +226,14 @@ void zboss_signal_handler(zb_bufid_t bufid)
             else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
 			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
             else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
+            else if( sig == ZB_ZDO_SIGNAL_DEVICE_ANNCE ) LOG_WRN(" SIGNAL 2:  Notifies the application about the new device appearance.");
 			else
 			{
                 if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
                 {
                     LOG_WRN( "SIGNAL %d , state OK",sig);
+                    soft_reset_counter = 0;
+                    hard_reset_counter = 0;
                 }
                 else
                 {
