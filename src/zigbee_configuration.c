@@ -13,40 +13,81 @@
 
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
+#include "nvram.h"
 
 LOG_MODULE_REGISTER(zb_conf, LOG_LEVEL_DBG);
 /* Local variables                                                            */
 static struct zb_user_conf_t zb_user_conf; // zigbee user configuration
 
-/* Function definition                                                        */
-
-
 //------------------------------------------------------------------------------
 /**@brief Load zigbee user configuration from NVRAM
  *
+ * This function reads the Zigbee user configuration from NVRAM.
+ * It reads the PAN_ID and stores it in the zb_user_conf structure.
  *
+ * @return The function returns a uint8_t value. If the read operation was successful, 
+ * it returns the number of bytes read. If the read operation failed, it returns an error code.
  */
-void zb_conf_read_from_nvram (void) // TODO
+ 
+uint8_t zb_conf_read_from_nvram (void)
 {
-    zb_user_conf.extended_pan_id = 0x000000000000abce;
-    zb_user_conf.at_ni[0] = ' ';
-    zb_user_conf.at_ni[1] = '\r';
+    uint8_t panid[8];   // Buffer to store the PAN_ID read from NVRAM
+    uint8_t rc;         // Return code from the read operation
+
+    // Read the PAN_ID from NVRAM
+    rc = read_nvram_PAN_ID(panid, sizeof(panid));
+    // Check if the PAN_ID was successfully read from NVRAM
+    if (rc > 0) {
+        // PAN_ID was successfully read from NVRAM
+        // Convert the PAN_ID to a uint64_t and store it in the zb_user_conf structure
+        zb_user_conf.extended_pan_id = *(uint64_t *)panid;
+        // Log the PAN_ID read from NVRAM
+        LOG_HEXDUMP_DBG(&zb_user_conf.extended_pan_id,sizeof(zb_user_conf.extended_pan_id),"Extended PAN ID: ");
+    } 
+    else 
+    {
+        // Failed to read the PAN_ID from NVRAM
+        LOG_ERR("Error reading PAN ID\n");
+    }
+
+    // Read the Node Identifier (NI) from NVRAM
+    rc = read_nvram_NI(zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
+    // Check if the Node Identifier was successfully read from NVRAM
+    if (rc > 0) {
+        // Node Identifier was successfully read from NVRAM
+        LOG_INF("Node Identifier: %s\n", zb_user_conf.at_ni);
+    } 
+    else 
+    {
+        // Failed to read the Node Identifier from NVRAM
+        LOG_ERR("Error reading Node Identifier\n");
+    }
+
+    return rc;
+
 }
 
 //------------------------------------------------------------------------------
 /**@brief Write zigbee user configuration to NVRAM
  *
- *
+ * This function writes the current Zigbee user configuration to NVRAM.
+ * It writes both the PAN_ID and the Node Identifier (NI).
  */
-void zb_conf_copy_to_nvram (void) // TODO
+void zb_conf_copy_to_nvram (void)
 {
+    // Write the PAN_ID to NVRAM
+    write_nvram_PAN_ID(&zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
 
+    // Write the Node Identifier (NI) to NVRAM
+    write_nvram_NI(zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
 }
 
 //------------------------------------------------------------------------------
 /**@brief Update the zigbee user configuration structure with the last values 
  *        introduced by the user.
  *
+ * This function updates the Zigbee user configuration structure with the latest
+ * values provided by the user. It updates both the PAN_ID and the Node Identifier (NI).
  */
 void zb_conf_update (void)
 {

@@ -18,6 +18,7 @@ target_sources(app PRIVATE
   src/zigbee_configuration.c
   src/Digi_node_discovery.c
   src/Digi_At_commands.c
+  src/nvram.c
 )
 
 target_include_directories(app PRIVATE include)

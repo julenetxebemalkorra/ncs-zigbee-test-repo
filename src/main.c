@@ -37,6 +37,7 @@
 #include "zigbee_aps.h"
 #include "Digi_At_commands.h"
 #include "Digi_node_discovery.h"
+#include "nvram.h"
 
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
@@ -520,11 +521,21 @@ void display_counters(void)
  */
 int main(void)
 {
-    LOG_INF("Router started successfully");
     int ret = 0;
 
     get_reset_reason();        // Read last reset reason
-    zb_conf_read_from_nvram(); // Read user configurable zigbee parameters from NVRAM
+    ret = init_nvram();              // Initialize NVRAM
+    if( ret != 0)
+    {
+        LOG_ERR("init_nvram error %d", ret);
+    }
+    
+    ret = zb_conf_read_from_nvram(); // Read user configurable zigbee parameters from NVRAM
+    if( ret <= 0)
+    {
+        LOG_ERR("zb_conf_read_from_nvram error %d", ret);
+    }
+    
     zigbee_aps_init();
     digi_at_init();
     digi_node_discovery_init();
@@ -549,6 +560,9 @@ int main(void)
     zigbee_enable(); // Start Zigbee default thread
     zb_af_set_data_indication(data_indication_cb); // Set call back function for APS frame received
     zb_aps_set_user_data_tx_cb(zigbee_aps_user_data_tx_cb); // Set call back function for APS frame transmitted
+            
+    LOG_INF("Router started successfully");
+
     while(1)
     {
         // run diagnostic functions

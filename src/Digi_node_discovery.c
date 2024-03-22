@@ -33,18 +33,9 @@ void digi_node_discovery_init(void)
     node_discovery_reply.max_reply_time_ms = 0;
     node_discovery_reply.time_request_ms = 0;
     node_discovery_reply.time_reply_ms = 0;
-    node_discovery_reply.at_ni[0] = 'F';
-    node_discovery_reply.at_ni[1] = 'A';
-    node_discovery_reply.at_ni[2] = 'N';
-    node_discovery_reply.at_ni[3] = 'S';
-    node_discovery_reply.at_ni[4] = 'T';
-    node_discovery_reply.at_ni[5] = 'E';
-    node_discovery_reply.at_ni[6] = 'L';
-    node_discovery_reply.at_ni[7] = '_';
-    node_discovery_reply.at_ni[8] = '1';
-    node_discovery_reply.at_ni[9] = '3';
-    node_discovery_reply.at_ni[10] = '5';
-    node_discovery_reply.at_ni[11] = 0;
+
+    zb_conf_get_extended_node_identifier(node_discovery_reply.at_ni);
+
 }
 
 /**@brief This function evaluates if the last received APS frame is a Digi's Node Discover request
