@@ -126,8 +126,21 @@ uint8_t zb_conf_read_from_nvram (void)
         LOG_ERR("Error reading Node Identifier\n");
     }
 
-    return rc;
+    uint32_t stored_checksum = 0;
+    uint32_t calculated_checksum = calculate_checksum(&zb_user_conf, sizeof(zb_user_conf));
 
+    rc = read_nvram(ZB_NODE_IDENTIFIER+1, &stored_checksum, sizeof(stored_checksum));
+    if (rc > 0) {
+        if (calculated_checksum != stored_checksum) {
+            LOG_ERR("Checksum does not match\n");
+            return NVRAM_WRONG_DATA;
+        }
+    } else {
+        LOG_ERR("Error reading checksum\n");
+        return rc;
+    }
+
+    return rc;
 }
 
 //------------------------------------------------------------------------------
@@ -138,11 +151,17 @@ uint8_t zb_conf_read_from_nvram (void)
  */
 void zb_conf_write_to_nvram (void)
 {
+
+    // Calculate checksum
+    uint32_t checksum = calculate_checksum(&zb_user_conf, sizeof(zb_user_conf));
+    
     // Write the PAN_ID to NVRAM
     write_nvram(ZB_EXT_PANID, &zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
 
     // Write the Node Identifier (NI) to NVRAM
     write_nvram(ZB_NODE_IDENTIFIER, zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
+
+    write_nvram(ZB_CHECKSUM, &checksum, sizeof(checksum));
 }
 
 //------------------------------------------------------------------------------
@@ -183,4 +202,21 @@ void zb_conf_get_extended_node_identifier (uint8_t *ni)
         if( ni[i] == '\0' ) break;
     }
     if( ni[i] != '\0' ) ni[i+1] = '\0';
+}
+
+//------------------------------------------------------------------------------
+/** @brief Calculate checksum for given data
+ * 
+ * @param data A pointer to the data to calculate the checksum.
+ * @param size The size of the data to calculate the checksum.
+*/
+// Calculate checksum for given data
+uint32_t calculate_checksum(char* data, int size) {
+    uint32_t checksum = 0;
+    for (int i = 0; i < size; i++) {
+        checksum += (uint32_t)data[i];
+        LOG_WRN("Checksum: %d\n", checksum);
+        LOG_WRN("Data: %d\n", (uint32_t)data[i]);
+    }
+    return checksum;
 }

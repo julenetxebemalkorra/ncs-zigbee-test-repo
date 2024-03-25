@@ -79,7 +79,10 @@ void zigbee_aps_user_data_tx_cb(zb_bufid_t bufid)
         aps_counter = pointerToBeginOfBuffer[24];
         LOG_DBG("Transmission completed, MAC seq = %d, NWK seq = %d, APS counter = %d", mac_sequence_number, nwk_sequence_number, aps_counter);
 
+        // safe way to free buffer
+        zb_osif_disable_all_inter();
         zb_buf_free(bufid);
+        zb_osif_enable_all_inter();
     }
 }
 
@@ -203,7 +206,9 @@ void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
         }
         else
         {
+            zb_osif_disable_all_inter();
             zb_buf_free(bufid); // No need to use the buffer is there was not a pending frame in the queue.
+            zb_osif_enable_all_inter();
             LOG_ERR("Transmission could not be scheduled: No pending output frame in queue");
         }
     }
