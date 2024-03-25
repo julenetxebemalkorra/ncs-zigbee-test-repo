@@ -17,7 +17,70 @@
 
 LOG_MODULE_REGISTER(zb_conf, LOG_LEVEL_DBG);
 /* Local variables                                                            */
-static struct zb_user_conf_t zb_user_conf; // zigbee user configuration
+static struct zb_user_conf_t zb_user_conf; // zigbee user configurationç
+
+/* Function definition                                                        */
+//------------------------------------------------------------------------------
+/**@brief Check if the NVRAM is being used for the first time
+ *
+ * This function checks if the NVRAM is being used for the first time.
+ * It reads the first 6 bytes of the NVRAM and compares them with the expected values.
+ * If the values are correct, it means that the NVRAM is being used for the first time.
+ * In this case, the function writes the expected values to the NVRAM.
+ *
+ * @return The function returns a int8_t value. If the NVRAM is being used for the first time, 
+ * it returns 0. If the NVRAM is not being used for the first time, it returns a negative error code.
+ */
+int8_t zb_nvram_check_usage(void)
+{
+    // Buffer to store the first 6 bytes of the NVRAM
+    int8_t rc = 0;
+    uint8_t nvram_first_id[6];
+    uint8_t nvram_first_id_expected[6];
+
+    // Expected values for the first 6 bytes of the NVRAM
+    nvram_first_id_expected[0] = 0xAA;
+    nvram_first_id_expected[1] = 0xBB;
+    nvram_first_id_expected[2] = 0xCC;
+    nvram_first_id_expected[3] = 0xDD;
+    nvram_first_id_expected[4] = 0xEE;
+    nvram_first_id_expected[5] = 0xFF;
+
+    // Read the first 6 bytes of the NVRAM
+    rc = read_nvram_first_id(nvram_first_id, sizeof(nvram_first_id));
+    // Check if the first 6 bytes of the NVRAM were successfully read
+    if (rc != sizeof(nvram_first_id)) 
+    {
+        LOG_WRN("NVRAM first id is missing, write the default values\n");
+        zb_user_conf.extended_pan_id = 0x0000000000000000;
+        zb_user_conf.at_ni[0] = ' ';
+        zb_user_conf.at_ni[1] = '\r';
+        write_nvram_first_id(nvram_first_id_expected, sizeof(nvram_first_id_expected));
+        return -1;
+    }
+    else if (rc == sizeof(nvram_first_id))
+    {
+        if(nvram_first_id[0] == 0xAA && nvram_first_id[1] == 0xBB && nvram_first_id[2] == 0xCC && nvram_first_id[3] == 0xDD && nvram_first_id[4] == 0xEE && nvram_first_id[5] == 0xFF)
+        {
+            LOG_INF("NVRAM first id is correct\n");
+            return 0;
+        }
+        else
+        {
+            LOG_WRN("NVRAM read data is not correct, write again and work with the default conf\n");
+            zb_user_conf.extended_pan_id = 0x0000000000000000;
+            zb_user_conf.at_ni[0] = ' ';
+            zb_user_conf.at_ni[1] = '\r';;
+            write_nvram_first_id(nvram_first_id_expected, sizeof(nvram_first_id_expected));
+            return -2;
+        }
+    }
+    else
+    {
+        LOG_ERR("Unkwon error reading NVRAM first id\n");
+        return -3;
+    }
+}
 
 //------------------------------------------------------------------------------
 /**@brief Load zigbee user configuration from NVRAM
@@ -73,7 +136,7 @@ uint8_t zb_conf_read_from_nvram (void)
  * This function writes the current Zigbee user configuration to NVRAM.
  * It writes both the PAN_ID and the Node Identifier (NI).
  */
-void zb_conf_copy_to_nvram (void)
+void zb_conf_write_to_nvram (void)
 {
     // Write the PAN_ID to NVRAM
     write_nvram_PAN_ID(&zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));

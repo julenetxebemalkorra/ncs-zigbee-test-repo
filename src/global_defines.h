@@ -8,11 +8,7 @@
 
 #define MAXIMUM_SIZE_NODE_IDENTIFIER 20
 
+//Indicadores de alarma     
+extern bool g_b_flash_error;
+
 #endif /* GLOBAL_DEFINES_H_ */
-
-
-
-
-
-
-

@@ -81,6 +81,8 @@ uint8_t hard_reset_counter = 0;
 
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
+bool g_b_flash_error = false; //   Flag to indicate if there was an error when reading the NVRAM
+
 /*
  * A build error on this line means your board is unsupported.
  * See the sample documentation for information on how to fix this.
@@ -391,9 +393,6 @@ void zigbee_configuration()
 		zb_nwk_set_ieee_policy(ZB_FALSE);
 	}
 
-	/* Register device context (endpoints). */
-	//ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
-
 	// Define a distributed key (assuming key size of 16 bytes, you might need to adjust based on documentation)
     zb_uint8_t distributed_key[16] = {0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 
                                      0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00};
@@ -521,20 +520,41 @@ void display_counters(void)
  */
 int main(void)
 {
-    int ret = 0;
+    int8_t ret = 0;
 
     get_reset_reason();        // Read last reset reason
+
     ret = init_nvram();              // Initialize NVRAM
     if( ret != 0)
     {
         LOG_ERR("init_nvram error %d", ret);
+        g_b_flash_error = ZB_TRUE;
     }
     
-    ret = zb_conf_read_from_nvram(); // Read user configurable zigbee parameters from NVRAM
-    if( ret <= 0)
+    if (!g_b_flash_error)
     {
-        LOG_ERR("zb_conf_read_from_nvram error %d", ret);
+        ret = zb_nvram_check_usage();   // Check NVRAM usage
+
+        if( ret == -1) // NVRAM is not used, so write default data
+        {
+            zb_conf_write_to_nvram(); // Write user configurable zigbee parameters to NVRAM
+        }
+        else if(ret == 0) // read NVRAM data and use it
+        {
+            ret = zb_conf_read_from_nvram(); // Read user configurable zigbee parameters from NVRAM
+            if(ret <= 0)
+            {
+                LOG_ERR("zb_conf_read_from_nvram error %d", ret);
+                g_b_flash_error = ZB_TRUE;
+            }
+        }
+        else
+        {
+            LOG_ERR("zb_nvram_check_usage error %d", ret);
+            g_b_flash_error = ZB_TRUE;
+        }	
     }
+
     
     zigbee_aps_init();
     digi_at_init();
