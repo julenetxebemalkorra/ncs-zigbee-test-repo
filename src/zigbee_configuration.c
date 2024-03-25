@@ -47,7 +47,7 @@ int8_t zb_nvram_check_usage(void)
     nvram_first_id_expected[5] = 0xFF;
 
     // Read the first 6 bytes of the NVRAM
-    rc = read_nvram_first_id(nvram_first_id, sizeof(nvram_first_id));
+    rc = read_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id, sizeof(nvram_first_id));
     // Check if the first 6 bytes of the NVRAM were successfully read
     if (rc != sizeof(nvram_first_id)) 
     {
@@ -55,30 +55,30 @@ int8_t zb_nvram_check_usage(void)
         zb_user_conf.extended_pan_id = 0x0000000000000000;
         zb_user_conf.at_ni[0] = ' ';
         zb_user_conf.at_ni[1] = '\r';
-        write_nvram_first_id(nvram_first_id_expected, sizeof(nvram_first_id_expected));
-        return -1;
+        write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
+        return NVRAM_NOT_WRITTEN;
     }
     else if (rc == sizeof(nvram_first_id))
     {
         if(nvram_first_id[0] == 0xAA && nvram_first_id[1] == 0xBB && nvram_first_id[2] == 0xCC && nvram_first_id[3] == 0xDD && nvram_first_id[4] == 0xEE && nvram_first_id[5] == 0xFF)
         {
             LOG_INF("NVRAM first id is correct\n");
-            return 0;
+            return SUCCESS;
         }
         else
         {
             LOG_WRN("NVRAM read data is not correct, write again and work with the default conf\n");
             zb_user_conf.extended_pan_id = 0x0000000000000000;
             zb_user_conf.at_ni[0] = ' ';
-            zb_user_conf.at_ni[1] = '\r';;
-            write_nvram_first_id(nvram_first_id_expected, sizeof(nvram_first_id_expected));
-            return -2;
+            zb_user_conf.at_ni[1] = '\r';
+            write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
+            return NVRAM_WRONG_DATA;
         }
     }
     else
     {
         LOG_ERR("Unkwon error reading NVRAM first id\n");
-        return -3;
+        return NVRAM_UNKNOWN_ERR;
     }
 }
 
@@ -98,7 +98,7 @@ uint8_t zb_conf_read_from_nvram (void)
     uint8_t rc;         // Return code from the read operation
 
     // Read the PAN_ID from NVRAM
-    rc = read_nvram_PAN_ID(panid, sizeof(panid));
+    rc = read_nvram(ZB_EXT_PANID, panid, sizeof(panid));
     // Check if the PAN_ID was successfully read from NVRAM
     if (rc > 0) {
         // PAN_ID was successfully read from NVRAM
@@ -114,7 +114,7 @@ uint8_t zb_conf_read_from_nvram (void)
     }
 
     // Read the Node Identifier (NI) from NVRAM
-    rc = read_nvram_NI(zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
+    rc = read_nvram(ZB_NODE_IDENTIFIER, zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
     // Check if the Node Identifier was successfully read from NVRAM
     if (rc > 0) {
         // Node Identifier was successfully read from NVRAM
@@ -139,10 +139,10 @@ uint8_t zb_conf_read_from_nvram (void)
 void zb_conf_write_to_nvram (void)
 {
     // Write the PAN_ID to NVRAM
-    write_nvram_PAN_ID(&zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
+    write_nvram(ZB_EXT_PANID, &zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
 
     // Write the Node Identifier (NI) to NVRAM
-    write_nvram_NI(zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
+    write_nvram(ZB_NODE_IDENTIFIER, zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
 }
 
 //------------------------------------------------------------------------------

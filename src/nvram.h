@@ -16,10 +16,7 @@
 #define ZB_NODE_IDENTIFIER 3
 
 uint8_t init_nvram(void);
-uint8_t read_nvram_first_id(uint8_t *nvram_first_id, size_t nvram_first_id_size);
-uint8_t read_nvram_PAN_ID(uint64_t *panid, size_t size);
-uint8_t read_nvram_NI(uint8_t *ni, size_t size);
-void write_nvram_PAN_ID(uint64_t *panid, size_t size);
-void write_nvram_NI(uint8_t *ni, size_t size);
+uint8_t read_nvram(uint16_t id, uint8_t *data, size_t len);
+void write_nvram(uint16_t id, uint8_t *data, size_t len);
 
 #endif /* NVRAM_H_ */
