@@ -242,8 +242,7 @@ void digi_at_reply_error(void)
 int8_t digi_at_read_ni(uint8_t* buffer)
 {
     uint8_t i = 0;
-    
-    for(i=0; i<33; i++)
+    for(i=0; i<=MAXIMUM_SIZE_NODE_IDENTIFIER; i++)
     {
         if( xbee_parameters.at_ni[i] == 0 )
         {
@@ -254,10 +253,8 @@ int8_t digi_at_read_ni(uint8_t* buffer)
             buffer[i] = xbee_parameters.at_ni[i];
         }
     }
-
+ 
     buffer[i] = '\r';
-    buffer[i+1] = 0;
-
     return(i+1);
 }
 

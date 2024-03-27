@@ -56,7 +56,7 @@ int8_t zb_nvram_check_usage(void)
         LOG_WRN("NVRAM first id is missing, write the default values\n");
         zb_user_conf.extended_pan_id = 0x0000000000000000;
         zb_user_conf.at_ni[0] = ' ';
-        zb_user_conf.at_ni[1] = '\r';
+        zb_user_conf.at_ni[1] = 0;
         write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
         return NVRAM_NOT_WRITTEN;
     }
@@ -72,7 +72,7 @@ int8_t zb_nvram_check_usage(void)
             LOG_WRN("NVRAM read data is not correct, write again and work with the default conf\n");
             zb_user_conf.extended_pan_id = 0x0000000000000000;
             zb_user_conf.at_ni[0] = ' ';
-            zb_user_conf.at_ni[1] = '\r';
+            zb_user_conf.at_ni[1] = 0;
             write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
             return NVRAM_WRONG_DATA;
         }

@@ -14,7 +14,7 @@ struct node_discovery_reply_t {
     uint16_t max_reply_time_ms; // Maximum allowed time for sending response to the discovery request
     uint64_t time_request_ms; // Time at which the node discovery request was received
     uint64_t time_reply_ms; // Time at which the node discovery request will be replied.
-    uint8_t at_ni[33];   // Node identifier string parameter
+    uint8_t at_ni[MAXIMUM_SIZE_NODE_IDENTIFIER+1];   // Node identifier string parameter
 };
 
 /* Function prototypes                                                        */
