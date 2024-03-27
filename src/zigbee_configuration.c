@@ -17,7 +17,9 @@
 
 LOG_MODULE_REGISTER(zb_conf, LOG_LEVEL_DBG);
 /* Local variables                                                            */
-static struct zb_user_conf_t zb_user_conf; // zigbee user configurationç
+static struct zb_user_conf_t zb_user_conf; // zigbee user configuration
+
+bool g_b_flash_write_cmd = false; //   Flag to indicate that a write command has been received
 
 /* Function definition                                                        */
 //------------------------------------------------------------------------------
@@ -159,7 +161,7 @@ void zb_conf_write_to_nvram (void)
     write_nvram(ZB_EXT_PANID, &zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
 
     // Write the Node Identifier (NI) to NVRAM
-    write_nvram(ZB_NODE_IDENTIFIER, zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
+    write_nvram(ZB_NODE_IDENTIFIER, &zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
 
     write_nvram(ZB_CHECKSUM, &checksum, sizeof(checksum));
 }
@@ -215,8 +217,17 @@ uint32_t calculate_checksum(char* data, int size) {
     uint32_t checksum = 0;
     for (int i = 0; i < size; i++) {
         checksum += (uint32_t)data[i];
-        LOG_WRN("Checksum: %d\n", checksum);
-        LOG_WRN("Data: %d\n", (uint32_t)data[i]);
     }
     return checksum;
+}
+
+void nvram_manager(void)
+{
+    if((!g_b_flash_error) && (g_b_flash_write_cmd))
+    {
+        zb_conf_update(); // Update the values in the zb_user_conf structure
+        zb_conf_write_to_nvram(); // Write the new values to NVRAM
+        g_b_flash_write_cmd = false;
+    }
+        
 }

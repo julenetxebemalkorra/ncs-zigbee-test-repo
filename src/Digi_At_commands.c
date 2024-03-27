@@ -358,6 +358,7 @@ void digi_at_reply_action_command(uint8_t at_command)
         break;
      case AT_WR: //Write in flash memory and leave command mode
         digi_at_reply_ok();
+        g_b_flash_write_cmd = true;
         break;
      case AT_CN: //Leave command mode
         digi_at_reply_ok();

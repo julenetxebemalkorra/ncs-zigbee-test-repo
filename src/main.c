@@ -594,6 +594,8 @@ int main(void)
         digi_node_discovery_request_manager(); // Manage the device discovery requests
         zigbee_aps_manager();                  // Manage the aps output frame queue
 
+        nvram_manager();                       // Manage the NVRAM
+
         k_sleep(K_MSEC(5));                    // Required to see log messages on console
     }
 
