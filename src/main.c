@@ -596,6 +596,8 @@ int main(void)
 
         nvram_manager();                       // Manage the NVRAM
 
+        zigbee_thread_manager();               // Manage the Zigbee thread
+
         k_sleep(K_MSEC(5));                    // Required to see log messages on console
     }
 

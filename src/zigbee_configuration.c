@@ -20,6 +20,7 @@ LOG_MODULE_REGISTER(zb_conf, LOG_LEVEL_DBG);
 static struct zb_user_conf_t zb_user_conf; // zigbee user configuration
 
 bool g_b_flash_write_cmd = false; //   Flag to indicate that a write command has been received
+bool g_b_reset_zigbee_cmd = false; // Flag to indicate that a reset command has been received
 
 /* Function definition                                                        */
 //------------------------------------------------------------------------------
@@ -228,6 +229,17 @@ void nvram_manager(void)
         zb_conf_update(); // Update the values in the zb_user_conf structure
         zb_conf_write_to_nvram(); // Write the new values to NVRAM
         g_b_flash_write_cmd = false;
+        g_b_reset_zigbee_cmd = true;
+    }     
+}
+
+void zigbee_thread_manager(void)
+{
+    if(g_b_reset_zigbee_cmd)
+    {
+        g_b_reset_zigbee_cmd = false;
+        LOG_WRN("Zigbee reset\n");
+        //ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
+        zb_reset(true);
     }
-        
 }

@@ -29,6 +29,7 @@ uint64_t zb_conf_get_extended_pan_id (void);
 void zb_conf_get_extended_node_identifier (uint8_t *ni);
 uint32_t calculate_checksum(char* data, int size);
 void nvram_manager(void);
+void zigbee_thread_manager(void);
 
 #endif /* ZIGBEE_CONFIGURATION_H_ */
 
