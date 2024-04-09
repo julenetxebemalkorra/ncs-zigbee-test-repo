@@ -102,6 +102,9 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 bool b_Zigbe_Connected = false;
 bool bTimeToSendFrame = false;
 
+static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
+
+
 /*----------------------------------------------------------------------------*/
 /*                           FUNCTION DEFINITIONS                             */
 /*----------------------------------------------------------------------------*/
@@ -277,7 +280,8 @@ void zboss_signal_handler(zb_bufid_t bufid)
             LOG_ERR( "device restarted since it is not able to join any network");
             
             // Reboot the device
-		    sys_reboot(0);
+		    //sys_reboot(0);
+            g_b_reset_zigbee_cmd = ZB_TRUE;
             hard_reset_counter = 0;
         }
     }
@@ -434,37 +438,26 @@ void diagnostic_zigbee_info()
 {
     zb_ieee_addr_t zb_long_address;
     zb_ext_pan_id_t zb_ext_pan_id;
-    zb_uint8_t zb_channel;
-    zb_uint16_t zb_shrot_addr;
 
     if(zb_zdo_joined() && b_infit_info_flag == ZB_TRUE)
     {
         b_infit_info_flag = ZB_FALSE;
         b_Zigbe_Connected = true;
         LOG_DBG("Zigbee application joined the network: bellow some info: \n");
-        zb_get_long_address(zb_long_address);
-        // Display MAC address
-        {
-            uint8_t temp[8];
-            for(uint8_t i = 0; i<8; i++)
-            {
-                temp[i] = zb_long_address[7-i];
-            }
-            LOG_HEXDUMP_DBG(temp,8,"MAC address: ");
-        }
 
-        zb_shrot_addr = zb_get_short_address();
-        LOG_DBG("zigbee shrot addr:  0x%x\n", zb_shrot_addr);
+        xbee_parameters.at_my = zb_get_short_address();
+        LOG_DBG("zigbee shrot addr:  0x%x\n", xbee_parameters.at_my);
+
         zb_get_extended_pan_id(zb_ext_pan_id);
+        
         // Display extended PAN ID
+        uint8_t temp[8];
+        for(uint8_t i = 0; i<8; i++)
         {
-            uint8_t temp[8];
-            for(uint8_t i = 0; i<8; i++)
-            {
-                temp[i] = zb_ext_pan_id[7-i];
-            }
-            LOG_HEXDUMP_DBG(temp,8,"Extended PAN ID: ");
+            temp[i] = zb_ext_pan_id[7-i];
         }
+        LOG_HEXDUMP_DBG(temp,8,"Extended PAN ID: ");
+
         switch(zb_get_network_role())
         {
         case 0:
@@ -481,8 +474,8 @@ void diagnostic_zigbee_info()
             break;
         }
 
-    zb_channel = zb_get_current_channel();
-    LOG_DBG("zigbee channel: %d \n", zb_channel);
+    xbee_parameters.at_ch = zb_get_current_channel();
+    LOG_DBG("zigbee channel: %d \n", xbee_parameters.at_ch);
 
     }
 }

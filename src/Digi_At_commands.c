@@ -42,8 +42,8 @@ void digi_at_init_xbee_parameters(void)
 {
     xbee_parameters.at_vr = 1;     // Xbee's FW version
     xbee_parameters.at_hv = 1;     // Xbee's HW version
-    xbee_parameters.at_sh = 0;     // High part of the MAC address
-    xbee_parameters.at_sl = 1;     // Low part of the MAC address
+    xbee_parameters.at_sh = zb_get_mac_addr_high(); // High part of the MAC address
+    xbee_parameters.at_sl = zb_get_mac_addr_low(); // Low part of the MAC address
     xbee_parameters.at_jv = 1;     // Node join verification
     xbee_parameters.at_nj = 0xFF;  // Node join time
     xbee_parameters.at_nw = 10;    // Network watchdog
@@ -313,9 +313,11 @@ void digi_at_reply_read_command(uint8_t at_command)
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_ai);
         break;
      case AT_CH:
+        xbee_parameters.at_ch = zb_get_current_channel();
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_ch);
         break;
      case AT_MY:
+        xbee_parameters.at_my = zb_get_short_address();
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_my);
         break;
      case AT_ZS:

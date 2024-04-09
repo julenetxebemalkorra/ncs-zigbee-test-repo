@@ -11,5 +11,6 @@
 //Indicadores de alarma     
 extern bool g_b_flash_error;
 extern bool g_b_flash_write_cmd;
+extern bool g_b_reset_zigbee_cmd;
 
 #endif /* GLOBAL_DEFINES_H_ */

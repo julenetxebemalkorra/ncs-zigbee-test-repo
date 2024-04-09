@@ -190,6 +190,78 @@ uint64_t zb_conf_get_extended_pan_id (void)
     return zb_user_conf.extended_pan_id;
 }
 
+
+uint32_t invert_bytes(uint32_t value) {
+    uint32_t result = 0;
+    result |= (value & 0xFF000000) >> 24;
+    result |= (value & 0x00FF0000) >> 8;
+    result |= (value & 0x0000FF00) << 8;
+    result |= (value & 0x000000FF) << 24;
+    return result;
+}
+
+//------------------------------------------------------------------------------
+/**@brief Get the used configurable parameter "mac address"
+ *
+ * @retval User configured extended pan id
+ */
+uint32_t zb_get_mac_addr_low (void)
+{
+        zb_ieee_addr_t zb_long_address; // MAC address of this node
+        // Retrieve and display MAC address
+        zb_get_long_address(zb_long_address);
+        LOG_DBG("Zigbee long address: ");
+
+        //Display MAC address
+        uint8_t temp[8];
+        uint32_t low = 0;
+        
+        for(uint8_t i = 0; i<8; i++)
+        {
+            temp[i] = zb_long_address[7-i];
+        }
+
+        // Convert extended PAN ID to short address
+        for (uint8_t i=0; i<4; i++) {
+            low = (low << 8) | zb_long_address[i];
+        }
+
+        low = invert_bytes(low);
+
+        return low;
+}
+
+//------------------------------------------------------------------------------
+/**@brief Get the used configurable parameter "mac address"
+ *
+ * @retval User configured extended pan id
+ */
+uint32_t zb_get_mac_addr_high (void)
+{
+        zb_ieee_addr_t zb_long_address;
+        // Retrieve and display MAC address
+        zb_get_long_address(zb_long_address);
+        LOG_DBG("Zigbee long address: ");
+
+        //Display MAC address
+        uint8_t temp[8];
+        uint32_t high = 0;
+        for(uint8_t i = 0; i<8; i++)
+        {
+            temp[i] = zb_long_address[i];
+        }
+
+        // Convert extended PAN ID to short address
+        for (uint8_t i=0; i<4; i++) {
+            high = (high << 8) | zb_long_address[i +4];
+        }
+
+        // Invert the order of bits in high
+        high = invert_bytes(high);
+
+        return high;
+}
+
 //------------------------------------------------------------------------------
 /**@brief Get the used configurable parameter "node identifier".
  *        It gets stored in the buffer passed as argument
@@ -239,7 +311,6 @@ void zigbee_thread_manager(void)
     {
         g_b_reset_zigbee_cmd = false;
         LOG_WRN("Zigbee reset\n");
-        //ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
         zb_reset(true);
     }
 }
