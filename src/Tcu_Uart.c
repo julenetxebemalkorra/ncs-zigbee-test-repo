@@ -490,11 +490,47 @@ bool tcu_uart_send_received_frame_through_zigbee(void)
         element.dst_endpoint = DIGI_BINARY_VALUE_DESTINATION_ENDPOINT;
         element.payload_size = tcu_uart_rx_buffer_frame_size;
 
-        if( element.payload_size > APS_UNENCRYPTED_PAYLOAD_MAX ) element.payload_size = APS_UNENCRYPTED_PAYLOAD_MAX; //TODO, we should divide the received frame in two pieces.
+        if( element.payload_size > APS_UNENCRYPTED_PAYLOAD_MAX)
+        {
+            // TODO: send the payload in several frames
+            LOG_WRN("Payload size too big to be sent in a single frame %d", element.payload_size);
+            // Split the payload into multiple frames and send them sequentially
+            uint8_t remaining_payload_size = element.payload_size;
+            uint8_t offset = 0;
+            while (remaining_payload_size > 0)
+            {
+                // Calculate the payload size for this frame
+                if (remaining_payload_size > APS_UNENCRYPTED_PAYLOAD_MAX) 
+                {
+                    element.payload_size = APS_UNENCRYPTED_PAYLOAD_MAX;            
+                } 
+                else 
+                {
+                    element.payload_size = remaining_payload_size;            
+                }
+                // Copy the portion of the payload to the new frame
+                for( uint8_t i = 0; i < element.payload_size; i++ )
+                {
+                    element.payload[i] = tcu_uart_rx_buffer[offset + i];
+                }
 
-        memcpy(element.payload, &tcu_uart_rx_buffer[0], element.payload_size);
+                LOG_WRN("Added new frame to buffer. Remaining payload size: %d", remaining_payload_size);
+                b_return = enqueue_aps_frame(&element);
 
-        if( enqueue_aps_frame(&element) ) b_return = true;
+                // Update remaining_payload_size and offset
+                remaining_payload_size -= element.payload_size;
+                offset += element.payload_size;
+            }
+            if (b_return) 
+            {
+                b_return = true;
+            }
+        }
+        else
+        {
+            memcpy(element.payload, &tcu_uart_rx_buffer[0], element.payload_size);
+            if( enqueue_aps_frame(&element) ) b_return = true;
+        }
     }
 
     if( !b_return ) LOG_ERR("Not free space of aps output frame queue");

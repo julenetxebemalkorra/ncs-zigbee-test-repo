@@ -6,7 +6,8 @@
 #ifndef ZIGBEE_APS_H_
 #define ZIGBEE_APS_H_
 
-#define APS_UNENCRYPTED_PAYLOAD_MAX 84
+#define APS_UNENCRYPTED_PAYLOAD_MAX 82
+#define APS_PAYLOAD_MAX 255
 #define APS_OUTPUT_FRAME_BUFFER_SIZE 8
 
 typedef struct {
@@ -14,7 +15,7 @@ typedef struct {
     zb_uint16_t cluster_id;
     zb_uint8_t dst_endpoint;
     zb_uint8_t src_endpoint;
-    zb_uint8_t payload[APS_UNENCRYPTED_PAYLOAD_MAX];
+    zb_uint8_t payload[APS_PAYLOAD_MAX];
     zb_uint8_t payload_size;
 } aps_output_frame_t;
 
