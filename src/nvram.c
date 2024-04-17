@@ -81,7 +81,7 @@ uint8_t init_nvram(void)
 		return rc;
 	}
 
-    LOG_INF("NVRAM initialized\n");
+    LOG_INF("NVRAM initialized successfully\n");
 
     return rc;
 }

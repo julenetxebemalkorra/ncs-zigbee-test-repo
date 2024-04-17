@@ -54,7 +54,7 @@ int8_t zb_nvram_check_usage(void)
     // Check if the first 6 bytes of the NVRAM were successfully read
     if (rc != sizeof(nvram_first_id)) 
     {
-        LOG_WRN("NVRAM first id is missing, write the default values\n");
+        LOG_WRN("NVRAM first id is missing, write the default values");
         zb_user_conf.extended_pan_id = 0x0000000000000000;
         zb_user_conf.at_ni[0] = ' ';
         zb_user_conf.at_ni[1] = 0;
@@ -65,12 +65,12 @@ int8_t zb_nvram_check_usage(void)
     {
         if(nvram_first_id[0] == 0xAA && nvram_first_id[1] == 0xBB && nvram_first_id[2] == 0xCC && nvram_first_id[3] == 0xDD && nvram_first_id[4] == 0xEE && nvram_first_id[5] == 0xFF)
         {
-            LOG_INF("NVRAM first id is correct\n");
+            LOG_INF("NVRAM first id is correct");
             return SUCCESS;
         }
         else
         {
-            LOG_WRN("NVRAM read data is not correct, write again and work with the default conf\n");
+            LOG_WRN("NVRAM read data is not correct, write again and work with the default configuration");
             zb_user_conf.extended_pan_id = 0x0000000000000000;
             zb_user_conf.at_ni[0] = ' ';
             zb_user_conf.at_ni[1] = 0;
@@ -80,7 +80,7 @@ int8_t zb_nvram_check_usage(void)
     }
     else
     {
-        LOG_ERR("Unkwon error reading NVRAM first id\n");
+        LOG_ERR("Unkwon error reading NVRAM first id");
         return NVRAM_UNKNOWN_ERR;
     }
 }
@@ -113,7 +113,7 @@ uint8_t zb_conf_read_from_nvram (void)
     else 
     {
         // Failed to read the PAN_ID from NVRAM
-        LOG_ERR("Error reading PAN ID\n");
+        LOG_ERR("Error reading PAN ID");
     }
 
     // Read the Node Identifier (NI) from NVRAM
@@ -121,12 +121,12 @@ uint8_t zb_conf_read_from_nvram (void)
     // Check if the Node Identifier was successfully read from NVRAM
     if (rc > 0) {
         // Node Identifier was successfully read from NVRAM
-        LOG_INF("Node Identifier: %s\n", zb_user_conf.at_ni);
+        LOG_INF("Node Identifier: %s", zb_user_conf.at_ni);
     } 
     else 
     {
         // Failed to read the Node Identifier from NVRAM
-        LOG_ERR("Error reading Node Identifier\n");
+        LOG_ERR("Error reading Node Identifier");
     }
 
     uint32_t stored_checksum = 0;
@@ -135,11 +135,11 @@ uint8_t zb_conf_read_from_nvram (void)
     rc = read_nvram(ZB_NODE_IDENTIFIER+1, &stored_checksum, sizeof(stored_checksum));
     if (rc > 0) {
         if (calculated_checksum != stored_checksum) {
-            LOG_ERR("Checksum does not match\n");
+            LOG_ERR("Checksum does not match");
             return NVRAM_WRONG_DATA;
         }
     } else {
-        LOG_ERR("Error reading checksum\n");
+        LOG_ERR("Error reading checksum");
         return rc;
     }
 
@@ -210,7 +210,6 @@ uint32_t zb_get_mac_addr_low (void)
         zb_ieee_addr_t zb_long_address; // MAC address of this node
         // Retrieve and display MAC address
         zb_get_long_address(zb_long_address);
-        LOG_DBG("Zigbee long address: ");
 
         //Display MAC address
         uint8_t temp[8];
@@ -241,7 +240,6 @@ uint32_t zb_get_mac_addr_high (void)
         zb_ieee_addr_t zb_long_address;
         // Retrieve and display MAC address
         zb_get_long_address(zb_long_address);
-        LOG_DBG("Zigbee long address: ");
 
         //Display MAC address
         uint8_t temp[8];
@@ -310,7 +308,7 @@ void zigbee_thread_manager(void)
     if(g_b_reset_zigbee_cmd)
     {
         g_b_reset_zigbee_cmd = false;
-        LOG_WRN("Zigbee reset\n");
+        LOG_WRN("Zigbee reset");
         zb_reset(true);
     }
 }

@@ -214,6 +214,7 @@ void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
     }
     else
     {
+        //TODO: Implement a mechanism to try to allocate the buffer again after a while
         LOG_ERR("Transmission could not be scheduled: Out buffer not allocated");
     }
 }
