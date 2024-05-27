@@ -53,7 +53,7 @@
 /* Flag  used to print zigbee info once the device joins a network. */
 #define PRINT_ZIGBEE_INFO                ZB_TRUE
 #define PRINT_UART_INFO                  ZB_TRUE
-#define CRYPTO_ENABLE                    ZB_FALSE
+#define CRYPTO_ENABLE                    ZB_TRUE
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
