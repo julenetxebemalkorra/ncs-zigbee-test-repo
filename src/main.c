@@ -39,6 +39,10 @@
 #include "Digi_node_discovery.h"
 #include "nvram.h"
 
+#include <zephyr/drivers/watchdog.h>
+#include <zephyr/task_wdt/task_wdt.h>
+#include <stdbool.h>
+
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
 
@@ -60,6 +64,12 @@
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
+
+#if DT_NODE_HAS_STATUS(DT_ALIAS(watchdog0), okay)
+#define WDT_NODE DT_ALIAS(watchdog0)
+#else
+#define WDT_NODE DT_INVALID_NODE
+#endif
 
 /*UART Modbus and zigbee buffer size definitions*/
 #define MODBUS_MIN_RX_LENGTH                8   // if the messagge has 8 bytes we consider it a modbus frame
@@ -92,8 +102,11 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 // Get a reference to the TIMER1 instance
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
-/* Zigbee messagge info*/
+// Get reference to watchdog device
+static const struct device *const hw_wdt_dev = DEVICE_DT_GET_OR_NULL(WDT_NODE);
+int task_wdt_id;
 
+/* Zigbee messagge info*/
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
@@ -371,6 +384,42 @@ static int8_t gpio_init(void)
     return 0;
 }
 
+//------------------------------------------------------------------------------
+/**@brief Function for initializing the watchdog task.
+ *      The watchdog task is used to monitor the main loop and reset the device if it gets stuck.
+ * @retval -1 Error
+ * @retval 0 OK
+ */
+static int8_t watchdog_init(void)
+{
+	int ret;
+
+    if (!device_is_ready(hw_wdt_dev)) {
+		LOG_ERR("Hardware watchdog not ready; ignoring it.\n");
+        return -1;
+	}
+    /* This function sets up necessary kernel timers and the hardware watchdog 
+    * (if desired as fallback). It has to be called before task_wdt_add() and task_wdt_feed().
+    * 0 – If successful.
+    * -ENOTSUP – If assigning a hardware watchdog is not supported.
+    * -Errno – Negative errno if the fallback hw_wdt is used and the install timeout API
+    * fails. See wdt_install_timeout() API for possible return values.
+    * */
+    ret = task_wdt_init(hw_wdt_dev);
+	if (ret != 0) {
+		LOG_ERR("task wdt init failure: %d\n", ret);
+		return ret;
+	}
+
+    /*
+	 * Add a new task watchdog channel with custom callback function and
+	 * the current thread ID as user data.
+	 */
+	task_wdt_id = task_wdt_add(1000U, NULL, NULL);
+
+    return 0;
+}
+
 void set_extended_pan_id_in_stack(void)
 {
     zb_uint8_t extended_pan_id[8] = {0};
@@ -436,7 +485,6 @@ void diagnostic_toogle_pin()
  */
 void diagnostic_zigbee_info()
 {
-    zb_ieee_addr_t zb_long_address;
     zb_ext_pan_id_t zb_ext_pan_id;
 
     if(zb_zdo_joined() && b_infit_info_flag == ZB_TRUE)
@@ -548,10 +596,15 @@ int main(void)
         }	
     }
 
-    
     zigbee_aps_init();
     digi_at_init();
     digi_node_discovery_init();
+
+    ret = watchdog_init();
+    if( ret < 0)
+    {
+        LOG_ERR("watchdog_init error %d", ret);
+    }
 
     ret = tcu_uart_init();
     if( ret < 0)
@@ -582,6 +635,8 @@ int main(void)
         diagnostic_toogle_pin();
         diagnostic_zigbee_info();
         display_counters();
+
+		task_wdt_feed(task_wdt_id); // Feed the watchdog
 
         tcu_uart_transparent_mode_manager();   // Manage the frames received from the TCU uart when module is in transparent mode
         digi_node_discovery_request_manager(); // Manage the device discovery requests
