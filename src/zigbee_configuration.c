@@ -21,6 +21,8 @@ static struct zb_user_conf_t zb_user_conf; // zigbee user configuration
 
 bool g_b_flash_write_cmd = false; //   Flag to indicate that a write command has been received
 bool g_b_reset_zigbee_cmd = false; // Flag to indicate that a reset command has been received
+bool g_b_reset_cmd = false; // Flag to indicate that a reset command has been received
+
 
 /* Function definition                                                        */
 //------------------------------------------------------------------------------
@@ -314,5 +316,12 @@ void zigbee_thread_manager(void)
         g_b_reset_zigbee_cmd = false;
         LOG_WRN("Zigbee reset");
         zb_reset(true);
+    }
+
+    if (g_b_reset_cmd)
+    {
+        g_b_reset_cmd = false;
+        LOG_WRN("Reset coomadn received from TCU, rebooting...");
+        sys_reboot(true);
     }
 }

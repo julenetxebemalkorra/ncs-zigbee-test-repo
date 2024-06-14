@@ -44,8 +44,8 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_hv = 1;     // Xbee's HW version
     xbee_parameters.at_sh = zb_get_mac_addr_high(); // High part of the MAC address
     xbee_parameters.at_sl = zb_get_mac_addr_low(); // Low part of the MAC address
-    xbee_parameters.at_jv = 1;     // Node join verification
-    xbee_parameters.at_nj = 0xFF;  // Node join time
+    xbee_parameters.at_jv = HARDCODED_ATJV_VALUE;     // Node join verification
+    xbee_parameters.at_nj = HARDCODED_ATNJ_VALUE;  // Node join time
     xbee_parameters.at_nw = 10;    // Network watchdog
     xbee_parameters.at_id = zb_conf_get_extended_pan_id();   // Extended pan id; It is user configurable, get it from NVRAM
     xbee_parameters.at_ce = 0;     // Coordinator enabled
@@ -362,6 +362,10 @@ void digi_at_reply_action_command(uint8_t at_command)
      case AT_CN: //Leave command mode
         digi_at_reply_ok();
         break;
+    case AT_NR: //Reset the Xbee module
+        digi_at_reply_ok();
+        g_b_reset_cmd = true;
+        break;
      default:
         digi_at_reply_error(); // Command not supported (It should never happen)
         break; //It should never happen
@@ -632,6 +636,11 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
         {
             if( digi_at_reply_write_command(AT_NB, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
             else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+        }
+        if( ( input_data[2] == 'N' ) && ( input_data[3] == 'R' ) ) // ATCN
+        {
+            digi_at_reply_action_command(AT_NR);
+            return AT_CMD_OK_LEAVE_CMD_MODE;
         }
         digi_at_reply_error();
         return AT_CMD_ERROR_NOT_SUPPORTED_WRITE_CMD; // It is not a supported write AT command

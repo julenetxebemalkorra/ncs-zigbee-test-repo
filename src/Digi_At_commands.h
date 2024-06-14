@@ -11,6 +11,9 @@
 #define MINIMUM_SIZE_AT_COMMAND 4
 #define MAXIMUM_SIZE_AT_COMMAND 4 + 1 + MAXIMUM_SIZE_NODE_IDENTIFIER //Write command + blank + size of node identifier
 
+#define HARDCODED_ATJV_VALUE 1
+#define HARDCODED_ATNJ_VALUE 0xFF
+
 /* Enumerative with the supported Xbee AT commands used to read/write parameters */
 enum parameter_at_command_e{
     AT_VR, // Read the Xbee's FW version
@@ -32,6 +35,7 @@ enum parameter_at_command_e{
     AT_AC, // Apply changes and leave command mode
     AT_WR, // Write in flash memory and leave command mode
     AT_CN, // Leave command mode
+    AT_NR, // Reset the Xbee
     NUMBER_OF_PARAMETER_AT_COMMANDS
 };
 

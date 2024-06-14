@@ -73,7 +73,7 @@ static struct uart_config tcu_uart_config = {
  */
 int8_t tcu_uart_init(void)
 {
-    int8_t ret = tcu_uart_configuration();
+    int8_t ret = 0;//tcu_uart_configuration();
     b_zigbee_module_in_command_mode = false;
     tcu_uart_rx_buffer_init();
     return ret;
