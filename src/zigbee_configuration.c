@@ -40,6 +40,8 @@ int8_t zb_nvram_check_usage(void)
     int8_t rc = 0;
     uint8_t nvram_first_id[6];
     uint8_t nvram_first_id_expected[6];
+    uint8_t number_restarts[1] = {0};
+    uint8_t reset_reason[1] = {0};
 
     // Expected values for the first 6 bytes of the NVRAM
     nvram_first_id_expected[0] = 0xAA;
@@ -59,6 +61,8 @@ int8_t zb_nvram_check_usage(void)
         zb_user_conf.at_ni[0] = ' ';
         zb_user_conf.at_ni[1] = 0;
         write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
+        write_nvram(RBT_CNT_ID, number_restarts, sizeof(number_restarts));
+        write_nvram(RBT_CNT_REASON, reset_reason, sizeof(reset_reason));
         return NVRAM_NOT_WRITTEN;
     }
     else if (rc == sizeof(nvram_first_id))

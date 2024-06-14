@@ -12,9 +12,12 @@
 #define NVS_PARTITION_OFFSET	FIXED_PARTITION_OFFSET(NVS_PARTITION)
 
 #define ZB_NVRAM_CHECK_ID 1
-#define ZB_EXT_PANID 2
-#define ZB_NODE_IDENTIFIER 3
-#define ZB_CHECKSUM 4
+#define RBT_CNT_ID 2
+#define RBT_CNT_REASON 3
+#define ZB_EXT_PANID 4
+#define ZB_NODE_IDENTIFIER 5
+#define ZB_CHECKSUM 6
+
 
 uint8_t init_nvram(void);
 uint8_t read_nvram(uint16_t id, uint8_t *data, size_t len);

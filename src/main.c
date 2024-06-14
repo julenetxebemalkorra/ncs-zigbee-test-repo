@@ -125,7 +125,12 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 /**@brief Function to read the reason for the last reset. The reason is printed in the console. */
 void get_reset_reason(void)
 {
+    int8_t rc = 0;
+    uint8_t restart_number[1] = {0};
+    uint8_t reset_cause_flags[1] = {0};
+
 	int result = hwinfo_get_reset_cause(&reset_cause);
+
     if (result == 0) // Success, reset_cause now contains the reset cause flags
 	{
         LOG_ERR("RESET");
@@ -148,13 +153,38 @@ void get_reset_reason(void)
 		else LOG_DBG("\n\n reset cause is: %d\n\n",reset_cause);
 
     	hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset
-    } else if (result == -ENOSYS) 
+    } 
+    else if (result == -ENOSYS) 
 	{
 		LOG_ERR("\n\n there is no implementation for the particular device.\n\n");
-    } else 
+    } 
+    else 
 	{
 		LOG_ERR("\n\n negative value on driver specific errors\n\n");
     }
+    rc = read_nvram(RBT_CNT_ID, restart_number, sizeof(restart_number));
+    if (rc <= 0)     
+    {
+        LOG_ERR("read_nvram error %d", rc);
+    }
+    else
+    {
+        restart_number[0]++;
+        write_nvram(RBT_CNT_ID, restart_number, sizeof(restart_number));
+        LOG_WRN("restart_number, %d\n", restart_number[0]);
+    }
+
+    rc = read_nvram(RBT_CNT_REASON, reset_cause_flags, sizeof(reset_cause_flags));
+    if (rc <= 0)     
+    {
+        LOG_ERR("read_nvram error %d", rc);
+    }
+    else
+    {
+        write_nvram(RBT_CNT_REASON, (uint8_t *)&reset_cause, sizeof(reset_cause));
+        LOG_WRN("reset_cause_flags, %d\n", reset_cause_flags[0]);
+    }
+
 }
 
 //------------------------------------------------------------------------------
@@ -563,8 +593,6 @@ int main(void)
 {
     int8_t ret = 0;
 
-    get_reset_reason();        // Read last reset reason
-
     ret = init_nvram();              // Initialize NVRAM
     if( ret != 0)
     {
@@ -595,6 +623,8 @@ int main(void)
             g_b_flash_error = ZB_TRUE;
         }	
     }
+
+    get_reset_reason();        // Read last reset reason
 
     zigbee_aps_init();
     digi_at_init();
