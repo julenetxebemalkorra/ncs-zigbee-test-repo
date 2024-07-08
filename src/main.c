@@ -323,7 +323,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
             LOG_ERR( "device restarted since it is not able to join any network");
             
             // Reboot the device
-		    //sys_reboot(0);
+		    sys_reboot(0);
             g_b_reset_zigbee_cmd = ZB_TRUE;
             hard_reset_counter = 0;
         }
@@ -477,8 +477,8 @@ void zigbee_configuration()
 	}
 
 	// Define a distributed key (assuming key size of 16 bytes, you might need to adjust based on documentation)
-    zb_uint8_t distributed_key[16] = {0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88, 
-                                     0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00};
+    zb_uint8_t distributed_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 
+                                       0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};
 
     // Set the network key
 	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
@@ -487,6 +487,9 @@ void zigbee_configuration()
 
 	//TRUE to disable trust center, legacy support for
 	zb_bdb_set_legacy_device_support(ZB_TRUE);
+
+    // Set the device nwkey. This action can help us choose between different nwk keys
+    zb_secur_nwk_key_switch_procedure(0);
 }
 
 //------------------------------------------------------------------------------
