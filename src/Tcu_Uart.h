@@ -6,6 +6,8 @@
 #ifndef TCU_UART_H_
 #define TCU_UART_H_
 
+#include <zephyr/device.h>  // Ensure this include is present
+
 /* Default tick to consider a modbus frame completed*/
 #define TICKS_TO_CONSIDER_FRAME_COMPLETED 10 // 10ms = approximately time for transmitting 20 chars at 19200
 

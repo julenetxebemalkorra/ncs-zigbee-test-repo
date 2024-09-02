@@ -237,7 +237,7 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
         }
         else
         {
-            int8_t command_analysis_result = digi_at_analyze_and_reply_to_command(tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
+            int8_t command_analysis_result = digi_at_analyze_and_reply_to_command((uint8_t *)tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
             if( command_analysis_result == AT_CMD_OK_LEAVE_CMD_MODE ) //As a result of the command, we should leave command mode
             {
                 switch_tcu_uart_out_of_command_mode();
@@ -528,7 +528,7 @@ bool tcu_uart_send_received_frame_through_zigbee(void)
         }
         else
         {
-            memcpy(element.payload, &tcu_uart_rx_buffer[0], element.payload_size);
+            memcpy(element.payload, (const uint8_t *)&tcu_uart_rx_buffer[0], element.payload_size);
             if( enqueue_aps_frame(&element) ) b_return = true;
         }
     }

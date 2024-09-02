@@ -25,8 +25,6 @@
 // NVRAM file system instance for persisting application data
 static struct nvs_fs fs;
 
-static struct zb_user_conf_t zb_user_conf; // zigbee user configuration
-
 LOG_MODULE_REGISTER(nvram_app, LOG_LEVEL_DBG);
 
 /**

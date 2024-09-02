@@ -19,9 +19,16 @@
 //#include <string.h>
 
 #include <zephyr/kernel.h>
+#include <zboss_api.h>
+#include <zigbee/zigbee_error_handler.h>
+#include <zigbee/zigbee_app_utils.h>
+#include <zb_nrf_platform.h>
+#include "zb_range_extender.h"
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
 #include "tcu_Uart.h"
+#include <zephyr/device.h>
+
 
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 static struct xbee_parameter_comando_at_t xbee_parameter_comando_at[NUMBER_OF_PARAMETER_AT_COMMANDS];

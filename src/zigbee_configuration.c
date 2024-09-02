@@ -10,6 +10,8 @@
 
 #include <zephyr/logging/log.h>
 #include <zboss_api.h>
+#include <zephyr/sys/reboot.h>
+#include <zephyr/device.h>
 
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
@@ -136,9 +138,9 @@ uint8_t zb_conf_read_from_nvram (void)
     }
 
     uint32_t stored_checksum = 0;
-    uint32_t calculated_checksum = calculate_checksum(&zb_user_conf, sizeof(zb_user_conf));
+    uint32_t calculated_checksum = calculate_checksum((char *)&zb_user_conf, sizeof(zb_user_conf));
 
-    rc = read_nvram(ZB_NODE_IDENTIFIER+1, &stored_checksum, sizeof(stored_checksum));
+    rc = read_nvram(ZB_NODE_IDENTIFIER+1, (uint8_t *)&stored_checksum, sizeof(stored_checksum));
     if (rc > 0) {
         if (calculated_checksum != stored_checksum) {
             LOG_ERR("Checksum does not match");
@@ -162,15 +164,15 @@ void zb_conf_write_to_nvram (void)
 {
 
     // Calculate checksum
-    uint32_t checksum = calculate_checksum(&zb_user_conf, sizeof(zb_user_conf));
+    uint32_t checksum = calculate_checksum((char *)&zb_user_conf, sizeof(zb_user_conf));
     
     // Write the PAN_ID to NVRAM
-    write_nvram(ZB_EXT_PANID, &zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
+    write_nvram(ZB_EXT_PANID, (uint8_t *)&zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
 
     // Write the Node Identifier (NI) to NVRAM
-    write_nvram(ZB_NODE_IDENTIFIER, &zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
+    write_nvram(ZB_NODE_IDENTIFIER, (uint8_t *)&zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
 
-    write_nvram(ZB_CHECKSUM, &checksum, sizeof(checksum));
+    write_nvram(ZB_CHECKSUM, (uint8_t *)&checksum, sizeof(checksum));
 }
 
 //------------------------------------------------------------------------------
@@ -315,6 +317,7 @@ void zigbee_thread_manager(void)
     {
         g_b_reset_zigbee_cmd = false;
         LOG_WRN("Zigbee reset");
+        //Platform dependent soft reset
         zb_reset(true);
     }
 
@@ -322,6 +325,9 @@ void zigbee_thread_manager(void)
     {
         g_b_reset_cmd = false;
         LOG_WRN("Reset coomadn received from TCU, rebooting...");
-        sys_reboot(true);
+        // Reboot the device SYS_REBOOT_COLD
+        //sys_reboot(SYS_REBOOT_COLD);
+        //sys_reboot(SYS_REBOOT_WARM);
+		sys_reboot(SYS_REBOOT_COLD);
     }
 }

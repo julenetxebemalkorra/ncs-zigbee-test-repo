@@ -9,7 +9,7 @@
  */
 
 #include <zephyr/logging/log.h>
-
+#include <zephyr/device.h>
 #include <zboss_api.h>
 
 #include "zigbee_aps.h"
