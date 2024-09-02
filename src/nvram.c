@@ -17,6 +17,8 @@
 #include <zephyr/storage/flash_map.h>
 #include <zephyr/fs/nvs.h>
 
+
+
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
 #include "tcu_Uart.h"
@@ -116,3 +118,10 @@ void write_nvram(uint16_t id, uint8_t *data, size_t len)
     // Write the PAN_ID to NVRAM
     (void)nvs_write(&fs, id, data, len);
 }
+
+size_t calc_free_space(void)
+{
+    size_t free_space = nvs_calc_free_space(&fs);
+    return free_space;
+}
+

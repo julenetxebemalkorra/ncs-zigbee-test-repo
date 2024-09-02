@@ -22,5 +22,6 @@
 uint8_t init_nvram(void);
 uint8_t read_nvram(uint16_t id, uint8_t *data, size_t len);
 void write_nvram(uint16_t id, uint8_t *data, size_t len);
+size_t calc_free_space(void);
 
 #endif /* NVRAM_H_ */

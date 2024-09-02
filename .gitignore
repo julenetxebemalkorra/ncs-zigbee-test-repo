@@ -52,3 +52,6 @@ TAGS
 tags
 
 .idea
+compile_commands.json
+reports/compiler_info.json
+results/compiler_info.json

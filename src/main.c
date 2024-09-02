@@ -43,6 +43,14 @@
 #include <zephyr/task_wdt/task_wdt.h>
 #include <stdbool.h>
 
+#include <zephyr/toolchain.h>
+#include <zephyr/sys/sys_heap.h>
+#include <zephyr/debug/thread_analyzer.h>
+
+#include <zephyr/debug/coredump.h>
+#include <zephyr/fatal.h>
+#include <zephyr/logging/log_ctrl.h>
+
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
 
@@ -117,6 +125,26 @@ bool bTimeToSendFrame = false;
 
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 
+void check_stack_space(void);  // Forward declaration
+void analyze_nvs_storage(void);  // Forward declaration
+
+#ifdef CUSTOM_FATAL_ERROR_HANDLER
+void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf)
+{
+    LOG_ERR("Fatal error occurred! Reason: %d", reason);
+
+    // Perform the ocredump (core dump) operation
+    if (reason == K_ERR_KERNEL_PANIC || reason == K_ERR_CPU_EXCEPTION) {
+        // Use the Zephyr's coredump API to generate a core dump
+        coredump(reason, esf, NULL);
+    }
+
+    // Optionally perform additional actions like resetting the system or halting
+    // Here we halt the system unconditionally
+    k_fatal_halt(reason);
+    log_panic();	
+}
+#endif
 
 /*----------------------------------------------------------------------------*/
 /*                           FUNCTION DEFINITIONS                             */
@@ -136,7 +164,6 @@ void get_reset_reason(void)
         LOG_ERR("RESET");
 
 		if (reset_cause & RESET_PIN) LOG_DBG("Reset cause is: RESET_PIN\n"); // 0
-		else if (reset_cause & RESET_SOFTWARE) LOG_DBG("Reset cause is: RESET_SOFTWARE\n"); // 1
 		else if (reset_cause & RESET_BROWNOUT) LOG_DBG("Reset cause is: RESET_BROWNOUT\n"); // 2
 		else if(reset_cause & RESET_POR) LOG_DBG("Reset cause is: RESET_POR\n"); // 3
 		else if(reset_cause & RESET_WATCHDOG) LOG_DBG("Reset cause is: RESET_WATCHDOG\n"); // 4
@@ -150,6 +177,7 @@ void get_reset_reason(void)
 		else if(reset_cause & RESET_HARDWARE) LOG_DBG("Reset cause is: RESET_HARDWARE\n"); // 12
 		else if(reset_cause & RESET_USER) LOG_DBG("Reset cause is: RESET_USER\n"); // 13
 		else if (reset_cause & RESET_TEMPERATURE) LOG_DBG("Reset cause is: RESET_TEMPERATURE\n\n"); // 14
+        else if (reset_cause & RESET_SOFTWARE) LOG_DBG("Reset cause is: RESET_SOFTWARE\n"); // 1
 		else LOG_DBG("\n\n reset cause is: %d\n\n",reset_cause);
 
     	hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset
@@ -184,6 +212,34 @@ void get_reset_reason(void)
         write_nvram(RBT_CNT_REASON, (uint8_t *)&reset_cause, sizeof(reset_cause));
         LOG_WRN("reset_cause_flags, %d\n", reset_cause_flags[0]);
     }
+    //Get the reason that triggered the last Zigbee reset.
+    uint8_t reset_cause = zb_get_reset_source();
+
+    switch (reset_cause)
+    {
+        case ZB_RESET_SRC_POWER_ON:
+            LOG_INF("Zigbee Reset cause: Power On");
+            break;
+        case ZB_RESET_SRC_SW_RESET:
+            LOG_INF("Zigbee Reset cause: Software Reset");
+            break;
+        case ZB_RESET_SRC_RESET_PIN:
+            LOG_INF("Zigbee Reset cause: Reset Pin");
+            break;
+        case ZB_RESET_SRC_BROWN_OUT:
+            LOG_INF("Zigbee Reset cause: Brown Out");
+            break;
+        case ZB_RESET_SRC_CLOCK_LOSS:
+            LOG_INF("Zigbee Reset cause: Clock Loss");
+            break;
+        case ZB_RESET_SRC_OTHER:
+            LOG_INF("Zigbee Reset cause: Other");
+            break;
+        default:
+            LOG_WRN("Zigbee Reset cause: Unknown (%d)", reset_cause);
+            break;
+    }
+    
 
 }
 
@@ -195,22 +251,30 @@ void get_reset_reason(void)
  */
 zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 {
-    if (bufid)
+    if (!bufid)
 	{
+        return ZB_FALSE;
+    }
+    
         zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
 
-        zb_uint8_t *pointerToBeginOfBuffer;
-        zb_uint8_t *pointerToEndOfBuffer;
-        zb_int32_t sizeOfPayload;
-        pointerToBeginOfBuffer = zb_buf_begin(bufid);
-        pointerToEndOfBuffer = zb_buf_end(bufid);
-        sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
+        zb_uint8_t *pointerToBeginOfBuffer = zb_buf_begin(bufid);
+        zb_uint8_t *pointerToEndOfBuffer = zb_buf_end(bufid);
+        zb_int32_t sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
 
-        if(PRINT_ZIGBEE_INFO) LOG_DBG("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes",
+        if(PRINT_ZIGBEE_INFO) 
+        {
+            LOG_DBG("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes",
                           (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,
                                                     (uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload);
 
+            check_stack_space();
+            analyze_nvs_storage();
+            thread_analyzer_print();	
+        }
+
         aps_frames_received_total_counter++;
+
         if( ind->clusterid == DIGI_BINARY_VALUE_CLUSTER )aps_frames_received_binary_cluster_counter++;
         if( ind->clusterid == DIGI_COMMISSIONING_CLUSTER )aps_frames_received_commissioning_cluster_counter++;
 
@@ -218,7 +282,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             ( ind->src_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) &&
             ( ind->dst_endpoint == DIGI_BINARY_VALUE_DESTINATION_ENDPOINT ) )
         {
-            if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
+            if (sizeOfPayload > 0 && sizeOfPayload < UART_RX_BUFFER_SIZE)
             {
                 /*if(PRINT_ZIGBEE_INFO)
                 {
@@ -230,7 +294,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                 {
                     if(PRINT_ZIGBEE_INFO) LOG_DBG("Payload of input RF packet sent to TCU UART");
                     tcu_uart_frames_transmitted_counter++;
-                    sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
+                    sendFrameToTcu(pointerToBeginOfBuffer, sizeOfPayload);
                 }
             }
         }
@@ -239,22 +303,16 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             ( ind->src_endpoint == DIGI_COMMISSIONING_SOURCE_ENDPOINT ) &&
             ( ind->dst_endpoint == DIGI_COMMISSIONING_DESTINATION_ENDPOINT ) )
         {
-            if( is_a_digi_node_discovery_request((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            if( is_a_digi_node_discovery_request(pointerToBeginOfBuffer, sizeOfPayload) )
             {
                 if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee Node Discovery Device Request");
             }
         }
-	}
 
-    if (bufid)
-    {
     	// safe way to free buffer
-        zb_osif_disable_all_inter();
         zb_buf_free(bufid);
-        zb_osif_enable_all_inter();
     	return ZB_TRUE;
-	}
-	return ZB_FALSE;
+
 }
 
 /**@brief Zigbee stack event handler.
@@ -322,8 +380,10 @@ void zboss_signal_handler(zb_bufid_t bufid)
         {
             LOG_ERR( "device restarted since it is not able to join any network");
             
-            // Reboot the device
-		    sys_reboot(0);
+            // Reboot the device SYS_REBOOT_COLD
+            //sys_reboot(SYS_REBOOT_COLD);
+            //sys_reboot(SYS_REBOOT_WARM);
+		    sys_reboot(SYS_REBOOT_COLD);
             g_b_reset_zigbee_cmd = ZB_TRUE;
             hard_reset_counter = 0;
         }
@@ -414,6 +474,16 @@ static int8_t gpio_init(void)
     return 0;
 }
 
+void my_watchdog_callback(int channel_id, void *user_data)
+{
+     printk("Watchdog callback invoked!\n");
+    // Handle the watchdog timeout event
+    // user_data can be used to pass additional information
+    check_stack_space();  // Forward declaration
+    analyze_nvs_storage();  // Forward declaration
+    LOG_ERR("Watchdog timeout event detected. Resetting the device.");
+}
+
 //------------------------------------------------------------------------------
 /**@brief Function for initializing the watchdog task.
  *      The watchdog task is used to monitor the main loop and reset the device if it gets stuck.
@@ -445,7 +515,17 @@ static int8_t watchdog_init(void)
 	 * Add a new task watchdog channel with custom callback function and
 	 * the current thread ID as user data.
 	 */
-	task_wdt_id = task_wdt_add(1000U, NULL, NULL);
+	task_wdt_id = task_wdt_add(10000U, my_watchdog_callback, NULL);
+
+    if (task_wdt_id < 0) 
+    {
+		LOG_ERR("task wdt init failure: %d\n", ret);
+		return ret;
+	}
+    else
+    {
+        LOG_INF("task wdt init success: %d\n", ret);
+    }
 
     return 0;
 }
@@ -561,6 +641,26 @@ void diagnostic_zigbee_info()
     }
 }
 
+void check_stack_space(void)
+{
+	size_t stacksize;
+	int sr;
+
+	sr = k_thread_stack_space_get(k_current_get(), &stacksize);
+	if (sr == 0) {
+		LOG_INF("stack space: %d", stacksize);
+	} else {
+		LOG_ERR("could not get stack space");
+	}
+}
+
+void analyze_nvs_storage(void)
+{
+     size_t free_space = calc_free_space();
+     LOG_INF("NVS Free space: %d", free_space);
+}
+
+
 //------------------------------------------------------------------------------
 /**@brief This function prints the contents of multiple counters to the console.
  *
@@ -585,8 +685,13 @@ void display_counters(void)
         LOG_DBG("Uart frames: Tx %d, Rx %d",
                                tcu_uart_frames_transmitted_counter,
                                tcu_uart_frames_received_counter);
+
+        check_stack_space();
+        analyze_nvs_storage();
     }
+
 }
+
 
 //------------------------------------------------------------------------------
 /**@brief Main function
