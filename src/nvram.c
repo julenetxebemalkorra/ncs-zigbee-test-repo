@@ -55,7 +55,7 @@ uint8_t init_nvram(void)
     // returns 0 on success, -EINVAL if page of the offset doesn’t exist.
 	rc = flash_get_page_info_by_offs(fs.flash_device, fs.offset, &info);
     if (rc == 0) {
-        LOG_INF("Page info: size %d, start offset %d\n", info.size, info.start_offset);
+        LOG_INF("Page info: size %d, start offset %ld\n", info.size, info.start_offset);
     } 
     else if (rc == EINVAL) // Invalid argument
     {

@@ -31,17 +31,17 @@ extern uint16_t tcu_uart_frames_received_counter;
 LOG_MODULE_REGISTER(uart_app, LOG_LEVEL_DBG);
 
 /* Local variables used to manage the command mode of the zigbee module */
-static bool b_zigbee_module_in_command_mode = false;
-static uint8_t enter_cmd_mode_sequence_st = ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_INITIAL_SILENCE_ST;
-static uint16_t pre_silence_timer_ms = 0;
-static uint16_t post_silence_timer_ms = 0;
-static uint16_t leave_cmd_mode_silence_timer_ms = 0;
+static volatile bool b_zigbee_module_in_command_mode = false;
+static volatile uint8_t enter_cmd_mode_sequence_st = ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_INITIAL_SILENCE_ST;
+static volatile uint16_t pre_silence_timer_ms = 0;
+static volatile uint16_t post_silence_timer_ms = 0;
+static volatile uint16_t leave_cmd_mode_silence_timer_ms = 0;
 /**/
 
-static uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
-static uint8_t tcu_transmission_buffer_index = 0;
-static uint8_t tcu_transmission_size = 0;
-static bool    tcu_transmission_running = false;
+static volatile uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
+static volatile uint8_t tcu_transmission_buffer_index = 0;
+static volatile uint8_t tcu_transmission_size = 0;
+static volatile bool    tcu_transmission_running = false;
 
 static volatile uint8_t tcu_uart_rx_buffer[UART_RX_BUFFER_SIZE] = {0};
 static volatile uint16_t tcu_uart_rx_buffer_index = 0;
@@ -174,6 +174,8 @@ void tcu_uart_timers_10kHz(void)
                         b_tcu_uart_rx_complete_frame_received = true;
                         tcu_uart_rx_buffer_frame_size = tcu_uart_rx_buffer_index;
                         b_tcu_uart_rx_buffer_busy = true; // Do not accept new characters until received frame is processed
+                        LOG_WRN("Frame received. Size: %d", tcu_uart_rx_buffer_frame_size);
+                        LOG_WRN("Frame received. b_tcu_uart_rx_buffer_busy: %d", b_tcu_uart_rx_buffer_busy);
                     }
                     b_tcu_uart_rx_receiving_frame = false;
                     tcu_uart_rx_time_since_last_byte_ms = 0;
@@ -245,7 +247,7 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
             else if( command_analysis_result < 0 ) //Command not accepted
             {
                 LOG_ERR("Wrong AT command. Error code: %d", command_analysis_result);
-                for(uint8_t kk=0; kk<tcu_uart_rx_buffer_index; kk++)
+                for(uint16_t kk=0; kk<tcu_uart_rx_buffer_index; kk++)
                 {
                     LOG_WRN("%d", tcu_uart_rx_buffer[kk]);
                 }
@@ -332,12 +334,17 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
 	uint8_t uart_rx_hw_fifo[SIZE_OF_RX_FIFO_OF_NRF52840_UART];
     uint8_t uart_rx_hw_fifo_index = 0;
 
+    (void)dev;
+    (void)user_data;
+    int ret;
+
 	if( !uart_irq_update(dev_tcu_uart) )
     {
+        LOG_ERR("Error in UART IRQ update");
 		return;
 	}
-
-	if( uart_irq_rx_ready(dev_tcu_uart) ) // Check if the UART interruption was triggered because a new character was received
+    ret = uart_irq_rx_ready(dev_tcu_uart);
+	if( ret == 1 ) // Check if the UART interruption was triggered because a new character was received
     {
     /*  read until FIFO empty  */
         int number_of_bytes_available;
@@ -357,7 +364,8 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
         }
 	}
 
-	if (uart_irq_tx_ready(dev_tcu_uart)) // Check if the UART interruption was triggered because the transmission buffer got empty
+    ret = uart_irq_tx_ready(dev_tcu_uart);
+	if(ret == 1) // Check if the UART interruption was triggered because the transmission buffer got empty
     {
         int ret;
         if(tcu_transmission_running)
@@ -381,6 +389,22 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
             uart_irq_tx_disable(dev_tcu_uart);
         }
     }
+    else
+    {
+        //LOG_ERR("Error UART IRQ TX buffer not ready to accept a new char %d",ret);
+    }
+
+    ret = uart_irq_is_pending(dev_tcu_uart);
+    if(ret)
+    {
+        LOG_WRN("UART IRQ pending %d",ret);
+    }
+
+    ret = uart_irq_tx_complete(dev_tcu_uart);
+    if( ret == 1) // Check if the UART interruption was triggered because the transmission buffer got empty
+    {
+        LOG_WRN("UART IRQ TX complete %d",ret);
+    }
 }
 
 /**@brief Transmit frame using the TCU uart
@@ -389,9 +413,9 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
  */
 void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
 {
-    if(!tcu_transmission_running)
+    if (!tcu_transmission_running)
     {
-        for(uint16_t i = 0; i <size_input_data; i++)
+        for (uint16_t i = 0; i < size_input_data; i++)
         {
             tcu_transmission_buffer[i] = input_data[i];
         }

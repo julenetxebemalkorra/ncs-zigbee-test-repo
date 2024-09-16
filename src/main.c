@@ -128,7 +128,6 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 void check_stack_space(void);  // Forward declaration
 void analyze_nvs_storage(void);  // Forward declaration
 
-#ifdef CUSTOM_FATAL_ERROR_HANDLER
 void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf)
 {
     LOG_ERR("Fatal error occurred! Reason: %d", reason);
@@ -144,7 +143,7 @@ void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf)
     k_fatal_halt(reason);
     log_panic();	
 }
-#endif
+
 
 /*----------------------------------------------------------------------------*/
 /*                           FUNCTION DEFINITIONS                             */
@@ -268,9 +267,9 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                           (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,
                                                     (uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload);
 
-            check_stack_space();
-            analyze_nvs_storage();
-            thread_analyzer_print();	
+            //check_stack_space();
+            //analyze_nvs_storage();
+            //thread_analyzer_print();	
         }
 
         aps_frames_received_total_counter++;
@@ -310,7 +309,9 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         }
 
     	// safe way to free buffer
+        //zb_osif_disable_all_inter();
         zb_buf_free(bufid);
+        //zb_osif_enable_all_inter();
     	return ZB_TRUE;
 
 }
@@ -400,9 +401,9 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	if (bufid)
 	{
 		// safe way to free buffer
-        zb_osif_disable_all_inter();
+        //zb_osif_disable_all_inter();
         zb_buf_free(bufid);
-        zb_osif_enable_all_inter();	
+        //zb_osif_enable_all_inter();	
     }
 	
 }
@@ -412,6 +413,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
 void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
+    void * p_context_local = p_context;
 	switch(event_type) {
 		case NRF_TIMER_EVENT_COMPARE0:
             if(debug_led_ms_x10 < 10000) debug_led_ms_x10++;
@@ -476,6 +478,8 @@ static int8_t gpio_init(void)
 
 void my_watchdog_callback(int channel_id, void *user_data)
 {
+    void *user_data_local = user_data;
+    void *channel_id_local = channel_id;
      printk("Watchdog callback invoked!\n");
     // Handle the watchdog timeout event
     // user_data can be used to pass additional information
@@ -678,16 +682,16 @@ void display_counters(void)
     if( (uint64_t)( time_now_ms - time_last_ms ) > 60000 )
     {
         time_last_ms = time_now_ms;
-        LOG_DBG("APS RX COUNTERS: Total %d, Binary %d, Commis %d",
+        LOG_WRN("APS RX COUNTERS: Total %d, Binary %d, Commis %d",
                                aps_frames_received_total_counter,
                                aps_frames_received_binary_cluster_counter,
                                aps_frames_received_commissioning_cluster_counter);
-        LOG_DBG("Uart frames: Tx %d, Rx %d",
+        LOG_WRN("Uart frames: Tx %d, Rx %d",
                                tcu_uart_frames_transmitted_counter,
                                tcu_uart_frames_received_counter);
 
-        check_stack_space();
-        analyze_nvs_storage();
+        //check_stack_space();
+        //analyze_nvs_storage();
     }
 
 }
