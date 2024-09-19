@@ -17,6 +17,7 @@
 #include <zigbee/zigbee_app_utils.h>
 #include <zb_nrf_platform.h>
 #include "zb_range_extender.h"
+#include "zb_mem_config_max.h" // This file has to be included after zboss_api.h
 
 // UART async includes
 #include <zephyr/device.h>
@@ -259,6 +260,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         zb_osif_enable_all_inter();
     	return ZB_TRUE;
 	}
+    LOG_ERR("Error: bufid is NULL");
 	return ZB_FALSE;
 }
 
@@ -355,7 +357,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
         zb_buf_free(bufid);
         zb_osif_enable_all_inter();	
     }
-	
+    LOG_ERR("Error: bufid is NULL");
 }
 
 // Interrupt handler for the timer
