@@ -26,6 +26,9 @@
 
 #include "tcu_Uart.h"
 
+#define MAX_QUEUE_SIZE 10
+#define MAX_MESSAGE_SIZE 256
+
 extern uint16_t tcu_uart_frames_received_counter;
 
 LOG_MODULE_REGISTER(uart_app, LOG_LEVEL_DBG);
@@ -65,6 +68,15 @@ static struct uart_config tcu_uart_config = {
     .flow_ctrl = UART_CFG_FLOW_CTRL_NONE
  };
 
+ typedef struct {
+    uint8_t buffer[MAX_QUEUE_SIZE][MAX_MESSAGE_SIZE];
+    uint16_t message_sizes[MAX_QUEUE_SIZE];  // Store the size of each message
+    uint8_t head;                            // Index of the message to send next
+    uint8_t tail;                            // Index where the next new message will be stored
+    uint8_t count;                           // Number of queued messages
+} message_queue_t;
+
+message_queue_t tcu_message_queue = {0};    // Initialize the message queue
 
 /**@brief Initialization of the TCU UART FW module
  *
@@ -377,12 +389,49 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
             {
                 tcu_transmission_running = false;
                 uart_irq_tx_disable(dev_tcu_uart);
+                if(tcu_message_queue.count > 0)
+                {
+                    // Dequeue the next message
+                    memcpy(tcu_transmission_buffer, tcu_message_queue.buffer[tcu_message_queue.head], tcu_message_queue.message_sizes[tcu_message_queue.head]);
+                    tcu_transmission_size = tcu_message_queue.message_sizes[tcu_message_queue.head];
+                    tcu_message_queue.head = (tcu_message_queue.head + 1) % MAX_QUEUE_SIZE;
+                    tcu_message_queue.count--;
+                                    
+                    // Start sending the next message
+                    tcu_transmission_running = true;
+                    uart_poll_out(dev_tcu_uart, tcu_transmission_buffer[0]); // Place the first byte in the UART transmission buffer
+                    tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
+                    uart_irq_tx_enable(dev_tcu_uart);
+                    LOG_WRN("Message dequeued");
+                }
             }
         }
         else
         {
             uart_irq_tx_disable(dev_tcu_uart);
         }
+    }
+}
+
+/**@brief Queue a message to be sent through the TCU UART
+ *
+ * @param[in]   input_data          Pointer to the message to be sent
+ * @param[in]   size_input_data     Size of the message to be sent
+ *
+ */
+void queueMessage(uint8_t *input_data, uint16_t size_input_data)
+{
+    if (tcu_message_queue.count < MAX_QUEUE_SIZE) {
+        // Copy the new message into the queue at the tail position
+        memcpy(tcu_message_queue.buffer[tcu_message_queue.tail], input_data, size_input_data);
+        tcu_message_queue.message_sizes[tcu_message_queue.tail] = size_input_data;
+
+        // Update the tail and count
+        tcu_message_queue.tail = (tcu_message_queue.tail + 1) % MAX_QUEUE_SIZE;
+        tcu_message_queue.count++;
+        LOG_WRN("Message queued");
+    } else {
+        LOG_ERR("Message queue is full");
     }
 }
 
@@ -403,6 +452,7 @@ void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
     }
     else
     {
+        queueMessage(input_data, size_input_data);
         LOG_ERR("TCU UART transmission buffer is busy");
     }
 }
