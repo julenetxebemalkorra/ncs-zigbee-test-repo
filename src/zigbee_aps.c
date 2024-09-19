@@ -80,9 +80,9 @@ void zigbee_aps_user_data_tx_cb(zb_bufid_t bufid)
         LOG_DBG("Transmission completed, MAC seq = %d, NWK seq = %d, APS counter = %d", mac_sequence_number, nwk_sequence_number, aps_counter);
 
         // safe way to free buffer
-        //zb_osif_disable_all_inter();
+        zb_osif_disable_all_inter();
         zb_buf_free(bufid);
-        //zb_osif_enable_all_inter();
+        zb_osif_enable_all_inter();
     }
 }
 

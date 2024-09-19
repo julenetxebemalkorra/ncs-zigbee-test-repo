@@ -63,8 +63,8 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 /* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO                ZB_TRUE
-#define PRINT_UART_INFO                  ZB_TRUE
+#define PRINT_ZIGBEE_INFO                ZB_FALSE
+#define PRINT_UART_INFO                  ZB_FALSE
 #define CRYPTO_ENABLE                    ZB_TRUE
 
 /* 1000 msec = 1 sec */
@@ -97,6 +97,9 @@ uint16_t tcu_uart_frames_received_counter = 0;
 uint8_t soft_reset_counter = 0;
 uint8_t hard_reset_counter = 0;
 
+uint8_t OTA_frame1 = 0x00;
+uint8_t OTA_frame2 = 0x00;
+
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
 bool g_b_flash_error = false; //   Flag to indicate if there was an error when reading the NVRAM
@@ -122,6 +125,7 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
 // boolean flags for detecting modbus request handling
 bool b_Zigbe_Connected = false;
 bool bTimeToSendFrame = false;
+bool g_b_OTA_ongoing = false;
 
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 
@@ -283,10 +287,26 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         {
             if (sizeOfPayload > 0 && sizeOfPayload < UART_RX_BUFFER_SIZE)
             {
-                /*if(PRINT_ZIGBEE_INFO)
+                if(PRINT_ZIGBEE_INFO)
                 {
                     LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
                     LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
+                }
+                /*if(g_b_OTA_ongoing && pointerToBeginOfBuffer[7] == OTA_frame1 && pointerToBeginOfBuffer[8] == OTA_frame2)
+                {
+                    if(PRINT_ZIGBEE_INFO) LOG_ERR("The same fram repeated 0x%x && 0x%x", pointerToBeginOfBuffer[7], pointerToBeginOfBuffer[8]);
+                    OTA_frame1 = pointerToBeginOfBuffer[7];
+                    OTA_frame2 = pointerToBeginOfBuffer[8];
+                    zb_buf_free(bufid);
+                    //zb_osif_enable_all_inter();
+    	            return ZB_TRUE;  
+                }
+                if(pointerToBeginOfBuffer[0] == 0x87 && pointerToBeginOfBuffer[1] == 0x10)
+                {
+                    if(PRINT_ZIGBEE_INFO) LOG_WRN("OTA WIP");
+                    OTA_frame1 = pointerToBeginOfBuffer[7];
+                    OTA_frame2 = pointerToBeginOfBuffer[8];
+                    g_b_OTA_ongoing = true;
                 }*/
 
                 if( !is_tcu_uart_in_command_mode() && (sizeOfPayload >= MODBUS_MIN_RX_LENGTH) )
@@ -309,9 +329,9 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         }
 
     	// safe way to free buffer
-        //zb_osif_disable_all_inter();
+        zb_osif_disable_all_inter();
         zb_buf_free(bufid);
-        //zb_osif_enable_all_inter();
+        zb_osif_enable_all_inter();
     	return ZB_TRUE;
 
 }
@@ -401,9 +421,9 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	if (bufid)
 	{
 		// safe way to free buffer
-        //zb_osif_disable_all_inter();
+        zb_osif_disable_all_inter();
         zb_buf_free(bufid);
-        //zb_osif_enable_all_inter();	
+        zb_osif_enable_all_inter();	
     }
 	
 }
@@ -774,9 +794,9 @@ int main(void)
     while(1)
     {
         // run diagnostic functions
-        diagnostic_toogle_pin();
-        diagnostic_zigbee_info();
-        display_counters();
+        //diagnostic_toogle_pin();
+        //diagnostic_zigbee_info();
+        //display_counters();
 
 		task_wdt_feed(task_wdt_id); // Feed the watchdog
 

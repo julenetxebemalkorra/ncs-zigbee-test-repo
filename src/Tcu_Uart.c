@@ -65,6 +65,7 @@ static struct uart_config tcu_uart_config = {
     .flow_ctrl = UART_CFG_FLOW_CTRL_NONE
  };
 
+uint32_t data_loss_counter = 0;
 
 /**@brief Initialization of the TCU UART FW module
  *
@@ -352,7 +353,7 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
         while( number_of_bytes_available > 0 )
         {
             number_of_bytes_available--;
-            if( b_zigbee_module_in_command_mode )
+            if( b_zigbee_module_in_command_mode && !g_b_OTA_ongoing ) // Check if the Zigbee module is in command mode
             {
                 tcu_uart_process_byte_received_in_command_mode(uart_rx_hw_fifo[uart_rx_hw_fifo_index]);
             }
@@ -415,15 +416,21 @@ void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
 {
     if (!tcu_transmission_running)
     {
-        for (uint16_t i = 0; i < size_input_data; i++)
-        {
-            tcu_transmission_buffer[i] = input_data[i];
-        }
+        
+        memcpy(tcu_transmission_buffer, input_data, size_input_data * sizeof(input_data[0]));
+
         tcu_transmission_size = size_input_data;
         tcu_transmission_running = true;
         uart_poll_out(dev_tcu_uart, tcu_transmission_buffer[0]); // Place the first byte in the UART transmission buffer
         tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
         uart_irq_tx_enable(dev_tcu_uart);
+    }
+    else
+    {
+        data_loss_counter++;
+        LOG_ERR("TCU UART transmission buffer busy");
+        LOG_DBG("Size of received payload is %d bytes %d\n", size_input_data, data_loss_counter);
+        LOG_HEXDUMP_DBG(input_data, size_input_data,"Payload of input RF packet discarded");
     }
 }
 
