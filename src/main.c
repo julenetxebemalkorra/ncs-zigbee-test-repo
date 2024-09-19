@@ -135,9 +135,8 @@ void get_reset_reason(void)
 	{
         LOG_ERR("RESET");
 
-		if (reset_cause & RESET_PIN) LOG_DBG("Reset cause is: RESET_PIN\n"); // 0
-		else if (reset_cause & RESET_SOFTWARE) LOG_DBG("Reset cause is: RESET_SOFTWARE\n"); // 1
-		else if (reset_cause & RESET_BROWNOUT) LOG_DBG("Reset cause is: RESET_BROWNOUT\n"); // 2
+		if (reset_cause & RESET_BROWNOUT) LOG_WRN("Reset cause is: RESET_BROWNOUT\n"); // 2
+        else if (reset_cause & RESET_PIN) LOG_DBG("Reset cause is: RESET_PIN\n"); // 0
 		else if(reset_cause & RESET_POR) LOG_DBG("Reset cause is: RESET_POR\n"); // 3
 		else if(reset_cause & RESET_WATCHDOG) LOG_DBG("Reset cause is: RESET_WATCHDOG\n"); // 4
 		else if(reset_cause & RESET_DEBUG) LOG_DBG("Reset cause is: RESET_DEBUG\n"); // 5
@@ -150,6 +149,7 @@ void get_reset_reason(void)
 		else if(reset_cause & RESET_HARDWARE) LOG_DBG("Reset cause is: RESET_HARDWARE\n"); // 12
 		else if(reset_cause & RESET_USER) LOG_DBG("Reset cause is: RESET_USER\n"); // 13
 		else if (reset_cause & RESET_TEMPERATURE) LOG_DBG("Reset cause is: RESET_TEMPERATURE\n\n"); // 14
+        else if (reset_cause & RESET_SOFTWARE) LOG_DBG("Reset cause is: RESET_SOFTWARE\n"); // 1
 		else LOG_DBG("\n\n reset cause is: %d\n\n",reset_cause);
 
     	hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset
@@ -195,7 +195,12 @@ void get_reset_reason(void)
  */
 zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 {
-    if (bufid)
+    if(!bufid)
+    {
+        LOG_ERR("Error: bufid is NULL");
+        return ZB_FALSE;
+    } 
+    else
 	{
         zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
 
@@ -266,6 +271,12 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	//Read signal description out of memory buffer. */
 	zb_zdo_app_signal_hdr_t *sg_p = NULL;
 	zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
+
+    if(!bufid)
+    {
+        LOG_ERR("Error: bufid is NULL");
+        return;
+    }
 
     if( PRINT_ZIGBEE_INFO )
     {

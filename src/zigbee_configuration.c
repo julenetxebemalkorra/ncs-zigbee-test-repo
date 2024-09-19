@@ -14,6 +14,7 @@
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
 #include "nvram.h"
+#include <zephyr/sys/reboot.h>
 
 LOG_MODULE_REGISTER(zb_conf, LOG_LEVEL_DBG);
 /* Local variables                                                            */
@@ -322,6 +323,6 @@ void zigbee_thread_manager(void)
     {
         g_b_reset_cmd = false;
         LOG_WRN("Reset coomadn received from TCU, rebooting...");
-        sys_reboot(true);
+        sys_reboot(SYS_REBOOT_COLD);
     }
 }

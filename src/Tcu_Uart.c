@@ -31,17 +31,17 @@ extern uint16_t tcu_uart_frames_received_counter;
 LOG_MODULE_REGISTER(uart_app, LOG_LEVEL_DBG);
 
 /* Local variables used to manage the command mode of the zigbee module */
-static bool b_zigbee_module_in_command_mode = false;
-static uint8_t enter_cmd_mode_sequence_st = ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_INITIAL_SILENCE_ST;
-static uint16_t pre_silence_timer_ms = 0;
-static uint16_t post_silence_timer_ms = 0;
-static uint16_t leave_cmd_mode_silence_timer_ms = 0;
+static volatile bool b_zigbee_module_in_command_mode = false;
+static volatile uint8_t enter_cmd_mode_sequence_st = ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_INITIAL_SILENCE_ST;
+static volatile uint16_t pre_silence_timer_ms = 0;
+static volatile uint16_t post_silence_timer_ms = 0;
+static volatile uint16_t leave_cmd_mode_silence_timer_ms = 0;
 /**/
 
-static uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
-static uint8_t tcu_transmission_buffer_index = 0;
+static volatile uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
+static volatile uint8_t tcu_transmission_buffer_index = 0;
 static uint8_t tcu_transmission_size = 0;
-static bool    tcu_transmission_running = false;
+static volatile bool    tcu_transmission_running = false;
 
 static volatile uint8_t tcu_uart_rx_buffer[UART_RX_BUFFER_SIZE] = {0};
 static volatile uint16_t tcu_uart_rx_buffer_index = 0;
@@ -168,6 +168,7 @@ void tcu_uart_timers_10kHz(void)
                     {
                         b_tcu_uart_rx_buffer_overflow = false;
                         b_tcu_uart_rx_corrupted_frame = false;
+                        LOG_ERR("Discarded frame. Buffer overflow or corrupted frame");
                     }
                     else
                     {
@@ -313,6 +314,7 @@ void tcu_uart_process_byte_received_in_transparent_mode(uint8_t input_byte)
             if( b_tcu_uart_rx_buffer_busy ) // Ignore new characters if we are still processing the last received frame.
             {
                 b_tcu_uart_rx_corrupted_frame  = true;
+                LOG_ERR("Discarded frame. Buffer busy");
             }
             else
             {
@@ -334,6 +336,7 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
 
 	if( !uart_irq_update(dev_tcu_uart) )
     {
+        LOG_ERR("Error updating the UART IRQ");
 		return;
 	}
 
@@ -391,15 +394,16 @@ void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
 {
     if(!tcu_transmission_running)
     {
-        for(uint16_t i = 0; i <size_input_data; i++)
-        {
-            tcu_transmission_buffer[i] = input_data[i];
-        }
+        memcpy(tcu_transmission_buffer, input_data, size_input_data);
         tcu_transmission_size = size_input_data;
         tcu_transmission_running = true;
         uart_poll_out(dev_tcu_uart, tcu_transmission_buffer[0]); // Place the first byte in the UART transmission buffer
         tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
         uart_irq_tx_enable(dev_tcu_uart);
+    }
+    else
+    {
+        LOG_ERR("TCU UART transmission buffer is busy");
     }
 }
 
@@ -414,7 +418,7 @@ void switch_tcu_uart_to_command_mode(void)
     if( !b_zigbee_module_in_command_mode )
     {
         b_zigbee_module_in_command_mode = true;
-        LOG_DBG("Enter in command mode");
+        LOG_WRN("Enter in command mode");
     }
 }
 
@@ -550,5 +554,6 @@ void tcu_uart_transparent_mode_manager(void)
         tcu_uart_send_received_frame_through_zigbee();
         b_tcu_uart_rx_complete_frame_received = false;
         b_tcu_uart_rx_buffer_busy = false;
+        LOG_WRN("Frame received from TCU UART");
     }   
 }
