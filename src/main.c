@@ -198,7 +198,19 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 {
     if(!bufid)
     {
-        LOG_ERR("Error: bufid is NULL");
+        if (zb_buf_is_oom_state()) {
+        // Handle Out Of Memory state
+        LOG_ERR("Buffer pool is out of memory!\n");
+        }
+        if (zb_buf_memory_low()) 
+        {
+            // Handle low memory state
+            LOG_WRN("Warning: Buffer pool memory is running low!\n");
+        }
+    
+        // Trace the buffer statistics for debugging purposes
+        zb_buf_oom_trace();
+        LOG_ERR("Error: bufid is NULL data_indication_cb beggining");
         return ZB_FALSE;
     } 
     else
@@ -599,6 +611,18 @@ void display_counters(void)
                                tcu_uart_frames_transmitted_counter,
                                tcu_uart_frames_received_counter);
     }
+
+    if (zb_buf_is_oom_state()) {
+        // Handle Out Of Memory state
+        LOG_ERR("Buffer pool is out of memory!\n");
+    }
+    if (zb_buf_memory_low()) {
+        // Handle low memory state
+        LOG_WRN("Warning: Buffer pool memory is running low!\n");
+    }
+
+    // Trace the buffer statistics for debugging purposes
+    zb_buf_oom_trace();
 }
 
 //------------------------------------------------------------------------------
