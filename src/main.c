@@ -252,7 +252,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                         if(PRINT_ZIGBEE_INFO) LOG_WRN("Received frame is a Modbus frame");
                         if(PRINT_ZIGBEE_INFO) LOG_HEXDUMP_WRN(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
                     }
-                    if(tcu_transmission_running && pointerToBeginOfBuffer[1] == 0x03)
+                    /*if(tcu_transmission_running && pointerToBeginOfBuffer[1] == 0x03)
                     {
                         LOG_ERR("OTA Ongoing and readholding register command received and discarded");
                         if (bufid)
@@ -264,8 +264,10 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                         	return ZB_TRUE;
 	                    }
                     }
+                    */
                     
-                    sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
+                    //sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
+                    queueMessage(pointerToBeginOfBuffer, sizeOfPayload);
                     tcu_uart_frames_transmitted_counter++;
                     if(PRINT_ZIGBEE_INFO) LOG_WRN("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
                 }

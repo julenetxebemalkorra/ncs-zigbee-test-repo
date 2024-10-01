@@ -382,7 +382,7 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
                 ret = uart_fifo_fill(dev_tcu_uart, (uint8_t *)&tcu_transmission_buffer[tcu_transmission_buffer_index], 1);
                 if(ret > 0)
                 {
-                    //LOG_DBG("Sent byte ret %d: %02X", ret, tcu_transmission_buffer[tcu_transmission_buffer_index]);
+                    //LOG_DBG("Sent byte ret %d: %02X, %d , %d", ret, tcu_transmission_buffer[tcu_transmission_buffer_index], tcu_transmission_buffer_index, tcu_transmission_size);
                     tcu_transmission_buffer_index = tcu_transmission_buffer_index + ret;
                 }
                 else if(ret < 0)
@@ -394,6 +394,7 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
             {
                 LOG_WRN("Message finished transmitting, buffer index: %d", tcu_transmission_buffer_index);
                 tcu_transmission_running = false;
+                uart_irq_tx_disable(dev_tcu_uart);
             }
         }
         else
@@ -433,17 +434,16 @@ void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
 {
     if(!tcu_transmission_running)
     {
+        tcu_transmission_running = true;
         memcpy(tcu_transmission_buffer, input_data, size_input_data);
         tcu_transmission_size = size_input_data;
-        tcu_transmission_running = true;
         uart_poll_out(dev_tcu_uart, tcu_transmission_buffer[0]); // Place the first byte in the UART transmission buffer
-        LOG_DBG("Sent byte %02X", tcu_transmission_buffer[0]);
         tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
         uart_irq_tx_enable(dev_tcu_uart);
     }
     else
     {
-        queueMessage(input_data, size_input_data);
+        //queueMessage(input_data, size_input_data);
         LOG_ERR("TCU UART transmission buffer is busy");
     }
 }
@@ -613,11 +613,11 @@ void tcu_uart_manager(void)
             sendFrameToTcu(tcu_message_queue.buffer[tcu_message_queue.head],tcu_message_queue.message_sizes[tcu_message_queue.head]);
             tcu_message_queue.head = (tcu_message_queue.head + 1) % MAX_QUEUE_SIZE;
             tcu_message_queue.count--;
-            LOG_DBG("Transmission scheduled");
+            LOG_DBG("Transmission scheduled %d", tcu_message_queue.count);
         } 
         else
         {
-            LOG_WRN("Transmission could not be scheduled: TCU UART tcu_transmission_running already running");
+            LOG_WRN("Transmission could not be scheduled: TCU UART tcu_transmission_running already running %d", tcu_message_queue.count);
         }       
     }
 }
