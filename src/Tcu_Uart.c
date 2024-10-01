@@ -44,7 +44,7 @@ static volatile uint16_t leave_cmd_mode_silence_timer_ms = 0;
 static volatile uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
 static volatile uint8_t tcu_transmission_buffer_index = 0;
 static uint8_t tcu_transmission_size = 0;
-static volatile bool    tcu_transmission_running = false;
+bool    tcu_transmission_running = false;
 
 static volatile uint8_t tcu_uart_rx_buffer[UART_RX_BUFFER_SIZE] = {0};
 static volatile uint16_t tcu_uart_rx_buffer_index = 0;
@@ -382,28 +382,18 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
                 ret = uart_fifo_fill(dev_tcu_uart, (uint8_t *)&tcu_transmission_buffer[tcu_transmission_buffer_index], 1);
                 if(ret > 0)
                 {
+                    //LOG_DBG("Sent byte ret %d: %02X", ret, tcu_transmission_buffer[tcu_transmission_buffer_index]);
                     tcu_transmission_buffer_index = tcu_transmission_buffer_index + ret;
+                }
+                else if(ret < 0)
+                {
+                    LOG_ERR("Error filling the UART FIFO %d", ret );
                 }
             }
             else
             {
+                LOG_WRN("Message finished transmitting, buffer index: %d", tcu_transmission_buffer_index);
                 tcu_transmission_running = false;
-                uart_irq_tx_disable(dev_tcu_uart);
-                if(tcu_message_queue.count > 0)
-                {
-                    // Dequeue the next message
-                    memcpy(tcu_transmission_buffer, tcu_message_queue.buffer[tcu_message_queue.head], tcu_message_queue.message_sizes[tcu_message_queue.head]);
-                    tcu_transmission_size = tcu_message_queue.message_sizes[tcu_message_queue.head];
-                    tcu_message_queue.head = (tcu_message_queue.head + 1) % MAX_QUEUE_SIZE;
-                    tcu_message_queue.count--;
-                                    
-                    // Start sending the next message
-                    tcu_transmission_running = true;
-                    uart_poll_out(dev_tcu_uart, tcu_transmission_buffer[0]); // Place the first byte in the UART transmission buffer
-                    tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
-                    uart_irq_tx_enable(dev_tcu_uart);
-                    LOG_WRN("Message dequeued");
-                }
             }
         }
         else
@@ -447,6 +437,7 @@ void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
         tcu_transmission_size = size_input_data;
         tcu_transmission_running = true;
         uart_poll_out(dev_tcu_uart, tcu_transmission_buffer[0]); // Place the first byte in the UART transmission buffer
+        LOG_DBG("Sent byte %02X", tcu_transmission_buffer[0]);
         tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
         uart_irq_tx_enable(dev_tcu_uart);
     }
@@ -606,4 +597,27 @@ void tcu_uart_transparent_mode_manager(void)
         b_tcu_uart_rx_buffer_busy = false;
         LOG_WRN("Frame received from TCU UART");
     }   
+}
+
+//------------------------------------------------------------------------------
+/**@brief Management of tcu uart layer. Generation of TCU UART frames and scheduling of their transmission
+ *
+ *
+ */
+void tcu_uart_manager(void)
+{
+    if( tcu_message_queue.count > 0 ) // There is at least an output UART frame pending to be scheduled
+    {
+        if(!tcu_transmission_running) // If there is no transmission running, schedule the next frame
+        {        
+            sendFrameToTcu(tcu_message_queue.buffer[tcu_message_queue.head],tcu_message_queue.message_sizes[tcu_message_queue.head]);
+            tcu_message_queue.head = (tcu_message_queue.head + 1) % MAX_QUEUE_SIZE;
+            tcu_message_queue.count--;
+            LOG_DBG("Transmission scheduled");
+        } 
+        else
+        {
+            LOG_WRN("Transmission could not be scheduled: TCU UART tcu_transmission_running already running");
+        }       
+    }
 }

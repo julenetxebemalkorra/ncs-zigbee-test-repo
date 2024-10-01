@@ -242,18 +242,45 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                 {
                     LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
                     LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
-                }*/
+                }
+                */
 
                 if( !is_tcu_uart_in_command_mode() && (sizeOfPayload >= MODBUS_MIN_RX_LENGTH) )
                 {
-                    if(PRINT_ZIGBEE_INFO) LOG_DBG("Payload of input RF packet sent to TCU UART");
-                    tcu_uart_frames_transmitted_counter++;
+                    if(pointerToBeginOfBuffer[1] == 0x10) // Modbus frame write multipel register
+                    {
+                        if(PRINT_ZIGBEE_INFO) LOG_WRN("Received frame is a Modbus frame");
+                        if(PRINT_ZIGBEE_INFO) LOG_HEXDUMP_WRN(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
+                    }
+                    if(tcu_transmission_running && pointerToBeginOfBuffer[1] == 0x03)
+                    {
+                        LOG_ERR("OTA Ongoing and readholding register command received and discarded");
+                        if (bufid)
+                        {
+                        	// safe way to free buffer
+                            zb_osif_disable_all_inter();
+                            zb_buf_free(bufid);
+                            zb_osif_enable_all_inter();
+                        	return ZB_TRUE;
+	                    }
+                    }
+                    
                     sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
+                    tcu_uart_frames_transmitted_counter++;
+                    if(PRINT_ZIGBEE_INFO) LOG_WRN("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
                 }
+                else
+                {
+                    if(PRINT_ZIGBEE_INFO) LOG_ERR("Payload of input RF packet NOT sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
+                }
+            }
+            else
+            {
+                if(PRINT_ZIGBEE_INFO) LOG_ERR("Payload of input RF packet is too big or too small: %d bytes", sizeOfPayload);
             }
         }
 
-        if( ( ind->clusterid == DIGI_COMMISSIONING_CLUSTER ) &&
+        else if( ( ind->clusterid == DIGI_COMMISSIONING_CLUSTER ) &&
             ( ind->src_endpoint == DIGI_COMMISSIONING_SOURCE_ENDPOINT ) &&
             ( ind->dst_endpoint == DIGI_COMMISSIONING_DESTINATION_ENDPOINT ) )
         {
@@ -261,6 +288,17 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             {
                 if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee Node Discovery Device Request");
             }
+        }
+        else
+        {
+            if(PRINT_ZIGBEE_INFO) LOG_ERR("Cluster ID not found");
+            if(PRINT_ZIGBEE_INFO) LOG_WRN("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes",
+                          (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,(uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload);
+            if(PRINT_ZIGBEE_INFO)
+                {
+                    LOG_WRN("Size of received payload is %d bytes \n", sizeOfPayload);
+                    LOG_HEXDUMP_WRN(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
+                }
         }
 	}
 
@@ -272,7 +310,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         zb_osif_enable_all_inter();
     	return ZB_TRUE;
 	}
-    LOG_ERR("Error: bufid is NULL");
+    LOG_ERR("Error: bufid is NULL data_indication_cb end");
 	return ZB_FALSE;
 }
 
@@ -285,12 +323,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	//Read signal description out of memory buffer. */
 	zb_zdo_app_signal_hdr_t *sg_p = NULL;
 	zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
-
-    if(!bufid)
-    {
-        LOG_ERR("Error: bufid is NULL");
-        return;
-    }
+    int ret = 0;
 
     if( PRINT_ZIGBEE_INFO )
     {
@@ -336,7 +369,11 @@ void zboss_signal_handler(zb_bufid_t bufid)
                 }
         	}	
 
-            ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
+            ret = ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
+            if(ret != RET_OK)
+            {
+                LOG_ERR("zb_bdb_reset_via_local_action failed, ret %d", ret);
+            }
 
             LOG_WRN( "The device will perform the NLME leave and clean all Zigbee persistent data except the outgoing NWK frame counter and application datasets");
 
@@ -369,7 +406,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
         zb_buf_free(bufid);
         zb_osif_enable_all_inter();	
     }
-    LOG_ERR("Error: bufid is NULL");
 }
 
 // Interrupt handler for the timer
@@ -549,10 +585,10 @@ void diagnostic_zigbee_info()
     {
         b_infit_info_flag = ZB_FALSE;
         b_Zigbe_Connected = true;
-        LOG_DBG("Zigbee application joined the network: bellow some info: \n");
+        if(PRINT_ZIGBEE_INFO) LOG_DBG("Zigbee application joined the network: bellow some info: \n");
 
         xbee_parameters.at_my = zb_get_short_address();
-        LOG_DBG("zigbee shrot addr:  0x%x\n", xbee_parameters.at_my);
+        if(PRINT_ZIGBEE_INFO) LOG_DBG("zigbee shrot addr:  0x%x\n", xbee_parameters.at_my);
 
         zb_get_extended_pan_id(zb_ext_pan_id);
         
@@ -562,26 +598,26 @@ void diagnostic_zigbee_info()
         {
             temp[i] = zb_ext_pan_id[7-i];
         }
-        LOG_HEXDUMP_DBG(temp,8,"Extended PAN ID: ");
+        if(PRINT_ZIGBEE_INFO) LOG_HEXDUMP_DBG(temp,8,"Extended PAN ID: ");
 
         switch(zb_get_network_role())
         {
         case 0:
-            LOG_DBG("zigbee role coordinator\n");
+            if(PRINT_ZIGBEE_INFO) LOG_DBG("zigbee role coordinator\n");
             break;
         case 1:
-            LOG_DBG("zigbee role router\n");
+            if(PRINT_ZIGBEE_INFO) LOG_DBG("zigbee role router\n");
             break;
         case 2:
-            LOG_DBG("zigbee role end device\n");
+            if(PRINT_ZIGBEE_INFO) LOG_DBG("zigbee role end device\n");
             break;
         default:
-            LOG_DBG("Zigbee role NOT found \n");
+            if(PRINT_ZIGBEE_INFO) LOG_DBG("Zigbee role NOT found \n");
             break;
         }
 
     xbee_parameters.at_ch = zb_get_current_channel();
-    LOG_DBG("zigbee channel: %d \n", xbee_parameters.at_ch);
+    if(PRINT_ZIGBEE_INFO) LOG_DBG("zigbee channel: %d \n", xbee_parameters.at_ch);
 
     }
 }
@@ -702,15 +738,20 @@ int main(void)
     while(1)
     {
         // run diagnostic functions
-        diagnostic_toogle_pin();
-        diagnostic_zigbee_info();
-        display_counters();
+        if(PRINT_ZIGBEE_INFO)
+        {
+            diagnostic_toogle_pin();
+            diagnostic_zigbee_info();
+            display_counters();
+        }
 
 		task_wdt_feed(task_wdt_id); // Feed the watchdog
 
         tcu_uart_transparent_mode_manager();   // Manage the frames received from the TCU uart when module is in transparent mode
         digi_node_discovery_request_manager(); // Manage the device discovery requests
         zigbee_aps_manager();                  // Manage the aps output frame queue
+        tcu_uart_manager();                   // Manage the TCU UART
+
 
         nvram_manager();                       // Manage the NVRAM
 
