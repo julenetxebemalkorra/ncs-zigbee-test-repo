@@ -56,8 +56,8 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 /* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO                ZB_FALSE
-#define PRINT_UART_INFO                  ZB_FALSE
+#define PRINT_ZIGBEE_INFO                ZB_TRUE
+#define PRINT_UART_INFO                  ZB_TRUE
 #define CRYPTO_ENABLE                    ZB_TRUE
 
 /* The devicetree node identifier for the "led0" alias. */
@@ -248,7 +248,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                     {
                         tcu_uart_frames_transmitted_counter++;
                         if (PRINT_ZIGBEE_INFO) 
-                        LOG_WRN("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
+                        LOG_DBG("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
                     }
                     else
                     {
@@ -282,8 +282,8 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                           (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,(uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload);
             if(PRINT_ZIGBEE_INFO)
                 {
-                    LOG_WRN("Size of received payload is %d bytes \n", sizeOfPayload);
-                    LOG_HEXDUMP_WRN(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
+                    LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
+                    LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
                 }
         }
 	}
@@ -740,7 +740,7 @@ int main(void)
         zigbee_thread_manager();               // Manage the Zigbee thread
         tcu_uart_manager();                   // Manage the TCU UART
 
-        //k_sleep(K_MSEC(5));                    // Required to see log messages on console
+        k_sleep(K_MSEC(5));                    // Required to see log messages on console
     }
 
     return 0;

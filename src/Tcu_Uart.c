@@ -37,8 +37,6 @@ typedef struct{
 
 K_MSGQ_DEFINE(tcu_uart_tx_message_queue, sizeof(tcu_message), MAX_QUEUE_SIZE, 4);  // Align buffer to 4 bytes
 
-
-
 extern uint16_t tcu_uart_frames_received_counter;
 
 LOG_MODULE_REGISTER(uart_app, LOG_LEVEL_DBG);
@@ -64,6 +62,11 @@ static volatile bool b_tcu_uart_rx_receiving_frame = false;
 static volatile bool b_tcu_uart_rx_complete_frame_received = false;
 static volatile bool b_tcu_uart_rx_corrupted_frame = false;
 static volatile uint16_t tcu_uart_rx_time_since_last_byte_ms = 0;
+
+// Define a counter variable outside the function
+// Declare variables to store the idle start time and idle duration
+static uint64_t uart_idle_start_time = 0;
+static uint64_t uart_idle_duration = 0;
 
 /* Get the device pointer of the UART hardware */
 static const struct device *dev_tcu_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
@@ -261,7 +264,7 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
                 LOG_ERR("Wrong AT command. Error code: %d", command_analysis_result);
                 for(uint8_t kk=0; kk<tcu_uart_rx_buffer_index; kk++)
                 {
-                    LOG_WRN("%d", tcu_uart_rx_buffer[kk]);
+                    LOG_ERR("%d", tcu_uart_rx_buffer[kk]);
                 }
             }
         }
@@ -378,16 +381,18 @@ void handle_uart_tx(void)
             if (ret > 0) {
                 //LOG_WRN("Sent %d bytes", ret);
                 tcu_transmission_buffer_index += ret;
-            } else {
+            } else 
+            {
                 LOG_ERR("Error filling UART FIFO: %d", ret);
                 tcu_transmission_running = false;
 			    uart_irq_tx_disable(dev_tcu_uart);
 			    return;
             }
-        } else {
+        } else 
+        {
             tcu_transmission_running = false;
             uart_irq_tx_disable(dev_tcu_uart);
-            LOG_DBG("Transmission complete.");
+            LOG_WRN("Transmission complete.");
         }
     }
 }
@@ -439,7 +444,7 @@ int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data)
     int ret = k_msgq_put(&tcu_uart_tx_message_queue, &message_buffer, K_NO_WAIT);
 
     if (ret == 0) {
-        LOG_WRN("Message queued successfully");
+        LOG_DBG("Message queued successfully");
     } else if (ret == -ENOMSG) {
         LOG_ERR("Message queue is full");
     }
@@ -607,18 +612,34 @@ void tcu_uart_transparent_mode_manager(void)
  */
 void tcu_uart_manager(void)
 {
-    if (!tcu_transmission_running & !b_tcu_uart_rx_receiving_frame)// && (uart_irq_tx_complete(dev_tcu_uart))) 
+    if (!tcu_transmission_running)// && (uart_irq_tx_complete(dev_tcu_uart))) 
     {
-        //LOG_WRN("tcu_uart_manager %d and %d", tcu_transmission_running, uart_irq_tx_complete(dev_tcu_uart));
-        k_sleep(K_MSEC(10));                    // Required to see log messages on console
-        int ret = k_msgq_get(&tcu_uart_tx_message_queue, &tcu_transmission_buffer, K_NO_WAIT);
-        if (ret == 0) {
-            //LOG_WRN("Sending message from queue");
-            //LOG_HEXDUMP_DBG((uint8_t *)tcu_transmission_buffer.buffer, tcu_transmission_buffer.size, "Payload of message from queue");
-            tcu_transmission_running = true;
-            uart_poll_out(dev_tcu_uart, tcu_transmission_buffer.buffer[0]);  // Send the first byte
-            tcu_transmission_buffer_index = 1;
-            uart_irq_tx_enable(dev_tcu_uart);  // Enable TX interrupt
+        uint64_t current_time = k_uptime_get();
+
+        // If transmission just became idle, start counting idle time
+        if (uart_idle_start_time == 0) {
+            uart_idle_start_time = current_time;
+        }
+
+        // Calculate the idle duration in milliseconds
+        uart_idle_duration = current_time - uart_idle_start_time;
+
+        // You can also log or take action after a certain number of increments if needed
+        // For example, log a warning after 1000 iterations
+        if (uart_idle_duration  >= 80) {
+            int ret = k_msgq_get(&tcu_uart_tx_message_queue, &tcu_transmission_buffer, K_NO_WAIT);
+            if (ret == 0) {
+                //LOG_WRN("Sending message from queue");
+                //LOG_HEXDUMP_DBG((uint8_t *)tcu_transmission_buffer.buffer, tcu_transmission_buffer.size, "Payload of message from queue");
+                tcu_transmission_running = true;
+                // Reset the idle time tracking since transmission starts
+                uart_idle_start_time = 0;
+                uart_idle_duration = 0;
+                uart_idle_start_time = current_time;
+                uart_poll_out(dev_tcu_uart, tcu_transmission_buffer.buffer[0]);  // Send the first byte
+                tcu_transmission_buffer_index = 1;
+                uart_irq_tx_enable(dev_tcu_uart);  // Enable TX interrupt
+            }
         }
     }
 }
