@@ -224,7 +224,7 @@ void digi_at_init_xbee_parameter_command(void) // TODO This structure currently 
 void digi_at_reply_ok(void)
 {
     uint8_t reply[3] = {'O','K','\r'};
-    sendFrameToTcu(reply, 3);
+    queue_zigbee_Message(reply, 3);
 }
 
 /**@brief This function sends an 'ERROR\r' string through the TCU UART
@@ -233,7 +233,7 @@ void digi_at_reply_ok(void)
 void digi_at_reply_error(void)
 {
     uint8_t reply[6] = {'E','R','R','O','R','\r'};
-    sendFrameToTcu(reply, 6);
+    queue_zigbee_Message(reply, 6);
 }
 
 /**@brief This function places the node identifier string into a buffer
@@ -335,7 +335,7 @@ void digi_at_reply_read_command(uint8_t at_command)
 
     if(reply_size > 0)
     {
-        sendFrameToTcu(reply, reply_size);
+        queue_zigbee_Message(reply, reply_size);
     }
     else
     {

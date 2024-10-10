@@ -28,6 +28,16 @@
 
 #define MAX_QUEUE_SIZE 10
 #define MAX_MESSAGE_SIZE 256
+#define UART_CHUNK_SIZE 8
+
+typedef struct{
+    uint8_t buffer[MAX_MESSAGE_SIZE];
+    uint16_t size;  // Keep track of the size
+}tcu_message;
+
+K_MSGQ_DEFINE(tcu_uart_tx_message_queue, sizeof(tcu_message), MAX_QUEUE_SIZE, 4);  // Align buffer to 4 bytes
+
+
 
 extern uint16_t tcu_uart_frames_received_counter;
 
@@ -41,9 +51,8 @@ static volatile uint16_t post_silence_timer_ms = 0;
 static volatile uint16_t leave_cmd_mode_silence_timer_ms = 0;
 /**/
 
-static volatile uint8_t tcu_transmission_buffer[SIZE_TRANSMISSION_BUFFER] = {0};
+static volatile tcu_message tcu_transmission_buffer = {0};
 static volatile uint8_t tcu_transmission_buffer_index = 0;
-static uint8_t tcu_transmission_size = 0;
 bool    tcu_transmission_running = false;
 
 static volatile uint8_t tcu_uart_rx_buffer[UART_RX_BUFFER_SIZE] = {0};
@@ -68,15 +77,7 @@ static struct uart_config tcu_uart_config = {
     .flow_ctrl = UART_CFG_FLOW_CTRL_NONE
  };
 
- typedef struct {
-    uint8_t buffer[MAX_QUEUE_SIZE][MAX_MESSAGE_SIZE];
-    uint16_t message_sizes[MAX_QUEUE_SIZE];  // Store the size of each message
-    uint8_t head;                            // Index of the message to send next
-    uint8_t tail;                            // Index where the next new message will be stored
-    uint8_t count;                           // Number of queued messages
-} message_queue_t;
-
-message_queue_t tcu_message_queue = {0};    // Initialize the message queue
+//extern struct k_msgq tcu_message_queue; // Ensure the message queue is declared
 
 /**@brief Initialization of the TCU UART FW module
  *
@@ -130,7 +131,7 @@ int8_t tcu_uart_configuration(void)
     }
 
 	/* configure interrupt and callback to receive data */
-	int ret = uart_irq_callback_user_data_set(dev_tcu_uart, tcu_uart_isr, NULL);
+	int ret = uart_irq_callback_set(dev_tcu_uart, tcu_uart_isr);
 
 	if (ret < 0) {
 		if (ret == -ENOTSUP) {
@@ -250,7 +251,7 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
         }
         else
         {
-            int8_t command_analysis_result = digi_at_analyze_and_reply_to_command(tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
+            int8_t command_analysis_result = digi_at_analyze_and_reply_to_command((uint8_t *)tcu_uart_rx_buffer, tcu_uart_rx_buffer_index);
             if( command_analysis_result == AT_CMD_OK_LEAVE_CMD_MODE ) //As a result of the command, we should leave command mode
             {
                 switch_tcu_uart_out_of_command_mode();
@@ -337,14 +338,67 @@ void tcu_uart_process_byte_received_in_transparent_mode(uint8_t input_byte)
     }
 }
 
+void handle_uart_rx(void)
+{
+    uint8_t uart_rx_hw_fifo[SIZE_OF_RX_FIFO_OF_NRF52840_UART];
+    uint8_t uart_rx_hw_fifo_index = 0;
+
+    int number_of_bytes_available = uart_fifo_read(dev_tcu_uart, uart_rx_hw_fifo, SIZE_OF_RX_FIFO_OF_NRF52840_UART);
+    while (number_of_bytes_available > 0) {
+        number_of_bytes_available--;
+        uint8_t byte_received = uart_rx_hw_fifo[uart_rx_hw_fifo_index];
+        uart_rx_hw_fifo_index++;
+
+        if (b_zigbee_module_in_command_mode) {
+            tcu_uart_process_byte_received_in_command_mode(byte_received);
+        } else {
+            tcu_uart_process_byte_received_in_transparent_mode(byte_received);
+        }
+    }
+}
+
+void handle_uart_tx(void)
+{
+    if (tcu_transmission_running) {
+        if (tcu_transmission_buffer_index < tcu_transmission_buffer.size) {
+
+            // Calculate the number of bytes remaining to send
+            size_t bytes_remaining = tcu_transmission_buffer.size - tcu_transmission_buffer_index;
+
+            // Calculate the number of bytes to send in this chunk (max 8 bytes)
+            size_t bytes_to_send = (bytes_remaining < UART_CHUNK_SIZE) ? bytes_remaining : UART_CHUNK_SIZE;
+            //LOG_WRN("Sending %d bytes", bytes_to_send);
+
+            // Send up to 8 bytes from the current index in the buffer
+            int ret = uart_fifo_fill(dev_tcu_uart, 
+                                     &tcu_transmission_buffer.buffer[tcu_transmission_buffer_index], 
+                                     bytes_to_send);
+
+            //int ret = uart_fifo_fill(dev_tcu_uart, (uint8_t *)&tcu_transmission_buffer.buffer, tcu_transmission_buffer.size);
+            if (ret > 0) {
+                //LOG_WRN("Sent %d bytes", ret);
+                tcu_transmission_buffer_index += ret;
+            } else {
+                LOG_ERR("Error filling UART FIFO: %d", ret);
+                tcu_transmission_running = false;
+			    uart_irq_tx_disable(dev_tcu_uart);
+			    return;
+            }
+        } else {
+            tcu_transmission_running = false;
+            uart_irq_tx_disable(dev_tcu_uart);
+            LOG_DBG("Transmission complete.");
+        }
+    }
+}
+
 /**@brief Interrupt Service Routine for the UART used to communicate with the TCU
  *
  *
  */
 void tcu_uart_isr(const struct device *dev, void *user_data)
 {
-	uint8_t uart_rx_hw_fifo[SIZE_OF_RX_FIFO_OF_NRF52840_UART];
-    uint8_t uart_rx_hw_fifo_index = 0;
+    ARG_UNUSED(user_data);
 
 	if( !uart_irq_update(dev_tcu_uart) )
     {
@@ -352,55 +406,12 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
 		return;
 	}
 
-	if( uart_irq_rx_ready(dev_tcu_uart) ) // Check if the UART interruption was triggered because a new character was received
-    {
-    /*  read until FIFO empty  */
-        int number_of_bytes_available;
-        number_of_bytes_available = uart_fifo_read(dev_tcu_uart, uart_rx_hw_fifo, SIZE_OF_RX_FIFO_OF_NRF52840_UART);
-        while( number_of_bytes_available > 0 )
-        {
-            number_of_bytes_available--;
-            if( b_zigbee_module_in_command_mode )
-            {
-                tcu_uart_process_byte_received_in_command_mode(uart_rx_hw_fifo[uart_rx_hw_fifo_index]);
-            }
-            else
-            {
-                tcu_uart_process_byte_received_in_transparent_mode(uart_rx_hw_fifo[uart_rx_hw_fifo_index]);
-            }
-            uart_rx_hw_fifo_index++;
-        }
-	}
+    if (uart_irq_rx_ready(dev_tcu_uart)) {
+        handle_uart_rx();
+    }
 
-	if (uart_irq_tx_ready(dev_tcu_uart)) // Check if the UART interruption was triggered because the transmission buffer got empty
-    {
-        int ret;
-        if(tcu_transmission_running)
-        {
-            if(tcu_transmission_buffer_index < tcu_transmission_size) // Any pending byte to be transmitted?
-            {
-                ret = uart_fifo_fill(dev_tcu_uart, (uint8_t *)&tcu_transmission_buffer[tcu_transmission_buffer_index], 1);
-                if(ret > 0)
-                {
-                    //LOG_DBG("Sent byte ret %d: %02X, %d , %d", ret, tcu_transmission_buffer[tcu_transmission_buffer_index], tcu_transmission_buffer_index, tcu_transmission_size);
-                    tcu_transmission_buffer_index = tcu_transmission_buffer_index + ret;
-                }
-                else if(ret < 0)
-                {
-                    LOG_ERR("Error filling the UART FIFO %d", ret );
-                }
-            }
-            else
-            {
-                LOG_WRN("Message finished transmitting, buffer index: %d", tcu_transmission_buffer_index);
-                tcu_transmission_running = false;
-                uart_irq_tx_disable(dev_tcu_uart);
-            }
-        }
-        else
-        {
-            uart_irq_tx_disable(dev_tcu_uart);
-        }
+    if (uart_irq_tx_ready(dev_tcu_uart)) {
+        handle_uart_tx();
     }
 }
 
@@ -410,42 +421,32 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
  * @param[in]   size_input_data     Size of the message to be sent
  *
  */
-void queueMessage(uint8_t *input_data, uint16_t size_input_data)
+int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data)
 {
-    if (tcu_message_queue.count < MAX_QUEUE_SIZE) {
-        // Copy the new message into the queue at the tail position
-        memcpy(tcu_message_queue.buffer[tcu_message_queue.tail], input_data, size_input_data);
-        tcu_message_queue.message_sizes[tcu_message_queue.tail] = size_input_data;
+    if (size_input_data > MAX_MESSAGE_SIZE) {
+        LOG_ERR("Message size exceeds queue capacity");
+        return -1;
+    }
 
-        // Update the tail and count
-        tcu_message_queue.tail = (tcu_message_queue.tail + 1) % MAX_QUEUE_SIZE;
-        tcu_message_queue.count++;
-        LOG_WRN("Message queued");
-    } else {
+    LOG_DBG("Queueing message of size %d", size_input_data);
+    //LOG_HEXDUMP_DBG(input_data, size_input_data,"Payload of input queueMessage packet");
+
+    // Create a buffer to hold the message (if needed)
+    tcu_message message_buffer;
+    memcpy(message_buffer.buffer, input_data, size_input_data);
+    message_buffer.size = size_input_data;
+
+    int ret = k_msgq_put(&tcu_uart_tx_message_queue, &message_buffer, K_NO_WAIT);
+
+    if (ret == 0) {
+        LOG_WRN("Message queued successfully");
+    } else if (ret == -ENOMSG) {
         LOG_ERR("Message queue is full");
     }
-}
-
-/**@brief Transmit frame using the TCU uart
- *
- *
- */
-void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data)
-{
-    if(!tcu_transmission_running)
-    {
-        tcu_transmission_running = true;
-        memcpy(tcu_transmission_buffer, input_data, size_input_data);
-        tcu_transmission_size = size_input_data;
-        uart_poll_out(dev_tcu_uart, tcu_transmission_buffer[0]); // Place the first byte in the UART transmission buffer
-        tcu_transmission_buffer_index = 1;      // Index of next byte to be transmitted
-        uart_irq_tx_enable(dev_tcu_uart);
+    else {
+        LOG_ERR("Error queuing message");
     }
-    else
-    {
-        //queueMessage(input_data, size_input_data);
-        LOG_ERR("TCU UART transmission buffer is busy");
-    }
+    return ret;
 }
 
 /**@brief Switch the TCU uart to command mode
@@ -606,18 +607,18 @@ void tcu_uart_transparent_mode_manager(void)
  */
 void tcu_uart_manager(void)
 {
-    if( tcu_message_queue.count > 0 ) // There is at least an output UART frame pending to be scheduled
+    if (!tcu_transmission_running & !b_tcu_uart_rx_receiving_frame)// && (uart_irq_tx_complete(dev_tcu_uart))) 
     {
-        if(!tcu_transmission_running) // If there is no transmission running, schedule the next frame
-        {        
-            sendFrameToTcu(tcu_message_queue.buffer[tcu_message_queue.head],tcu_message_queue.message_sizes[tcu_message_queue.head]);
-            tcu_message_queue.head = (tcu_message_queue.head + 1) % MAX_QUEUE_SIZE;
-            tcu_message_queue.count--;
-            LOG_DBG("Transmission scheduled %d", tcu_message_queue.count);
-        } 
-        else
-        {
-            LOG_WRN("Transmission could not be scheduled: TCU UART tcu_transmission_running already running %d", tcu_message_queue.count);
-        }       
+        //LOG_WRN("tcu_uart_manager %d and %d", tcu_transmission_running, uart_irq_tx_complete(dev_tcu_uart));
+        k_sleep(K_MSEC(10));                    // Required to see log messages on console
+        int ret = k_msgq_get(&tcu_uart_tx_message_queue, &tcu_transmission_buffer, K_NO_WAIT);
+        if (ret == 0) {
+            //LOG_WRN("Sending message from queue");
+            //LOG_HEXDUMP_DBG((uint8_t *)tcu_transmission_buffer.buffer, tcu_transmission_buffer.size, "Payload of message from queue");
+            tcu_transmission_running = true;
+            uart_poll_out(dev_tcu_uart, tcu_transmission_buffer.buffer[0]);  // Send the first byte
+            tcu_transmission_buffer_index = 1;
+            uart_irq_tx_enable(dev_tcu_uart);  // Enable TX interrupt
+        }
     }
 }

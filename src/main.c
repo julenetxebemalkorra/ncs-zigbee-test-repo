@@ -56,12 +56,9 @@
 #define IDENTIFY_MODE_BUTTON             1
 
 /* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO                ZB_TRUE
-#define PRINT_UART_INFO                  ZB_TRUE
+#define PRINT_ZIGBEE_INFO                ZB_FALSE
+#define PRINT_UART_INFO                  ZB_FALSE
 #define CRYPTO_ENABLE                    ZB_TRUE
-
-/* 1000 msec = 1 sec */
-#define SLEEP_TIME_MS   1000
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
@@ -238,38 +235,25 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         {
             if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
             {
-                /*if(PRINT_ZIGBEE_INFO)
+                if(PRINT_ZIGBEE_INFO)
                 {
                     LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
                     LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
                 }
-                */
+                
 
                 if( !is_tcu_uart_in_command_mode() && (sizeOfPayload >= MODBUS_MIN_RX_LENGTH) )
                 {
-                    if(pointerToBeginOfBuffer[1] == 0x10) // Modbus frame write multipel register
+                    if (queue_zigbee_Message(pointerToBeginOfBuffer, sizeOfPayload) == SUCCESS) // Assuming queueMessage returns SUCCESS or error
                     {
-                        if(PRINT_ZIGBEE_INFO) LOG_WRN("Received frame is a Modbus frame");
-                        if(PRINT_ZIGBEE_INFO) LOG_HEXDUMP_WRN(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
+                        tcu_uart_frames_transmitted_counter++;
+                        if (PRINT_ZIGBEE_INFO) 
+                        LOG_WRN("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
                     }
-                    /*if(tcu_transmission_running && pointerToBeginOfBuffer[1] == 0x03)
+                    else
                     {
-                        LOG_ERR("OTA Ongoing and readholding register command received and discarded");
-                        if (bufid)
-                        {
-                        	// safe way to free buffer
-                            zb_osif_disable_all_inter();
-                            zb_buf_free(bufid);
-                            zb_osif_enable_all_inter();
-                        	return ZB_TRUE;
-	                    }
-                    }
-                    */
-                    
-                    //sendFrameToTcu((uint8_t *)pointerToBeginOfBuffer, sizeOfPayload);
-                    queueMessage(pointerToBeginOfBuffer, sizeOfPayload);
-                    tcu_uart_frames_transmitted_counter++;
-                    if(PRINT_ZIGBEE_INFO) LOG_WRN("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
+                        LOG_ERR("Failed to send payload to TCU UART");
+                    }                    
                 }
                 else
                 {
@@ -752,14 +736,11 @@ int main(void)
         tcu_uart_transparent_mode_manager();   // Manage the frames received from the TCU uart when module is in transparent mode
         digi_node_discovery_request_manager(); // Manage the device discovery requests
         zigbee_aps_manager();                  // Manage the aps output frame queue
+        nvram_manager();                       // Manage the NVRAM
+        zigbee_thread_manager();               // Manage the Zigbee thread
         tcu_uart_manager();                   // Manage the TCU UART
 
-
-        nvram_manager();                       // Manage the NVRAM
-
-        zigbee_thread_manager();               // Manage the Zigbee thread
-
-        k_sleep(K_MSEC(5));                    // Required to see log messages on console
+        //k_sleep(K_MSEC(5));                    // Required to see log messages on console
     }
 
     return 0;

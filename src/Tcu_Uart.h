@@ -35,15 +35,14 @@ void tcu_uart_timers_10kHz(void);
 void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte);
 void tcu_uart_process_byte_received_in_transparent_mode(uint8_t input_byte);
 void tcu_uart_isr(const struct device *dev, void *user_data);
-void sendFrameToTcu(uint8_t *input_data, uint16_t size_input_data);
 void switch_tcu_uart_to_command_mode(void);
 void switch_tcu_uart_out_of_command_mode(void);
 bool is_tcu_uart_in_command_mode(void);
 void check_input_sequence_for_entering_in_command_mode(uint8_t input_byte);
 bool tcu_uart_send_received_frame_through_zigbee(void);
 void tcu_uart_transparent_mode_manager(void);
-void queueMessage(uint8_t *input_data, uint16_t size_input_data);
 void tcu_uart_manager(void);
+int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data);
 
 extern uint8_t tcu_transmitted_frames_counter;
 #endif /* TCU_UART_H_ */
