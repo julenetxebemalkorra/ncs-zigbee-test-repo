@@ -392,7 +392,7 @@ void handle_uart_tx(void)
         {
             tcu_transmission_running = false;
             uart_irq_tx_disable(dev_tcu_uart);
-            LOG_WRN("Transmission complete.");
+            //LOG_WRN("Transmission complete.");
         }
     }
 }
@@ -434,7 +434,7 @@ int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data)
     }
 
     LOG_DBG("Queueing message of size %d", size_input_data);
-    //LOG_HEXDUMP_DBG(input_data, size_input_data,"Payload of input queueMessage packet");
+    LOG_HEXDUMP_DBG(input_data, size_input_data,"Payload of input queueMessage packet");
 
     // Create a buffer to hold the message (if needed)
     tcu_message message_buffer;
@@ -444,7 +444,7 @@ int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data)
     int ret = k_msgq_put(&tcu_uart_tx_message_queue, &message_buffer, K_NO_WAIT);
 
     if (ret == 0) {
-        LOG_DBG("Message queued successfully");
+        //LOG_DBG("Message queued successfully");
     } else if (ret == -ENOMSG) {
         LOG_ERR("Message queue is full");
     }
@@ -601,7 +601,7 @@ void tcu_uart_transparent_mode_manager(void)
         tcu_uart_send_received_frame_through_zigbee();
         b_tcu_uart_rx_complete_frame_received = false;
         b_tcu_uart_rx_buffer_busy = false;
-        LOG_WRN("Frame received from TCU UART");
+        //LOG_WRN("Frame received from TCU UART");
     }   
 }
 

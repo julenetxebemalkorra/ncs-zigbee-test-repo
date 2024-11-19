@@ -22,6 +22,10 @@
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
 #include "tcu_Uart.h"
+#include <zephyr/logging/log.h>
+
+LOG_MODULE_REGISTER(Dig_AT_commands, LOG_LEVEL_DBG);
+
 
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 static struct xbee_parameter_comando_at_t xbee_parameter_comando_at[NUMBER_OF_PARAMETER_AT_COMMANDS];
@@ -422,6 +426,7 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
              case AT_ID: // Valid range is [0, 0xFFFFFFFFFFFFFFFF]
                 xbee_parameters.at_id = command_data;
                 return_value = true; 
+                g_b_flash_write_cmd = true;
                 break;
              case AT_CE:
                 if( command_data == 0 ) return_value = true; // Only accepted value with the current firmware
@@ -465,6 +470,10 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
  */
 int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_input_data)
 {
+
+    LOG_WRN("Received input data size: %d\n", size_input_data);
+    LOG_HEXDUMP_DBG(input_data, size_input_data, "Received input data in hex:");
+
     if( size_input_data < MINIMUM_SIZE_AT_COMMAND )
     {
         digi_at_reply_error();

@@ -8,10 +8,13 @@
 
 #include "global_defines.h"
 
-#define SUCCESS 0
-#define NVRAM_NOT_WRITTEN -1
-#define NVRAM_WRONG_DATA -2
-#define NVRAM_UNKNOWN_ERR -3
+enum nvram_status_t {
+    NVRAM_UNKNOWN_ERR = -4,
+    NVRAM_ERROR_READING = -3,
+    NVRAM_WRONG_DATA = -2,
+    NVRAM_NOT_WRITTEN = -1,
+    SUCCESS = 0
+};
 
 struct zb_user_conf_t {
     uint64_t extended_pan_id; // Extended pan id

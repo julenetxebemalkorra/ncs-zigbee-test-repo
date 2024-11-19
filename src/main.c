@@ -44,8 +44,20 @@
 #include <zephyr/task_wdt/task_wdt.h>
 #include <stdbool.h>
 
+#include <zboss_api_addons.h>
+#include "zb_config.h"
+#include "zb_address.h"
+#include "zboss_api_buf.h"
+#include "zb_types.h"
+#include "zboss_api_zgp.h"
+
+#define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
+
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
+
+//#define ZB_APS_MAX_IN_FRAGMENT_TRANSMISSIONS 5U  // Example: Increase to handle 5 fragments in parallel
+//#define ZB_APS_ACK_WAIT_TIMEOUT             1000U // Example: Increase to 1000 ms
 
 /* Type of power sources available for the device.
  * For possible values see section 3.2.2.2.8 of ZCL specification.
@@ -127,6 +139,17 @@ void get_reset_reason(void)
     uint8_t restart_number[1] = {0};
     uint8_t reset_cause_flags[1] = {0};
 
+    const zb_char_t *zb_version;
+    // Call the zb_get_version function to get the ZBOSS version string
+    zb_version = zb_get_version();
+
+    // Print the version string
+    LOG_DBG("ZBOSS Version: %s\n", zb_version);
+
+    zb_uint8_t max_children_allowed = zb_get_max_children();
+
+    LOG_DBG("Max children allowed: %d\n", max_children_allowed);
+
 	int result = hwinfo_get_reset_cause(&reset_cause);
 
     if (result == 0) // Success, reset_cause now contains the reset cause flags
@@ -207,7 +230,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
     
         // Trace the buffer statistics for debugging purposes
         zb_buf_oom_trace();
-        LOG_ERR("Error: bufid is NULL data_indication_cb beggining");
+        LOG_ERR("Error: bufid is NULL data_indication_cb beggining: bufid status %d", zb_buf_get_status(bufid));
         return ZB_FALSE;
     } 
     else
@@ -221,9 +244,31 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         pointerToEndOfBuffer = zb_buf_end(bufid);
         sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
 
-        if(PRINT_ZIGBEE_INFO) LOG_DBG("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes",
-                          (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,
-                                                    (uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload);
+        if(PRINT_ZIGBEE_INFO) {
+            LOG_DBG("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes, status %d",
+                                                    (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,
+                                                    (uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload, zb_buf_get_status(bufid));
+            //LOG_DBG("  Rx APS Frame:\n");
+            LOG_DBG("  Frame control (fc): %d\n", ind->fc);
+            //LOG_DBG("  Destination address: 0x%04X\n", ind->dst_addr);
+            //LOG_DBG("  Group address: 0x%04X\n", ind->group_addr);
+            LOG_DBG("  APS counter: %d\n", ind->aps_counter);
+            //LOG_DBG("  MAC source address: 0x%04X\n", ind->mac_src_addr);
+            //LOG_DBG("  MAC destination address: 0x%04X\n", ind->mac_dst_addr);
+            //LOG_DBG("  LQI: %d\n", ind->lqi);
+            //LOG_DBG("  RSSI: %d\n", ind->rssi);
+            //LOG_DBG("  APS key source: %d\n", ind->aps_key_source);
+            //LOG_DBG("  APS key attributes: %d\n", ind->aps_key_attrs);
+            //LOG_DBG("  APS key from TC: %d\n", ind->aps_key_from_tc);
+            LOG_DBG("  Extended frame control: %d\n", ind->extended_fc);
+            LOG_DBG("  Reserved: %d\n", ind->reserved);
+            LOG_DBG("  Transaction sequence number (TSN): %d\n", ind->tsn);
+            LOG_DBG("  Block number: %d\n", ind->block_num);
+            LOG_DBG("  Block acknowledgment: %d\n", ind->block_ack);
+            //LOG_DBG("  Radius: %d\n", ind->radius);
+            //LOG_DBG("  Payload size: %d bytes\n", sizeOfPayload);
+            //LOG_DBG("  Status: %d\n", zb_buf_get_status(bufid));
+        }
 
         aps_frames_received_total_counter++;
         if( ind->clusterid == DIGI_BINARY_VALUE_CLUSTER )aps_frames_received_binary_cluster_counter++;
@@ -247,8 +292,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                     if (queue_zigbee_Message(pointerToBeginOfBuffer, sizeOfPayload) == SUCCESS) // Assuming queueMessage returns SUCCESS or error
                     {
                         tcu_uart_frames_transmitted_counter++;
-                        if (PRINT_ZIGBEE_INFO) 
-                        LOG_DBG("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
+                        //if (PRINT_ZIGBEE_INFO) LOG_DBG("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
                     }
                     else
                     {
@@ -608,6 +652,63 @@ void diagnostic_zigbee_info()
     }
 }
 
+// Custom logging function to print extended address and PAN ID
+void log_ext_address(zb_uint8_t *addr)
+{
+    LOG_INF("%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x", 
+        addr[7], addr[6], addr[5], addr[4], addr[3], addr[2], addr[1], addr[0]);
+}
+
+/* Callback for neighbor table response */
+void get_lqi_cb(zb_uint8_t param)
+{
+    zb_bufid_t buf = param;
+    zb_uint8_t *zdp_cmd = zb_buf_begin(buf);
+    zb_zdo_mgmt_lqi_resp_t *resp = (zb_zdo_mgmt_lqi_resp_t *)(zdp_cmd);
+    zb_zdo_neighbor_table_record_t *record = (zb_zdo_neighbor_table_record_t *)(resp + 1);
+    zb_uint_t i;
+
+    LOG_INF("LQI callback status: %hd, neighbor_table_entries: %hd, start_index: %hd, neighbor_table_list_count: %d",
+        resp->status, resp->neighbor_table_entries, resp->start_index, resp->neighbor_table_list_count);
+
+    /* Iterate over the list of neighbors */
+    for (i = 0; i < resp->neighbor_table_list_count; i++)
+    {
+        LOG_INF("#%hd: Long Addr: ", i);
+        log_ext_address(record->ext_addr);  // Print extended address
+        LOG_INF("PAN ID: ");
+        log_ext_address(record->ext_pan_id);  // Print PAN ID
+
+        LOG_INF("Network Addr: %d, Dev Type: %hd, Rx On Idle: %hd, Relationship: %hd, Permit Join: %hd, Depth: %hd, LQI: %hd",
+            record->network_addr,
+            ZB_ZDO_RECORD_GET_DEVICE_TYPE(record->type_flags),
+            ZB_ZDO_RECORD_GET_RX_ON_WHEN_IDLE(record->type_flags),
+            ZB_ZDO_RECORD_GET_RELATIONSHIP(record->type_flags),
+            record->permit_join,
+            record->depth,
+            record->lqi);
+
+        record++;
+    }
+
+    zb_buf_free(buf);  // Free buffer after processing
+}
+
+
+/* Send LQI (Neighbor Table) request */
+void send_lqi_request(zb_bufid_t buf)
+{
+    zb_uint8_t tsn;
+    zb_zdo_mgmt_lqi_param_t *req_param;
+
+    req_param = ZB_BUF_GET_PARAM(buf, zb_zdo_mgmt_lqi_param_t);
+    req_param->start_index = 0;
+    req_param->dst_addr = ZIGBEE_COORDINATOR_SHORT_ADDR;
+
+    tsn = zb_zdo_mgmt_lqi_req(buf, get_lqi_cb);
+    LOG_INF("LQI request sent, TSN: %d", tsn);
+}
+
 //------------------------------------------------------------------------------
 /**@brief This function prints the contents of multiple counters to the console.
  *
@@ -632,6 +733,20 @@ void display_counters(void)
         LOG_DBG("Uart frames: Tx %d, Rx %d",
                                tcu_uart_frames_transmitted_counter,
                                tcu_uart_frames_received_counter);
+
+                                   /* Create buffer to send LQI request */
+        /*
+        zb_bufid_t buf = zb_buf_get_out();
+        if (buf)
+        {
+            //Send LQI request to coordinator to get neighbor table
+            send_lqi_request(buf);
+        }
+        else
+        {
+            LOG_ERR("Failed to get buffer for LQI request");
+        }
+        */
     }
 
     if (zb_buf_is_oom_state()) {
@@ -646,6 +761,7 @@ void display_counters(void)
     // Trace the buffer statistics for debugging purposes
     zb_buf_oom_trace();
 }
+
 
 //------------------------------------------------------------------------------
 /**@brief Main function
@@ -673,11 +789,22 @@ int main(void)
         else if(ret == 0) // read NVRAM data and use it
         {
             ret = zb_conf_read_from_nvram(); // Read user configurable zigbee parameters from NVRAM
-            if(ret <= 0)
+            if(ret < 0)
             {
                 LOG_ERR("zb_conf_read_from_nvram error %d", ret);
                 g_b_flash_error = ZB_TRUE;
             }
+            else if(ret == 0)
+            {
+                LOG_INF("NVRAM data read successfully");
+                g_b_flash_error = ZB_FALSE;
+            }
+            else
+            {
+                LOG_ERR("zb_conf_read_from_nvram error %d", ret);
+                g_b_flash_error = ZB_TRUE;
+            }
+            
         }
         else
         {

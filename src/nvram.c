@@ -51,6 +51,7 @@ uint8_t init_nvram(void)
 		return -1;
 	}
 	fs.offset = NVS_PARTITION_OFFSET;
+
     // Get the size and start offset of flash page at certain flash offset.
     // returns 0 on success, -EINVAL if page of the offset doesn’t exist.
 	rc = flash_get_page_info_by_offs(fs.flash_device, fs.offset, &info);
@@ -82,6 +83,14 @@ uint8_t init_nvram(void)
 	}
 
     LOG_INF("NVRAM initialized successfully\n");
+
+    // Calculate the available free space in the file system
+    ssize_t free_space = nvs_calc_free_space(&fs);
+    if (free_space < 0) {
+        LOG_ERR("Failed to calculate free space: %d\n", free_space);
+        return free_space;
+    }
+    LOG_INF("Available free space: %d bytes\n", free_space);
 
     return rc;
 }
@@ -118,3 +127,28 @@ void write_nvram(uint16_t id, uint8_t *data, size_t len)
     // Write the PAN_ID to NVRAM
     (void)nvs_write(&fs, id, data, len);
 }
+
+/**
+ * @brief This function Retrieve the hsitorically saved data entry in the NVRAM
+ * 
+ * @param id The ID of the data to be read.
+ * @param data A pointer to a buffer where the data will be stored.
+ * @param len The size of the data to be read.
+ * 
+ * @return The function returns a uint8_t value. (You should describe what this return value represents)
+ */
+void read_nvram_hist(uint16_t id, uint8_t *data, size_t len)
+{
+    ssize_t result = nvs_read_hist(&fs, id, data, len, 0);
+    
+    if (result < 0) {
+        // Handle error
+        LOG_ERR("Error reading data: %zd\n", result);
+    } else {
+        // Successfully read data
+        LOG_DBG("Read %zd bytes of data\n", result);
+        // Process the data as needed
+    }
+}
+
+

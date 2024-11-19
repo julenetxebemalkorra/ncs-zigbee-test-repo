@@ -20,6 +20,9 @@ LOG_MODULE_REGISTER(zb_conf, LOG_LEVEL_DBG);
 /* Local variables                                                            */
 static struct zb_user_conf_t zb_user_conf; // zigbee user configuration
 
+
+enum nvram_status_t status = NVRAM_WRONG_DATA;
+
 bool g_b_flash_write_cmd = false; //   Flag to indicate that a write command has been received
 bool g_b_reset_zigbee_cmd = false; // Flag to indicate that a reset command has been received
 bool g_b_reset_cmd = false; // Flag to indicate that a reset command has been received
@@ -110,7 +113,7 @@ uint8_t zb_conf_read_from_nvram (void)
     // Read the PAN_ID from NVRAM
     rc = read_nvram(ZB_EXT_PANID, panid, sizeof(panid));
     // Check if the PAN_ID was successfully read from NVRAM
-    if (rc > 0) {
+    if (rc == sizeof(panid)) {
         // PAN_ID was successfully read from NVRAM
         // Convert the PAN_ID to a uint64_t and store it in the zb_user_conf structure
         zb_user_conf.extended_pan_id = *(uint64_t *)panid;
@@ -121,12 +124,13 @@ uint8_t zb_conf_read_from_nvram (void)
     {
         // Failed to read the PAN_ID from NVRAM
         LOG_ERR("Error reading PAN ID");
+        return NVRAM_ERROR_READING;
     }
 
     // Read the Node Identifier (NI) from NVRAM
     rc = read_nvram(ZB_NODE_IDENTIFIER, zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
     // Check if the Node Identifier was successfully read from NVRAM
-    if (rc > 0) {
+    if (rc == sizeof(zb_user_conf.at_ni)) {
         // Node Identifier was successfully read from NVRAM
         LOG_INF("Node Identifier: %s", zb_user_conf.at_ni);
     } 
@@ -134,23 +138,26 @@ uint8_t zb_conf_read_from_nvram (void)
     {
         // Failed to read the Node Identifier from NVRAM
         LOG_ERR("Error reading Node Identifier");
+        return NVRAM_ERROR_READING;
     }
 
     uint32_t stored_checksum = 0;
     uint32_t calculated_checksum = calculate_checksum(&zb_user_conf, sizeof(zb_user_conf));
 
     rc = read_nvram(ZB_NODE_IDENTIFIER+1, &stored_checksum, sizeof(stored_checksum));
-    if (rc > 0) {
+    if (rc == sizeof(stored_checksum)) {
         if (calculated_checksum != stored_checksum) {
             LOG_ERR("Checksum does not match");
             return NVRAM_WRONG_DATA;
         }
-    } else {
+    } 
+    else 
+    {
         LOG_ERR("Error reading checksum");
-        return rc;
+        return NVRAM_ERROR_READING;
     }
 
-    return rc;
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
