@@ -11,7 +11,7 @@
 #include <zephyr/logging/log.h>
 
 #include <zboss_api.h>
-
+#include <zigbee/zigbee_error_handler.h>
 #include "zigbee_aps.h"
 #include "Digi_profile.h"
 
@@ -202,6 +202,7 @@ uint16_t zigbee_aps_get_output_frame_buffer_free_space(void)
 void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
 {
     ZVUNUSED(param);
+    zb_ret_t zb_err_code;
 
     if (zb_buf_is_oom_state()) {
         // Handle Out Of Memory state
@@ -252,6 +253,8 @@ void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
     else
     {
         //TODO: Implement a mechanism to try to allocate the buffer again after a while
+        zb_err_code = zb_buf_get_out_delayed(zigbee_aps_frame_scheduling_cb);
+        ZB_ERROR_CHECK(zb_err_code);
         LOG_ERR("Transmission could not be scheduled: Zigbee Out buffer not allocated");
     }
 
