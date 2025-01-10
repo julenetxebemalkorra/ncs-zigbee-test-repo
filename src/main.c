@@ -51,6 +51,8 @@
 #include "zb_types.h"
 #include "zboss_api_zgp.h"
 
+#include <zephyr/debug/coredump.h>
+
 #define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
 
 /* Device endpoint, used to receive ZCL commands. */
