@@ -38,6 +38,7 @@ void zigbee_aps_init(void);
 void zigbee_aps_user_data_tx_cb(zb_bufid_t bufid);
 uint16_t zigbee_aps_get_output_frame_buffer_free_space(void);
 void zigbee_aps_manager(void);
+void check_scheduling_cb_timeout(void);
 
 #endif /* ZIGBEE_APS_H_ */
 

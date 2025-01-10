@@ -15,9 +15,13 @@
 #include "zigbee_aps.h"
 #include "Digi_profile.h"
 
+#define SCHEDULING_CB_TIMEOUT_MS 50000 // Tiempo límite en milisegundos para enviar un frame APS
+#define SYSTEM_TICK_MS 1              // Tiempo de tick del sistema en milisegundos
+
 /* Local variables                                                            */
 static aps_output_frame_circular_buffer_t aps_output_frame_buffer;
 static bool b_scheduling_cb_pending = false;
+static uint32_t scheduling_cb_timer = 0;
 
 LOG_MODULE_REGISTER(zigbee_aps, LOG_LEVEL_DBG);
 
@@ -44,6 +48,24 @@ void init_aps_output_frame_buffer(void)
     aps_output_frame_buffer.tail = 0;
     aps_output_frame_buffer.free_space = APS_OUTPUT_FRAME_BUFFER_SIZE;
     aps_output_frame_buffer.used_space = 0;
+}
+
+// -----------------------------------------------------------------------------
+/**@brief Function to get the free space of the aps output frame buffer.
+ *
+ * @return  The free space of the aps output frame buffer.
+ */
+void check_scheduling_cb_timeout(void)
+{
+    if (b_scheduling_cb_pending && scheduling_cb_timer > 0)
+    {
+        scheduling_cb_timer -= SYSTEM_TICK_MS; // Decrementa cada 10KHz
+        if (scheduling_cb_timer <= 0)
+        {
+            b_scheduling_cb_pending = false;
+            LOG_DBG("Scheduling callback flag reset after timeout");
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -246,9 +268,11 @@ void zigbee_aps_manager(void)
     int ret = 0;
     if( aps_output_frame_buffer.used_space > 0 ) // There is at least an output aps frame pending to be scheduled
     {
-        if( !b_scheduling_cb_pending ) //TODO, por si acaso, para evitar una hipotetica situacion de bloqueo, igual convendría poder limpiar este flag automaticamente a los x segundos
+        if( !b_scheduling_cb_pending )
         {        
             b_scheduling_cb_pending = true;
+            scheduling_cb_timer = SCHEDULING_CB_TIMEOUT_MS;
+
             ret = ZB_SCHEDULE_APP_CALLBACK(zigbee_aps_frame_scheduling_cb,0);
             if(ret == RET_OK) LOG_DBG("Transmission scheduled");
             else if(ret == RET_OVERFLOW) LOG_ERR("Transmission could not be scheduled: Scheduling failed RET_OVERFLOW");
@@ -257,7 +281,6 @@ void zigbee_aps_manager(void)
         else
         {
             LOG_WRN("Transmission could not be scheduled: Scheduling callback already pending");
-            LOG_WRN("Free space in output frame buffer: %d", aps_output_frame_buffer.free_space);
         }       
     }
 }

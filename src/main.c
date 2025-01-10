@@ -248,26 +248,26 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             LOG_DBG("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes, status %d",
                                                     (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,
                                                     (uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload, zb_buf_get_status(bufid));
-            //LOG_DBG("  Rx APS Frame:\n");
-            LOG_DBG("  Frame control (fc): %d\n", ind->fc);
-            //LOG_DBG("  Destination address: 0x%04X\n", ind->dst_addr);
-            //LOG_DBG("  Group address: 0x%04X\n", ind->group_addr);
-            LOG_DBG("  APS counter: %d\n", ind->aps_counter);
-            //LOG_DBG("  MAC source address: 0x%04X\n", ind->mac_src_addr);
-            //LOG_DBG("  MAC destination address: 0x%04X\n", ind->mac_dst_addr);
-            //LOG_DBG("  LQI: %d\n", ind->lqi);
-            //LOG_DBG("  RSSI: %d\n", ind->rssi);
-            //LOG_DBG("  APS key source: %d\n", ind->aps_key_source);
-            //LOG_DBG("  APS key attributes: %d\n", ind->aps_key_attrs);
-            //LOG_DBG("  APS key from TC: %d\n", ind->aps_key_from_tc);
-            LOG_DBG("  Extended frame control: %d\n", ind->extended_fc);
-            LOG_DBG("  Reserved: %d\n", ind->reserved);
-            LOG_DBG("  Transaction sequence number (TSN): %d\n", ind->tsn);
-            LOG_DBG("  Block number: %d\n", ind->block_num);
-            LOG_DBG("  Block acknowledgment: %d\n", ind->block_ack);
-            //LOG_DBG("  Radius: %d\n", ind->radius);
-            //LOG_DBG("  Payload size: %d bytes\n", sizeOfPayload);
-            //LOG_DBG("  Status: %d\n", zb_buf_get_status(bufid));
+            ////LOG_DBG("  Rx APS Frame:\n");
+            //LOG_DBG("  Frame control (fc): %d\n", ind->fc);
+            ////LOG_DBG("  Destination address: 0x%04X\n", ind->dst_addr);
+            ////LOG_DBG("  Group address: 0x%04X\n", ind->group_addr);
+            //LOG_DBG("  APS counter: %d\n", ind->aps_counter);
+            ////LOG_DBG("  MAC source address: 0x%04X\n", ind->mac_src_addr);
+            ////LOG_DBG("  MAC destination address: 0x%04X\n", ind->mac_dst_addr);
+            ////LOG_DBG("  LQI: %d\n", ind->lqi);
+            ////LOG_DBG("  RSSI: %d\n", ind->rssi);
+            ////LOG_DBG("  APS key source: %d\n", ind->aps_key_source);
+            ////LOG_DBG("  APS key attributes: %d\n", ind->aps_key_attrs);
+            ////LOG_DBG("  APS key from TC: %d\n", ind->aps_key_from_tc);
+            //LOG_DBG("  Extended frame control: %d\n", ind->extended_fc);
+            //LOG_DBG("  Reserved: %d\n", ind->reserved);
+            //LOG_DBG("  Transaction sequence number (TSN): %d\n", ind->tsn);
+            //LOG_DBG("  Block number: %d\n", ind->block_num);
+            //LOG_DBG("  Block acknowledgment: %d\n", ind->block_ack);
+            ////LOG_DBG("  Radius: %d\n", ind->radius);
+            ////LOG_DBG("  Payload size: %d bytes\n", sizeOfPayload);
+            ////LOG_DBG("  Status: %d\n", zb_buf_get_status(bufid));
         }
 
         aps_frames_received_total_counter++;
@@ -447,6 +447,7 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 		case NRF_TIMER_EVENT_COMPARE0:
             if(debug_led_ms_x10 < 10000) debug_led_ms_x10++;
             tcu_uart_timers_10kHz();
+            check_scheduling_cb_timeout();
 			break;
 		default:
 			break;
@@ -615,7 +616,7 @@ void diagnostic_zigbee_info()
     {
         b_infit_info_flag = ZB_FALSE;
         b_Zigbe_Connected = true;
-        if(PRINT_ZIGBEE_INFO) LOG_DBG("Zigbee application joined the network: bellow some info: \n");
+        if(PRINT_ZIGBEE_INFO) LOG_DBG("Zigbee application joined the network: bellow some info : \n");
 
         xbee_parameters.at_my = zb_get_short_address();
         if(PRINT_ZIGBEE_INFO) LOG_DBG("zigbee shrot addr:  0x%x\n", xbee_parameters.at_my);
