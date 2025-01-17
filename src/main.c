@@ -233,7 +233,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         // Trace the buffer statistics for debugging purposes
         zb_buf_oom_trace();
         LOG_ERR("Error: bufid is NULL data_indication_cb beggining: bufid status %d", zb_buf_get_status(bufid));
-        return ZB_FALSE;
+        return ZB_TRUE;
     } 
     else
 	{
@@ -343,7 +343,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
     	return ZB_TRUE;
 	}
     LOG_ERR("Error: bufid is NULL data_indication_cb end");
-	return ZB_FALSE;
+	return ZB_TRUE;
 }
 
 /**@brief Zigbee stack event handler.
@@ -356,6 +356,12 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	zb_zdo_app_signal_hdr_t *sg_p = NULL;
 	zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
     int ret = 0;
+
+    if(ZB_GET_APP_SIGNAL_STATUS(bufid) != 0)
+    {
+        LOG_ERR("Signal %d failed, status %d", sig, ZB_GET_APP_SIGNAL_STATUS(bufid));
+        return;
+    }
 
     if( PRINT_ZIGBEE_INFO )
     {
