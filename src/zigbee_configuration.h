@@ -19,6 +19,7 @@ enum nvram_status_t {
 struct zb_user_conf_t {
     uint64_t extended_pan_id; // Extended pan id
     uint8_t at_ni[MAXIMUM_SIZE_NODE_IDENTIFIER + 1];   // Node identifier string parameter (plus one to include the '\0')
+    uint8_t network_key[16];      	// Define a network key (assuming key size of 16 bytes, you might need to adjust based on documentation);
 };
 
 /* Function prototypes (used only internally)                                 */
@@ -35,6 +36,7 @@ void nvram_manager(void);
 void zigbee_thread_manager(void);
 uint32_t zb_get_mac_addr_high (void);
 uint32_t zb_get_mac_addr_low (void);
+void zb_conf_get_network_key(uint8_t *network_key);
 
 
 #endif /* ZIGBEE_CONFIGURATION_H_ */

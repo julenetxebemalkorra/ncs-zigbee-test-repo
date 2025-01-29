@@ -18,17 +18,18 @@
 //#include <zephyr/drivers/uart.h>
 //#include <string.h>
 
+#include <stdint.h>
+#include <stddef.h>
+#include <ctype.h>
 #include <zephyr/kernel.h>
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
-#include "tcu_Uart.h"
+#include "tcu_uart.h"
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(Dig_AT_commands, LOG_LEVEL_DBG);
 
-
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
-static struct xbee_parameter_comando_at_t xbee_parameter_comando_at[NUMBER_OF_PARAMETER_AT_COMMANDS];
 
 /**@brief This function initializes the Digi_At_commands firmware module
  *
@@ -36,7 +37,6 @@ static struct xbee_parameter_comando_at_t xbee_parameter_comando_at[NUMBER_OF_PA
 void digi_at_init(void)
 {
     digi_at_init_xbee_parameters();
-    digi_at_init_xbee_parameter_command();
 }
 
 /**@brief This function initializes with default values the Xbee parameters
@@ -56,6 +56,9 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_ai = 0xFF;  // Association indication
     xbee_parameters.at_ch = 0;     // Operation channel
     xbee_parameters.at_my = 0;     // Short address
+    xbee_parameters.at_ee = 1;     // Encryption enable
+    xbee_parameters.at_eo = 2;     // Encryption options
+    memset(xbee_parameters.at_ky, 0, sizeof(xbee_parameters.at_ky));     // Link Encryption Key
     xbee_parameters.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
     xbee_parameters.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
     xbee_parameters.at_nb = 0;     // Xbee's UART parity (0 = None)
@@ -88,139 +91,21 @@ void digi_at_get_parameter_ni(uint8_t *ni)
     if( ni[i] != '\0' ) ni[i+1] = '\0';
 }
 
-/**@brief This function initializes the structure used to handle the AT commands
- * used to read/write parameters
+//------------------------------------------------------------------------------
+/**@brief Get the value of the ATKY parameter
+ *       It gets stored in the buffer passed as argument
+ * 
+ * @param  ky  Pointer to buffer where the key will be stored.
  */
-void digi_at_init_xbee_parameter_command(void) // TODO This structure currently is not used. It was part of a major change that eventually I did not implement
-{                                              // TODO We should either use it, or delete it.
-    // Xbee's FW version
-    xbee_parameter_comando_at[AT_VR].first_char = 'V';
-    xbee_parameter_comando_at[AT_VR].second_char = 'R';
-    xbee_parameter_comando_at[AT_VR].data = (uint8_t*)&xbee_parameters.at_vr;
-    xbee_parameter_comando_at[AT_VR].size_of_data = 2;
-    xbee_parameter_comando_at[AT_VR].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_VR].b_read_only = true;
-
-    // Xbee's HW version
-    xbee_parameter_comando_at[AT_HV].first_char = 'H';
-    xbee_parameter_comando_at[AT_HV].second_char = 'V';
-    xbee_parameter_comando_at[AT_HV].data = (uint8_t*)&xbee_parameters.at_hv;
-    xbee_parameter_comando_at[AT_HV].size_of_data = 2;
-    xbee_parameter_comando_at[AT_HV].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_HV].b_read_only = true;
-
-    // High part of the MAC address
-    xbee_parameter_comando_at[AT_SH].first_char = 'S';
-    xbee_parameter_comando_at[AT_SH].second_char = 'H';
-    xbee_parameter_comando_at[AT_SH].data = (uint8_t*)&xbee_parameters.at_sh;
-    xbee_parameter_comando_at[AT_SH].size_of_data = 4;
-    xbee_parameter_comando_at[AT_SH].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_SH].b_read_only = true;
-
-    // Low part of the MAC address
-    xbee_parameter_comando_at[AT_SL].first_char = 'S';
-    xbee_parameter_comando_at[AT_SL].second_char = 'L';
-    xbee_parameter_comando_at[AT_SL].data = (uint8_t*)&xbee_parameters.at_sl;
-    xbee_parameter_comando_at[AT_SL].size_of_data = 4;
-    xbee_parameter_comando_at[AT_SL].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_SL].b_read_only = true;
-
-    // "Coordinator join verification" parameter
-    xbee_parameter_comando_at[AT_JV].first_char = 'J';
-    xbee_parameter_comando_at[AT_JV].second_char = 'V';
-    xbee_parameter_comando_at[AT_JV].data = (uint8_t*)&xbee_parameters.at_jv;
-    xbee_parameter_comando_at[AT_JV].size_of_data = 1;
-    xbee_parameter_comando_at[AT_JV].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_JV].b_read_only = false;
-
-    // "node join time" parameter
-    xbee_parameter_comando_at[AT_NJ].first_char = 'N';
-    xbee_parameter_comando_at[AT_NJ].second_char = 'J';
-    xbee_parameter_comando_at[AT_NJ].data = (uint8_t*)&xbee_parameters.at_nj;
-    xbee_parameter_comando_at[AT_NJ].size_of_data = 1;
-    xbee_parameter_comando_at[AT_NJ].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_NJ].b_read_only = false;
-
-    // "Network watchdog" parameter
-    xbee_parameter_comando_at[AT_NW].first_char = 'N';
-    xbee_parameter_comando_at[AT_NW].second_char = 'W';
-    xbee_parameter_comando_at[AT_NW].data = (uint8_t*)&xbee_parameters.at_nw;
-    xbee_parameter_comando_at[AT_NW].size_of_data = 2;
-    xbee_parameter_comando_at[AT_NW].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_NW].b_read_only = false;
-
-    // "Extended pan id" parameter
-    xbee_parameter_comando_at[AT_ID].first_char = 'I';
-    xbee_parameter_comando_at[AT_ID].second_char = 'D';
-    xbee_parameter_comando_at[AT_ID].data = (uint8_t*)&xbee_parameters.at_id;
-    xbee_parameter_comando_at[AT_ID].size_of_data = 8;
-    xbee_parameter_comando_at[AT_ID].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_ID].b_read_only = false;
-
-    // "Node identifier string" parameter
-    xbee_parameter_comando_at[AT_NI].first_char = 'N';
-    xbee_parameter_comando_at[AT_NI].second_char = 'I';
-    xbee_parameter_comando_at[AT_NI].data = (uint8_t*)&xbee_parameters.at_ni;
-    xbee_parameter_comando_at[AT_NI].size_of_data = 32;
-    xbee_parameter_comando_at[AT_NI].b_numeric_data = false;
-    xbee_parameter_comando_at[AT_NI].b_read_only = false;
-
-    // "Coordinator enabled" parameter
-    xbee_parameter_comando_at[AT_CE].first_char = 'C';
-    xbee_parameter_comando_at[AT_CE].second_char = 'E';
-    xbee_parameter_comando_at[AT_CE].data = (uint8_t*)&xbee_parameters.at_ce;
-    xbee_parameter_comando_at[AT_CE].size_of_data = 1;
-    xbee_parameter_comando_at[AT_CE].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_CE].b_read_only = false;
-
-    // "Association indication" parameter
-    xbee_parameter_comando_at[AT_AI].first_char = 'A';
-    xbee_parameter_comando_at[AT_AI].second_char = 'I';
-    xbee_parameter_comando_at[AT_AI].data = (uint8_t*)&xbee_parameters.at_ai;
-    xbee_parameter_comando_at[AT_AI].size_of_data = 1;
-    xbee_parameter_comando_at[AT_AI].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_AI].b_read_only = true;
-
-    // "Operation channel" parameter
-    xbee_parameter_comando_at[AT_CH].first_char = 'C';
-    xbee_parameter_comando_at[AT_CH].second_char = 'H';
-    xbee_parameter_comando_at[AT_CH].data = (uint8_t*)&xbee_parameters.at_ch;
-    xbee_parameter_comando_at[AT_CH].size_of_data = 1;
-    xbee_parameter_comando_at[AT_CH].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_CH].b_read_only = true;
-
-    // "Short address" parameter
-    xbee_parameter_comando_at[AT_MY].first_char = 'M';
-    xbee_parameter_comando_at[AT_MY].second_char = 'Y';
-    xbee_parameter_comando_at[AT_MY].data = (uint8_t*)&xbee_parameters.at_my;
-    xbee_parameter_comando_at[AT_MY].size_of_data = 2;
-    xbee_parameter_comando_at[AT_MY].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_MY].b_read_only = true;
-
-    // "Zigbee stack profile" parameter
-    xbee_parameter_comando_at[AT_ZS].first_char = 'Z';
-    xbee_parameter_comando_at[AT_ZS].second_char = 'S';
-    xbee_parameter_comando_at[AT_ZS].data = (uint8_t*)&xbee_parameters.at_zs;
-    xbee_parameter_comando_at[AT_ZS].size_of_data = 1;
-    xbee_parameter_comando_at[AT_ZS].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_ZS].b_read_only = false;
-
-    // "baud rate" parameter
-    xbee_parameter_comando_at[AT_BD].first_char = 'B';
-    xbee_parameter_comando_at[AT_BD].second_char = 'D';
-    xbee_parameter_comando_at[AT_BD].data = (uint8_t*)&xbee_parameters.at_bd;
-    xbee_parameter_comando_at[AT_BD].size_of_data = 2;
-    xbee_parameter_comando_at[AT_BD].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_BD].b_read_only = false;
-
-    // "Parity" parameter
-    xbee_parameter_comando_at[AT_NB].first_char = 'N';
-    xbee_parameter_comando_at[AT_NB].second_char = 'B';
-    xbee_parameter_comando_at[AT_NB].data = (uint8_t*)&xbee_parameters.at_nb;
-    xbee_parameter_comando_at[AT_NB].size_of_data = 1;
-    xbee_parameter_comando_at[AT_NB].b_numeric_data = true;
-    xbee_parameter_comando_at[AT_NB].b_read_only = false;
+void digi_at_get_parameter_ky(uint8_t *ky)
+{
+    uint8_t i;
+    for(i=0; i < MAXIMUM_SIZE_LINK_KEY; i++)
+    {
+        ky[i] = xbee_parameters.at_ky[i];
+    }
 }
+
 
 /**@brief This function sends an 'OK\r' string through the TCU UART
  * That is the reply sent by Xbee module when an AT command is accepted
@@ -260,6 +145,18 @@ int8_t digi_at_read_ni(uint8_t* buffer)
  
     buffer[i] = '\r';
     return(i+1);
+}
+
+/**@brief This function places the node identifier string into a buffer
+ * We have considered that the maximum size of the identifier is 32 characters
+ */
+int8_t digi_at_read_ky(uint8_t* buffer)
+{
+    uint8_t i = 0;
+    for(i=0; i<= STANDARD_SIZE_LINK_KEY ; i++)
+    {
+            buffer[i] = xbee_parameters.at_ni[i];
+    }
 }
 
 
@@ -324,9 +221,18 @@ void digi_at_reply_read_command(uint8_t at_command)
         xbee_parameters.at_my = zb_get_short_address();
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_my);
         break;
+     case AT_EE:
+        reply_size = sprintf(reply, "%x\r", xbee_parameters.at_ee);
+        break;
+     case AT_EO:
+        reply_size = sprintf(reply, "%x\r", xbee_parameters.at_eo);
+        break;
+     case AT_KY:
+        reply_size = sprintf(reply, "%x\r", xbee_parameters.at_ky);
+        break;
      case AT_ZS:
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_zs);
-        break;
+        break;   
      case AT_BD:
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_bd);
         break;
@@ -358,6 +264,7 @@ void digi_at_reply_action_command(uint8_t at_command)
     {
      case AT_AC: //Apply changes and leave command mode
         digi_at_reply_ok();
+        LOG_WRN("Apply changes and leave command mode");
         break;
      case AT_WR: //Write in flash memory and leave command mode
         digi_at_reply_ok();
@@ -391,7 +298,10 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
     bool return_value = false;
 
     if( at_command == AT_NI ) // The data for that command is a string
-    {
+    {   
+        LOG_WRN("Received string size at_command WRITE== AT_KN: %d\n", string_size);
+        LOG_HEXDUMP_DBG(command_data_string, string_size, "Received string in hex:");
+
         if( string_size <= MAXIMUM_SIZE_NODE_IDENTIFIER )
         {
             uint8_t i;
@@ -403,6 +313,23 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
             return_value = true;
         }
     }
+    if( at_command == AT_KY ) // The data for that command is a string
+    {
+        LOG_WRN("Received string size at_command WRITE == AT_KY: %d\n", string_size);
+        LOG_HEXDUMP_DBG(command_data_string, string_size, "Received string in hex:");
+
+        uint8_t link_key[STANDARD_SIZE_LINK_KEY];
+        ascii_to_hex(command_data_string, link_key, STANDARD_SIZE_LINK_KEY);
+
+        LOG_WRN("Link key size: %d\n", string_size);
+        LOG_HEXDUMP_DBG(link_key, STANDARD_SIZE_LINK_KEY, "Link key in hex:");
+
+        if( string_size <= STANDARD_SIZE_LINK_KEY * 2 )
+        {
+            memcpy(xbee_parameters.at_ky, link_key, STANDARD_SIZE_LINK_KEY);
+            return_value = true;
+        }
+    } 
     else //The data for the rest of the commands is a number
     {
         uint64_t command_data;
@@ -426,9 +353,14 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
              case AT_ID: // Valid range is [0, 0xFFFFFFFFFFFFFFFF]
                 xbee_parameters.at_id = command_data;
                 return_value = true; 
-                g_b_flash_write_cmd = true;
                 break;
              case AT_CE:
+                if( command_data == 0 ) return_value = true; // Only accepted value with the current firmware
+                break;
+             case AT_EE:
+                if( command_data == 1 ) return_value = true; // Only accepted value with the current firmware
+                break;
+             case AT_EO:
                 if( command_data == 0 ) return_value = true; // Only accepted value with the current firmware
                 break;
              case AT_ZS:
@@ -448,6 +380,7 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
 
     if( return_value )
     {
+        //g_b_flash_write_cmd = true;
         digi_at_reply_ok();
     }
     else
@@ -564,6 +497,21 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
             digi_at_reply_read_command(AT_MY);
             return AT_CMD_OK_STAY_IN_CMD_MODE;
         }
+        if( ( input_data[2] == 'E' ) && ( input_data[3] == 'E' ) ) // ATEE
+        {
+            digi_at_reply_read_command(AT_EE);
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
+        }
+        if( ( input_data[2] == 'E' ) && ( input_data[3] == 'O' ) ) // ATEO
+        {
+            digi_at_reply_read_command(AT_EO);
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
+        }
+        if( ( input_data[2] == 'K' ) && ( input_data[3] == 'Y' ) ) // ATKY
+        {
+            digi_at_reply_read_command(AT_KY);
+            return AT_CMD_OK_STAY_IN_CMD_MODE;
+        }
         if( ( input_data[2] == 'Z' ) && ( input_data[3] == 'S' ) ) // ATZS
         {
             digi_at_reply_read_command(AT_ZS);
@@ -631,12 +579,27 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
             if( digi_at_reply_write_command(AT_CE, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
             else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
+        if( ( input_data[2] == 'E' ) && ( input_data[3] == 'E' ) ) // ATEE
+        {
+            if( digi_at_reply_write_command(AT_EE, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+        }
+        if( ( input_data[2] == 'E' ) && ( input_data[3] == 'O' ) ) // ATEO
+        {
+            if( digi_at_reply_write_command(AT_EO, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+        }
+        if( ( input_data[2] == 'K' ) && ( input_data[3] == 'Y' ) ) // ATKY
+        {
+            if( digi_at_reply_write_command(AT_KY, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+        }
         if( ( input_data[2] == 'Z' ) && ( input_data[3] == 'S' ) ) // ATZS
         {
             if( digi_at_reply_write_command(AT_ZS, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
             else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
-        if( ( input_data[2] == 'B' ) && ( input_data[3] == 'D' ) ) // ATBD
+        if( ( input_data[2] == 'B' ) && ( input_data[3] == 'D' ) ) // ATBDS
         {
             if( digi_at_reply_write_command(AT_BD, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
             else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
@@ -704,5 +667,13 @@ bool convert_hex_string_to_uint64(const char *hex_string, uint8_t string_size, u
 
     *output_result = result;
     return true;
+}
+
+void ascii_to_hex(const char *ascii, uint8_t *hex, size_t hex_len) {
+    for (size_t i = 0; i < hex_len; i++) {
+        uint8_t high_nibble = (uint8_t)(isdigit(ascii[i * 2]) ? ascii[i * 2] - '0' : tolower(ascii[i * 2]) - 'a' + 10);
+        uint8_t low_nibble = (uint8_t)(isdigit(ascii[i * 2 + 1]) ? ascii[i * 2 + 1] - '0' : tolower(ascii[i * 2 + 1]) - 'a' + 10);
+        hex[i] = (high_nibble << 4) | low_nibble;
+    }
 }
 

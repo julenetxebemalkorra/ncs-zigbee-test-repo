@@ -26,6 +26,7 @@ enum nvram_status_t status = NVRAM_WRONG_DATA;
 bool g_b_flash_write_cmd = false; //   Flag to indicate that a write command has been received
 bool g_b_reset_zigbee_cmd = false; // Flag to indicate that a reset command has been received
 bool g_b_reset_cmd = false; // Flag to indicate that a reset command has been received
+bool g_b_nvram_write_done = true; // Flag to indicate that the NVRAM write operation has been completed
 
 
 /* Function definition                                                        */
@@ -66,6 +67,8 @@ int8_t zb_nvram_check_usage(void)
         zb_user_conf.extended_pan_id = 0x0000000000000000;
         zb_user_conf.at_ni[0] = ' ';
         zb_user_conf.at_ni[1] = 0;
+        uint8_t network_link_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};  // defalut Zigbee Alliance key
+        memcpy(zb_user_conf.network_key, network_link_key, sizeof(network_link_key));
         write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
         write_nvram(RBT_CNT_ID, number_restarts, sizeof(number_restarts));
         write_nvram(RBT_CNT_REASON, reset_reason, sizeof(reset_reason));
@@ -84,6 +87,8 @@ int8_t zb_nvram_check_usage(void)
             zb_user_conf.extended_pan_id = 0x0000000000000000;
             zb_user_conf.at_ni[0] = ' ';
             zb_user_conf.at_ni[1] = 0;
+            uint8_t network_link_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};   // defalut Zigbee Alliance key
+            memcpy(zb_user_conf.network_key, network_link_key, sizeof(network_link_key));
             write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
             return NVRAM_WRONG_DATA;
         }
@@ -141,13 +146,31 @@ uint8_t zb_conf_read_from_nvram (void)
         return NVRAM_ERROR_READING;
     }
 
+    // Read the network key from NVRAM
+    rc = read_nvram(ZB_NETWORK_ENCRYPTION_KEY, zb_user_conf.network_key, sizeof(zb_user_conf.network_key));
+    // Check if the network key was successfully read from NVRAM
+    if (rc == sizeof(zb_user_conf.network_key)) {
+        // Network key was successfully read from NVRAM
+        //LOG_HEXDUMP_DBG(zb_user_conf.network_key,sizeof(zb_user_conf.network_key),"Network Key: ");
+        LOG_WRN("JULEN Network Key: %s", zb_user_conf.network_key);
+    } 
+    else 
+    {
+        // Failed to read the network key from NVRAM
+        LOG_ERR("Error reading Network Key");
+        LOG_ERR("rc: %d", rc);
+        return NVRAM_ERROR_READING;
+    }
+
     uint32_t stored_checksum = 0;
     uint32_t calculated_checksum = calculate_checksum(&zb_user_conf, sizeof(zb_user_conf));
 
-    rc = read_nvram(ZB_NODE_IDENTIFIER+1, &stored_checksum, sizeof(stored_checksum));
+    rc = read_nvram(ZB_CHECKSUM, &stored_checksum, sizeof(stored_checksum));
     if (rc == sizeof(stored_checksum)) {
         if (calculated_checksum != stored_checksum) {
             LOG_ERR("Checksum does not match");
+            LOG_WRN(" stored_checksum: %d", stored_checksum);
+            LOG_WRN(" calculated_checksum: %d", calculated_checksum);
             return NVRAM_WRONG_DATA;
         }
     } 
@@ -168,7 +191,7 @@ uint8_t zb_conf_read_from_nvram (void)
  */
 void zb_conf_write_to_nvram (void)
 {
-
+    g_b_nvram_write_done = false;
     // Calculate checksum
     uint32_t checksum = calculate_checksum(&zb_user_conf, sizeof(zb_user_conf));
     
@@ -178,7 +201,16 @@ void zb_conf_write_to_nvram (void)
     // Write the Node Identifier (NI) to NVRAM
     write_nvram(ZB_NODE_IDENTIFIER, &zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
 
+    // Write the network key to NVRAM
+    write_nvram(ZB_NETWORK_ENCRYPTION_KEY, &zb_user_conf.network_key, sizeof(zb_user_conf.network_key));
+    LOG_WRN("JULEN Network Key: %s", zb_user_conf.network_key);
+
     write_nvram(ZB_CHECKSUM, &checksum, sizeof(checksum));
+
+    LOG_WRN("Zigbee configuration written to NVRAM");
+    LOG_WRN(" Checksum: %d", checksum);
+
+    g_b_nvram_write_done = true;
 }
 
 //------------------------------------------------------------------------------
@@ -192,6 +224,12 @@ void zb_conf_update (void)
 {
     zb_user_conf.extended_pan_id = digi_at_get_parameter_id();
     digi_at_get_parameter_ni(&zb_user_conf.at_ni[0]);
+    digi_at_get_parameter_ky(&zb_user_conf.network_key[0]);
+    LOG_WRN("Updating Zigbee configuration");
+    LOG_WRN("Extended PAN ID: %llx", zb_user_conf.extended_pan_id);
+    LOG_WRN("Node Identifier: %s", zb_user_conf.at_ni);
+    LOG_WRN("Network Key: ");
+    LOG_HEXDUMP_DBG(zb_user_conf.network_key, sizeof(zb_user_conf.network_key), " ");
 }
 
 //------------------------------------------------------------------------------
@@ -204,7 +242,25 @@ uint64_t zb_conf_get_extended_pan_id (void)
     return zb_user_conf.extended_pan_id;
 }
 
+//------------------------------------------------------------------------------
+/**@brief Get the used configurable parameter network key
+ *
+ * @retval User configured network key
+ */
+void zb_conf_get_network_key (uint8_t *network_key)
+{
+    for(uint8_t i = 0; i < MAXIMUM_SIZE_LINK_KEY; i++)
+    {
+        network_key[i] = zb_user_conf.network_key[i];
+    }
+}
 
+//------------------------------------------------------------------------------
+/**@brief Invert the order of bytes in a 32-bit value 
+ *      (e.g., 0x12345678 becomes 0x78563412)
+ * 
+ * @param value The 32-bit value to invert
+*/
 uint32_t invert_bytes(uint32_t value) {
     uint32_t result = 0;
     result |= (value & 0xFF000000) >> 24;
@@ -289,6 +345,7 @@ void zb_conf_get_extended_node_identifier (uint8_t *ni)
         if( ni[i] == '\0' ) break;
     }
     if( ni[i] != '\0' ) ni[i+1] = '\0';
+    LOG_WRN("Node Identifier: %s", ni);
 }
 
 //------------------------------------------------------------------------------
@@ -310,6 +367,7 @@ void nvram_manager(void)
 {
     if((!g_b_flash_error) && (g_b_flash_write_cmd))
     {
+        LOG_WRN("Flash write command received");
         zb_conf_update(); // Update the values in the zb_user_conf structure
         zb_conf_write_to_nvram(); // Write the new values to NVRAM
         g_b_flash_write_cmd = false;

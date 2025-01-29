@@ -73,6 +73,8 @@
 #define PRINT_ZIGBEE_INFO                ZB_TRUE
 #define PRINT_UART_INFO                  ZB_TRUE
 #define CRYPTO_ENABLE                    ZB_TRUE
+#define DEFAULT_ENCRIPTION_KEY           0
+#define NEW_ENCRIPTION_KEY               1
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
@@ -388,6 +390,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
         }
     }
 
+
     if(sig == ZB_BDB_SIGNAL_STEERING || sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT)
     {
         soft_reset_counter++;
@@ -567,29 +570,51 @@ void set_extended_pan_id_in_stack(void)
 // Function for initializing the Zigbee configuration
 void zigbee_configuration()
 {
-	/* disable NVRAM erasing on every application startup*/
-	zb_set_nvram_erase_at_start(ZB_TRUE);
+    /* disable NVRAM erasing on every application startup*/
+    zb_set_nvram_erase_at_start(ZB_TRUE);
 
-	if(!CRYPTO_ENABLE)
-	{
-		zb_disable_nwk_security();
-		zb_nwk_set_ieee_policy(ZB_FALSE);
-	}
+    if(!CRYPTO_ENABLE)
+    {
+        zb_disable_nwk_security();
+        zb_nwk_set_ieee_policy(ZB_FALSE);
+    }
 
-	// Define a distributed key (assuming key size of 16 bytes, you might need to adjust based on documentation)
-    zb_uint8_t distributed_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 
-                                       0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};
+    //TRUE to disable trust center, FALSE to enable trust center
+    zb_bdb_set_legacy_device_support(ZB_FALSE);
 
-    // Set the network key
-	zb_secur_setup_nwk_key((zb_uint8_t *) distributed_key, 0);
+    // Define a distributed key thsi is Zigbee Alliance key
+    zb_uint8_t network_key[16] = {0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39};
+    zb_uint8_t network_link_key[16] = {0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39};
+
+    LOG_WRN("Link key: ");
+    LOG_HEXDUMP_DBG(network_link_key, 16, " ");
+
+    LOG_WRN("Network key: ");
+    LOG_HEXDUMP_DBG(network_key, 16, " ");
+
+    zb_conf_get_network_key(network_link_key);
+
+    LOG_WRN("Link key: ");
+    LOG_HEXDUMP_DBG(network_link_key, 16, " ");
+
+    // Set the network link key. This action can help us choose between different link keys
+    zb_zdo_set_tc_standard_distributed_key(network_link_key);
+
+    // Enable distributed Trust Center
+    zb_enable_distributed();
+    zb_zdo_setup_network_as_distributed();
+
+    // Set the network key Only for development proccess
+    zb_secur_setup_nwk_key(network_key, DEFAULT_ENCRIPTION_KEY);
 
     set_extended_pan_id_in_stack();
 
-	//TRUE to disable trust center, legacy support for
-	zb_bdb_set_legacy_device_support(ZB_TRUE);
-
     // Set the device nwkey. This action can help us choose between different nwk keys
-    zb_secur_nwk_key_switch_procedure(0);
+    zb_secur_nwk_key_switch_procedure(DEFAULT_ENCRIPTION_KEY);
+
+    // Set the device link key. This action can help us choose between different link keys it has to be distributed TC to all devices
+    if(zb_is_network_distributed()) LOG_WRN("Network key is distributed");
+    else LOG_WRN("Network key is NOT distributed");
 }
 
 //------------------------------------------------------------------------------
@@ -743,7 +768,7 @@ void display_counters(void)
                                tcu_uart_frames_transmitted_counter,
                                tcu_uart_frames_received_counter);
 
-                                   /* Create buffer to send LQI request */
+        /* Create buffer to send LQI request */
         /*
         zb_bufid_t buf = zb_buf_get_out();
         if (buf)
@@ -757,6 +782,12 @@ void display_counters(void)
         }
         */
     }
+
+    if( (uint64_t)( time_now_ms - time_last_ms ) > 1000 )
+    {
+        zigbee_thread_manager();               // Manage the Zigbee thread
+    }
+
 
     if (zb_buf_is_oom_state()) {
         // Handle Out Of Memory state
@@ -779,6 +810,8 @@ void display_counters(void)
 int main(void)
 {
     int8_t ret = 0;
+
+    LOG_WRN("Starting Zigbee Router");
 
     ret = init_nvram();              // Initialize NVRAM
     if( ret != 0)
@@ -850,6 +883,7 @@ int main(void)
         LOG_ERR("gpio_init error %d", ret);
     }
 
+    LOG_WRN("Starting Zigbee Router");
     zigbee_configuration(); //Zigbee configuration
     zigbee_enable(); // Start Zigbee default thread
     zb_af_set_data_indication(data_indication_cb); // Set call back function for APS frame received
@@ -873,7 +907,6 @@ int main(void)
         digi_node_discovery_request_manager(); // Manage the device discovery requests
         zigbee_aps_manager();                  // Manage the aps output frame queue
         nvram_manager();                       // Manage the NVRAM
-        zigbee_thread_manager();               // Manage the Zigbee thread
         tcu_uart_manager();                   // Manage the TCU UART
 
         k_sleep(K_MSEC(5));                    // Required to see log messages on console

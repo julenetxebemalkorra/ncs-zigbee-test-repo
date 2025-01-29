@@ -246,6 +246,9 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
 
     if(input_byte == '\r') // End of frame
     {
+        //LOG_WRN("Received AT command");
+        //LOG_HEXDUMP_DBG(tcu_uart_rx_buffer, tcu_uart_rx_buffer_index, "Received AT command in hex:");
+
         if( tcu_uart_rx_buffer_index == 0 ) return; //Ignore empty commands
 
         if( b_tcu_uart_rx_buffer_overflow )
@@ -264,7 +267,7 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
                 LOG_ERR("Wrong AT command. Error code: %d", command_analysis_result);
                 for(uint8_t kk=0; kk<tcu_uart_rx_buffer_index; kk++)
                 {
-                    LOG_ERR("%d", tcu_uart_rx_buffer[kk]);
+                    //LOG_ERR("%d", tcu_uart_rx_buffer[kk]);
                 }
             }
         }

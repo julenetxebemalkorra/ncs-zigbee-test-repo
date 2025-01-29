@@ -49,12 +49,15 @@ void digi_node_discovery_init(void)
 bool is_a_digi_node_discovery_request(uint8_t* input_data, int16_t size_of_input_data)
 {
     bool b_return = false;
+    LOG_WRN("is_a_digi_node_discovery_request, size %d", size_of_input_data);
+    LOG_HEXDUMP_WRN(input_data, size_of_input_data, "APS frame payload");
     if( size_of_input_data >= 12 ) // TODO. I don't know if the size of this frame is constant. I know it should have at least 12 chars
     {
         if( ( input_data[10] == 'N' ) && ( input_data[11] == 'D' ) ) // ND command
         {
             if( input_data[1] >= 32 ) // Minimum valid discovery timeout
             {
+                LOG_WRN("Node Discovery request received");
                 b_return = true;
                 node_discovery_reply.b_pending_request = true;
                 node_discovery_reply.first_character = input_data[0];
@@ -124,6 +127,8 @@ bool digi_node_discovery_reply(void)
         element.payload[i++] = (uint16_t)(MANUFACTURED_ID) & 0xFF;
         element.payload[i++] = 0x2e; // TODO. Not sure what it means. It represents the RSSI or a related magnitude.
         element.payload_size = (zb_uint8_t)i;
+        LOG_WRN("Node Discovery reply");
+        LOG_HEXDUMP_DBG(element.payload, element.payload_size, "Node Discovery reply payload");
         if( enqueue_aps_frame(&element) ) b_return = true;
     }
 

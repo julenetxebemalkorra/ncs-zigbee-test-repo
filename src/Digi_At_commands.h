@@ -9,7 +9,8 @@
 #include "global_defines.h"
 
 #define MINIMUM_SIZE_AT_COMMAND 4
-#define MAXIMUM_SIZE_AT_COMMAND 4 + 1 + MAXIMUM_SIZE_NODE_IDENTIFIER //Write command + blank + size of node identifier
+#define MAXIMUM_SIZE_AT_COMMAND 4 + 1 + MAXIMUM_SIZE_LINK_KEY //Write command + blank + size of node identifier
+#define STANDARD_SIZE_LINK_KEY 16
 
 #define HARDCODED_ATJV_VALUE 1
 #define HARDCODED_ATNJ_VALUE 0xFF
@@ -29,6 +30,9 @@ enum parameter_at_command_e{
     AT_AI, // Read the "association indication" parameter [AI]
     AT_CH, // Read the "operation channel" parameter [CH]
     AT_MY, // Read the "short address" parameter [MY]
+    AT_EE, // Read / write the "encryption enable" parameter [EE]
+    AT_EO, // Read / write the "encryption options" parameter [EO]
+    AT_KY, // Read / write the "link encryption key" parameter [KY]
     AT_ZS, // Read / write the "Zigbee stack profile" parameter [ZS]
     AT_BD, // Read / write the "baud rate" parameter [BD]
     AT_NB, // Read / write the "parity" parameter [BD]
@@ -65,29 +69,26 @@ struct xbee_parameters_t {
     uint8_t at_ai;   // Association indication parameter (read only)
     uint8_t at_ch;   // Operation channel parameter (read only)
     uint16_t at_my;   // Short address parameter (read only)
+    uint8_t at_ee;   // Encryption enable parameter
+    uint8_t at_eo;   // Encryption options parameter
+    uint8_t at_ky[MAXIMUM_SIZE_LINK_KEY];   // Link Encryption Key parameter
     uint8_t at_zs;   // Xbee's Zigbee stack profile parameter
     uint8_t at_bd;   // Xbee's UART baud rate parameter
     uint8_t at_nb;   // Xbee's UART parity parameter
     uint8_t at_ni[MAXIMUM_SIZE_NODE_IDENTIFIER + 1];   // Node identifier string parameter (plus one to include the '\0')
 };
 
- struct xbee_parameter_comando_at_t {
-    uint8_t first_char;        // First char of AT command
-    uint8_t second_char;       // Second char of AT command
-    uint8_t *data;             // Pointer to data associated to that command
-    uint8_t size_of_data;      // Size of data (number of bytes)
-    bool    b_numeric_data;    // If true, data is a numeric value. If false, is a string of characters.
-    bool    b_read_only;       // If true, it is a read only parameter. If false, it can be written.
-};
-
 /* Function prototypes used only internally                                   */
 void digi_at_init_xbee_parameters(void);
 void digi_at_init_xbee_parameter_command(void);
 int8_t digi_at_read_ni(uint8_t* buffer);
+int8_t digi_at_read_ky(uint8_t* buffer);
 void digi_at_reply_read_command(uint8_t at_command);
 void digi_at_reply_action_command(uint8_t at_command);
 bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_string, uint8_t string_size);
 bool convert_hex_string_to_uint64(const char *hex_string, uint8_t string_size, uint64_t *output_result);
+void ascii_to_hex(const char *ascii, uint8_t *hex, size_t hex_len);
+
 
 /* Function prototypes used externally                                        */
 void digi_at_init(void);
@@ -96,6 +97,7 @@ void digi_at_reply_error(void);
 int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_input_data);
 uint64_t digi_at_get_parameter_id(void);
 void digi_at_get_parameter_ni(uint8_t *ni);
+void digi_at_get_parameter_ky(uint8_t *ky);
 
 #endif /* DIGI_AT_COMMANDS_H_ */
 
