@@ -374,6 +374,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
 			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
             else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
             else if( sig == ZB_ZDO_SIGNAL_DEVICE_ANNCE ) LOG_WRN(" SIGNAL 2:  Notifies the application about the new device appearance.");
+            else if( sig == ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED) LOG_WRN(" SIGNAL 47: Notifies the Zigbee Trust center application about a new device is authorized in the network");
 			else
 			{
                 if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
@@ -586,13 +587,7 @@ void zigbee_configuration()
     zb_uint8_t network_key[16] = {0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39};
     zb_uint8_t network_link_key[16] = {0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39};
 
-    LOG_WRN("Link key: ");
-    LOG_HEXDUMP_DBG(network_link_key, 16, " ");
-
-    LOG_WRN("Network key: ");
-    LOG_HEXDUMP_DBG(network_key, 16, " ");
-
-    zb_conf_get_network_key(network_link_key);
+    zb_conf_get_network_link_key(network_link_key);
 
     LOG_WRN("Link key: ");
     LOG_HEXDUMP_DBG(network_link_key, 16, " ");

@@ -68,7 +68,7 @@ int8_t zb_nvram_check_usage(void)
         zb_user_conf.at_ni[0] = ' ';
         zb_user_conf.at_ni[1] = 0;
         uint8_t network_link_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};  // defalut Zigbee Alliance key
-        memcpy(zb_user_conf.network_key, network_link_key, sizeof(network_link_key));
+        memcpy(zb_user_conf.network_link_key, network_link_key, sizeof(network_link_key));
         write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
         write_nvram(RBT_CNT_ID, number_restarts, sizeof(number_restarts));
         write_nvram(RBT_CNT_REASON, reset_reason, sizeof(reset_reason));
@@ -88,7 +88,7 @@ int8_t zb_nvram_check_usage(void)
             zb_user_conf.at_ni[0] = ' ';
             zb_user_conf.at_ni[1] = 0;
             uint8_t network_link_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};   // defalut Zigbee Alliance key
-            memcpy(zb_user_conf.network_key, network_link_key, sizeof(network_link_key));
+            memcpy(zb_user_conf.network_link_key, network_link_key, sizeof(network_link_key));
             write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
             return NVRAM_WRONG_DATA;
         }
@@ -147,12 +147,12 @@ uint8_t zb_conf_read_from_nvram (void)
     }
 
     // Read the network key from NVRAM
-    rc = read_nvram(ZB_NETWORK_ENCRYPTION_KEY, zb_user_conf.network_key, sizeof(zb_user_conf.network_key));
+    rc = read_nvram(ZB_NETWORK_ENCRYPTION_KEY, zb_user_conf.network_link_key, sizeof(zb_user_conf.network_link_key));
     // Check if the network key was successfully read from NVRAM
-    if (rc == sizeof(zb_user_conf.network_key)) {
+    if (rc == sizeof(zb_user_conf.network_link_key)) {
         // Network key was successfully read from NVRAM
-        //LOG_HEXDUMP_DBG(zb_user_conf.network_key,sizeof(zb_user_conf.network_key),"Network Key: ");
-        LOG_WRN("JULEN Network Key: %s", zb_user_conf.network_key);
+        //LOG_HEXDUMP_DBG(zb_user_conf.network_link_key,sizeof(zb_user_conf.network_link_key),"Network Key: ");
+        LOG_WRN("JULEN Network Key: %s", zb_user_conf.network_link_key);
     } 
     else 
     {
@@ -202,8 +202,8 @@ void zb_conf_write_to_nvram (void)
     write_nvram(ZB_NODE_IDENTIFIER, &zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
 
     // Write the network key to NVRAM
-    write_nvram(ZB_NETWORK_ENCRYPTION_KEY, &zb_user_conf.network_key, sizeof(zb_user_conf.network_key));
-    LOG_WRN("JULEN Network Key: %s", zb_user_conf.network_key);
+    write_nvram(ZB_NETWORK_ENCRYPTION_KEY, &zb_user_conf.network_link_key, sizeof(zb_user_conf.network_link_key));
+    LOG_WRN("JULEN Network Key: %s", zb_user_conf.network_link_key);
 
     write_nvram(ZB_CHECKSUM, &checksum, sizeof(checksum));
 
@@ -224,12 +224,12 @@ void zb_conf_update (void)
 {
     zb_user_conf.extended_pan_id = digi_at_get_parameter_id();
     digi_at_get_parameter_ni(&zb_user_conf.at_ni[0]);
-    digi_at_get_parameter_ky(&zb_user_conf.network_key[0]);
+    digi_at_get_parameter_ky(&zb_user_conf.network_link_key[0]);
     LOG_WRN("Updating Zigbee configuration");
     LOG_WRN("Extended PAN ID: %llx", zb_user_conf.extended_pan_id);
     LOG_WRN("Node Identifier: %s", zb_user_conf.at_ni);
     LOG_WRN("Network Key: ");
-    LOG_HEXDUMP_DBG(zb_user_conf.network_key, sizeof(zb_user_conf.network_key), " ");
+    LOG_HEXDUMP_DBG(zb_user_conf.network_link_key, sizeof(zb_user_conf.network_link_key), " ");
 }
 
 //------------------------------------------------------------------------------
@@ -247,11 +247,11 @@ uint64_t zb_conf_get_extended_pan_id (void)
  *
  * @retval User configured network key
  */
-void zb_conf_get_network_key (uint8_t *network_key)
+void zb_conf_get_network_link_key (uint8_t *network_key)
 {
     for(uint8_t i = 0; i < MAXIMUM_SIZE_LINK_KEY; i++)
     {
-        network_key[i] = zb_user_conf.network_key[i];
+        network_key[i] = zb_user_conf.network_link_key[i];
     }
 }
 
