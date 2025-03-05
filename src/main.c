@@ -52,6 +52,8 @@
 #include "zboss_api_zgp.h"
 
 #include <zephyr/debug/coredump.h>
+#include <zephyr/kernel.h>
+#include <zephyr/linker/linker-defs.h>
 
 #define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
 
@@ -142,6 +144,10 @@ void get_reset_reason(void)
     int8_t rc = 0;
     uint8_t restart_number[1] = {0};
     uint8_t reset_cause_flags[1] = {0};
+
+    printk("Address of sample start %p\n", (void *)__rom_region_start);
+	printk("Address of sample end %p\n", (void *)__rom_region_end);
+	printk("Hello sysbuild with mcuboot! %s\n", CONFIG_BOARD);
 
     const zb_char_t *zb_version;
     // Call the zb_get_version function to get the ZBOSS version string
