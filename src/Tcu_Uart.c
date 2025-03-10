@@ -436,8 +436,8 @@ int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data)
         return -1;
     }
 
-    LOG_DBG("Queueing message of size %d", size_input_data);
-    LOG_HEXDUMP_DBG(input_data, size_input_data,"Payload of input queueMessage packet");
+    //LOG_DBG("Queueing message of size %d", size_input_data);
+    //LOG_HEXDUMP_DBG(input_data, size_input_data,"Payload of input queueMessage packet");
 
     // Create a buffer to hold the message (if needed)
     tcu_message message_buffer;

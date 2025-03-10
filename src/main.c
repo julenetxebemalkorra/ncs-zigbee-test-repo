@@ -55,6 +55,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/linker/linker-defs.h>
 
+#include <zephyr/dfu/mcuboot.h>
+
 #define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
 
 /* Device endpoint, used to receive ZCL commands. */
@@ -145,9 +147,25 @@ void get_reset_reason(void)
     uint8_t restart_number[1] = {0};
     uint8_t reset_cause_flags[1] = {0};
 
-    printk("Address of sample start %p\n", (void *)__rom_region_start);
-	printk("Address of sample end %p\n", (void *)__rom_region_end);
-	printk("Hello sysbuild with mcuboot! %s\n", CONFIG_BOARD);
+    // Print the address of the ROM region
+    LOG_DBG("Address of sample start %p\n", (void *)__rom_region_start);
+	LOG_DBG("Address of sample end %p\n", (void *)__rom_region_end);
+	LOG_DBG("Hello sysbuild with mcuboot! %s\n", CONFIG_BOARD);
+
+    
+    // Print the size of the ROM region
+    size_t rom_size = (size_t)__rom_region_end - (size_t)__rom_region_start;
+    LOG_DBG("Size of ROM region: %zu bytes\n", rom_size);
+
+    // Print the current stack pointer
+    void *stack_pointer;
+    __asm__ volatile ("mov %0, sp" : "=r" (stack_pointer));
+    LOG_DBG("Current stack pointer: %p\n", stack_pointer);
+
+    // Print the current heap pointer
+    void *heap_pointer;
+    __asm__ volatile ("mov %0, r0" : "=r" (heap_pointer));
+    LOG_DBG("Current heap pointer: %p\n", heap_pointer);
 
     const zb_char_t *zb_version;
     // Call the zb_get_version function to get the ZBOSS version string
@@ -862,7 +880,7 @@ int main(void)
     digi_at_init();
     digi_node_discovery_init();
 
-    ret = watchdog_init();
+    ret = 0; //watchdog_init();
     if( ret < 0)
     {
         LOG_ERR("watchdog_init error %d", ret);
