@@ -378,7 +378,6 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                 if(PRINT_ZIGBEE_INFO) LOG_ERR("Payload of input RF packet is too big or too small: %d bytes", sizeOfPayload);
             }
         }
-
         else if( ( ind->clusterid == DIGI_COMMISSIONING_CLUSTER ) &&
             ( ind->src_endpoint == DIGI_COMMISSIONING_SOURCE_ENDPOINT ) &&
             ( ind->dst_endpoint == DIGI_COMMISSIONING_DESTINATION_ENDPOINT ) )
@@ -386,6 +385,28 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             if( is_a_digi_node_discovery_request((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
             {
                 if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee Node Discovery Device Request");
+            }
+        }
+        else if (ind->clusterid == DIGI_FOTA_CLUSTER)
+        {
+            if(PRINT_ZIGBEE_INFO) LOG_DBG("FOTA Cluster ID found");
+            if(PRINT_ZIGBEE_INFO) LOG_WRN("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes",
+                          (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,(uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload);
+            if(PRINT_ZIGBEE_INFO)
+            {
+                LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
+                LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
+            }
+            return ZB_TRUE;
+        }
+        else if( ( ind->clusterid == DIGI_REMOTE_DDO_REQUEST_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_COMMISSIONING_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_COMMISSIONING_DESTINATION_ENDPOINT ) )
+        {
+
+            if( is_a_hv_info_request((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            {
+                if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee HV Info Request");
             }
         }
         else
@@ -987,7 +1008,7 @@ static void ota_evt_handler(const struct zigbee_fota_evt *evt)
  */
 static void zcl_device_cb(zb_bufid_t bufid)
 {
-    LOG_WRN("ZCL device callback");
+    LOG_WRN("ZCL device callback JULEN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	zb_zcl_device_callback_param_t *device_cb_param =
 		ZB_BUF_GET_PARAM(bufid, zb_zcl_device_callback_param_t);
 
@@ -1093,7 +1114,7 @@ int main(void)
 	ZB_ZCL_REGISTER_DEVICE_CB(zcl_device_cb);
 
     /* Register callback for handling ZCL commands. */
-    ZB_ZCL_REGISTER_DEVICE_CB(zigbee_fota_zcl_cb);
+    //ZB_ZCL_REGISTER_DEVICE_CB(zigbee_fota_zcl_cb);
 
     /* Register dimmer switch device context (endpoints). */
     LOG_WRN("Registering device context");
@@ -1101,9 +1122,9 @@ int main(void)
 
     /* Initialize clusters attributes. */
     LOG_WRN("Initializing clusters attributes");
-	ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(APP_TEMPLATE_ENDPOINT, identify_cb);
+	//ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(APP_TEMPLATE_ENDPOINT, identify_cb);
 
-    ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(CONFIG_ZIGBEE_FOTA_ENDPOINT, identify_cb);
+    //ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(CONFIG_ZIGBEE_FOTA_ENDPOINT, identify_cb);
 
     LOG_WRN("Starting Zigbee Router");
     zigbee_configuration(); //Zigbee configuration

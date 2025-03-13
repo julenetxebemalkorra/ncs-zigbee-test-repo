@@ -17,6 +17,9 @@
 #define DIGI_COMMISSIONING_SOURCE_ENDPOINT 230
 #define DIGI_COMMISSIONING_DESTINATION_ENDPOINT 230
 
+#define DIGI_FOTA_CLUSTER 0x0019
+#define DIGI_REMOTE_DDO_REQUEST_CLUSTER 0x0021
+
 #define PRODUCT_TYPE     0x00000001 // I will assign that value as product type of the Fanstel BT840E
 #define MANUFACTURED_ID  0x0001     // I will assign that value as manufactured ID of the Fanstel BT840E
 

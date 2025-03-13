@@ -20,6 +20,7 @@ struct node_discovery_reply_t {
 /* Function prototypes                                                        */
 void digi_node_discovery_init(void);
 bool is_a_digi_node_discovery_request(uint8_t* input_data, int16_t size_of_input_data);
+bool is_a_hv_info_request(uint8_t* input_data, int16_t size_of_input_data);
 bool digi_node_discovery_reply(void);
 void digi_node_discovery_request_manager(void);
 

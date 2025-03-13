@@ -70,6 +70,15 @@ bool is_a_digi_node_discovery_request(uint8_t* input_data, int16_t size_of_input
     return b_return;
 }
 
+bool is_a_hv_info_request(uint8_t* input_data, int16_t size_of_input_data)
+{
+    bool b_return = false;
+    LOG_WRN("hardware version request, size %d", size_of_input_data);
+    LOG_HEXDUMP_WRN(input_data, size_of_input_data, "APS frame payload");
+   // TODO; is neccesary to respond to this request
+    return b_return;
+}
+
 /**@brief This function places in the APS output frame queue the reply to a node discovery request.
 *
 */
