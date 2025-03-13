@@ -10,9 +10,11 @@
  */
 
 #include <zephyr/kernel.h>
+#include <zephyr/device.h>
 #include <zephyr/logging/log.h>
 
 #include <zboss_api.h>
+#include <zboss_api_addons.h>
 #include <zigbee/zigbee_error_handler.h>
 #include <zigbee/zigbee_app_utils.h>
 #include <zb_nrf_platform.h>
@@ -55,6 +57,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/linker/linker-defs.h>
 
+#include <zigbee/zigbee_fota.h>
+#include <zephyr/sys/reboot.h>
 #include <zephyr/dfu/mcuboot.h>
 
 #define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
@@ -135,6 +139,43 @@ bool bTimeToSendFrame = false;
 
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 
+struct zb_device_ctx {
+	zb_zcl_basic_attrs_t basic_attr;
+	zb_zcl_identify_attrs_t identify_attr;
+};
+
+static struct zb_device_ctx dev_ctx;
+
+ZB_ZCL_DECLARE_IDENTIFY_ATTRIB_LIST(
+	identify_attr_list,
+	&dev_ctx.identify_attr.identify_time);
+
+ZB_ZCL_DECLARE_BASIC_ATTRIB_LIST(
+	basic_attr_list,
+	&dev_ctx.basic_attr.zcl_version,
+	&dev_ctx.basic_attr.power_source);
+
+ZB_DECLARE_RANGE_EXTENDER_CLUSTER_LIST(
+	app_template_clusters,
+	basic_attr_list,
+	identify_attr_list);
+
+ZB_DECLARE_RANGE_EXTENDER_EP(
+	app_template_ep,
+	APP_TEMPLATE_ENDPOINT,
+	app_template_clusters);
+
+extern zb_af_endpoint_desc_t zigbee_fota_client_ep;
+
+ZBOSS_DECLARE_DEVICE_CTX_1_EP(
+	app_template_ctx,
+	zigbee_fota_client_ep);
+
+/*
+ZBOSS_DECLARE_DEVICE_CTX_2_EP(app_template_ctx,
+			      zigbee_fota_client_ep,
+			      app_template_ep);
+*/
 
 /*----------------------------------------------------------------------------*/
 /*                           FUNCTION DEFINITIONS                             */
@@ -456,6 +497,9 @@ void zboss_signal_handler(zb_bufid_t bufid)
             hard_reset_counter = 0;
         }
     }
+
+    /* Pass signal to the OTA client implementation. */
+    zigbee_fota_signal_handler(bufid);
 
 	/* No application-specific behavior is required.
 	 * Call default signal handler.
@@ -821,6 +865,141 @@ void display_counters(void)
     zb_buf_oom_trace();
 }
 
+static void confirm_image(void)
+{
+	if (!boot_is_img_confirmed()) {
+		int ret = boot_write_img_confirmed();
+
+		if (ret) {
+			LOG_ERR("Couldn't confirm image: %d", ret);
+		} else {
+			LOG_INF("Marked image as OK");
+		}
+	}
+    else
+    {
+        LOG_INF("Image already confirmed");
+    }
+}
+
+/**@brief Function for initializing all clusters attributes. */
+static void app_clusters_attr_init(void)
+{
+	/* Basic cluster attributes data. */
+	dev_ctx.basic_attr.zcl_version = ZB_ZCL_VERSION;
+	dev_ctx.basic_attr.power_source = ZB_ZCL_BASIC_POWER_SOURCE_UNKNOWN;
+
+	/* Identify cluster attributes data. */
+	dev_ctx.identify_attr.identify_time = ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE;
+}
+
+/**@brief Function to handle identify notification events on the first endpoint.
+ *
+ * @param  bufid  Unused parameter, required by ZBOSS scheduler API.
+ */
+static void identify_cb(zb_bufid_t bufid)
+{
+	zb_ret_t zb_err_code;
+
+	if (bufid) {
+		/* Schedule a self-scheduling function that will toggle the LED. */
+        ZB_SCHEDULE_APP_CALLBACK(gpio_pin_toggle_dt, bufid);
+    } else {
+        /* Cancel the toggling function alarm and turn off LED. */
+        zb_err_code = ZB_SCHEDULE_APP_ALARM_CANCEL(gpio_pin_toggle_dt, ZB_ALARM_ANY_PARAM);
+        ZVUNUSED(zb_err_code);
+
+        /* Update network status/idenitfication LED. */
+        if (ZB_JOINED()) {
+            gpio_pin_set_dt(&led, 1);
+        } else {
+            gpio_pin_set_dt(&led, 0);
+		}
+	}
+}
+
+
+/**@brief Starts identifying the device.
+ *
+ * @param  bufid  Unused parameter, required by ZBOSS scheduler API.
+ */
+static void start_identifying(zb_bufid_t bufid)
+{
+	ZVUNUSED(bufid);
+
+	if (ZB_JOINED()) {
+		/* Check if endpoint is in identifying mode,
+		 * if not put desired endpoint in identifying mode.
+		 */
+		if (dev_ctx.identify_attr.identify_time ==
+		ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE) {
+
+			zb_ret_t zb_err_code = zb_bdb_finding_binding_target(
+				APP_TEMPLATE_ENDPOINT);
+
+			if (zb_err_code == RET_OK) {
+				LOG_INF("Enter identify mode");
+			} else if (zb_err_code == RET_INVALID_STATE) {
+				LOG_WRN("RET_INVALID_STATE - Cannot enter identify mode");
+			} else {
+				ZB_ERROR_CHECK(zb_err_code);
+			}
+		} else {
+			LOG_INF("Cancel identify mode");
+			zb_bdb_finding_binding_target_cancel();
+		}
+	} else {
+		LOG_WRN("Device not in a network - cannot enter identify mode");
+	}
+}
+
+static void ota_evt_handler(const struct zigbee_fota_evt *evt)
+{
+	switch (evt->id) {
+	case ZIGBEE_FOTA_EVT_PROGRESS:
+		dk_set_led(led, evt->dl.progress % 2);
+		break;
+
+	case ZIGBEE_FOTA_EVT_FINISHED:
+		LOG_INF("Reboot application.");
+		/* Power on unused sections of RAM to allow MCUboot to use it. */
+		if (IS_ENABLED(CONFIG_RAM_POWER_DOWN_LIBRARY)) {
+			power_up_unused_ram();
+		}
+
+		sys_reboot(SYS_REBOOT_COLD);
+		break;
+
+	case ZIGBEE_FOTA_EVT_ERROR:
+		LOG_ERR("OTA image transfer failed.");
+		break;
+
+	default:
+        LOG_WRN("Unknown Zigbee FOTA event: %d", evt->id);
+		break;
+	}
+}
+
+/**@brief Callback function for handling ZCL commands.
+ *
+ * @param[in]   bufid   Reference to Zigbee stack buffer
+ *                      used to pass received data.
+ */
+static void zcl_device_cb(zb_bufid_t bufid)
+{
+    LOG_WRN("ZCL device callback");
+	zb_zcl_device_callback_param_t *device_cb_param =
+		ZB_BUF_GET_PARAM(bufid, zb_zcl_device_callback_param_t);
+
+	if (device_cb_param->device_cb_id == ZB_ZCL_OTA_UPGRADE_VALUE_CB_ID) {
+        LOG_WRN("ZCL OTA upgrade value callback");
+		zigbee_fota_zcl_cb(bufid);
+	} else {
+        LOG_WRN("ZCL device callback not implemented");
+		device_cb_param->status = RET_NOT_IMPLEMENTED;
+	}
+}
+
 
 //------------------------------------------------------------------------------
 /**@brief Main function
@@ -901,6 +1080,30 @@ int main(void)
     {
         LOG_ERR("gpio_init error %d", ret);
     }
+
+    /* Initialize Zigbee FOTA download service. */
+	zigbee_fota_init(ota_evt_handler);
+
+	/* Mark the current firmware as valid. */
+    LOG_WRN("Confirming image");
+	confirm_image();
+
+	/* Register callback for handling ZCL commands. */
+    LOG_WRN("Registering ZCL device callback");
+	ZB_ZCL_REGISTER_DEVICE_CB(zcl_device_cb);
+
+    /* Register callback for handling ZCL commands. */
+    ZB_ZCL_REGISTER_DEVICE_CB(zigbee_fota_zcl_cb);
+
+    /* Register dimmer switch device context (endpoints). */
+    LOG_WRN("Registering device context");
+	ZB_AF_REGISTER_DEVICE_CTX(&app_template_ctx);
+
+    /* Initialize clusters attributes. */
+    LOG_WRN("Initializing clusters attributes");
+	ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(APP_TEMPLATE_ENDPOINT, identify_cb);
+
+    ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(CONFIG_ZIGBEE_FOTA_ENDPOINT, identify_cb);
 
     LOG_WRN("Starting Zigbee Router");
     zigbee_configuration(); //Zigbee configuration
