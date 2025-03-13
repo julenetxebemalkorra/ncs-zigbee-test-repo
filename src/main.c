@@ -397,7 +397,19 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                 LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
                 LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
             }
-            return ZB_TRUE;
+            if(pointerToBeginOfBuffer[2] == 0x00)
+            {
+                LOG_WRN("FOTA Cluster ID: Start Image Request");
+                zigbee_fota_zcl_cb(bufid);
+            }
+            else
+            {
+                if(PRINT_ZIGBEE_INFO)
+                {
+                    LOG_WRN("FOTA Cluster ID: Unknown command");
+                    LOG_HEXDUMP_DBG(pointerToBeginOfBuffer, sizeOfPayload, "Unknown FOTA command payload");
+                }
+            }
         }
         else if( ( ind->clusterid == DIGI_REMOTE_DDO_REQUEST_CLUSTER ) &&
             ( ind->src_endpoint == DIGI_COMMISSIONING_SOURCE_ENDPOINT ) &&
@@ -978,6 +990,7 @@ static void ota_evt_handler(const struct zigbee_fota_evt *evt)
 {
 	switch (evt->id) {
 	case ZIGBEE_FOTA_EVT_PROGRESS:
+        LOG_WRN("OTA image transfer progress: %d%%", evt->dl.progress);
 		dk_set_led(led, evt->dl.progress % 2);
 		break;
 
@@ -987,7 +1000,6 @@ static void ota_evt_handler(const struct zigbee_fota_evt *evt)
 		if (IS_ENABLED(CONFIG_RAM_POWER_DOWN_LIBRARY)) {
 			power_up_unused_ram();
 		}
-
 		sys_reboot(SYS_REBOOT_COLD);
 		break;
 
@@ -1012,10 +1024,56 @@ static void zcl_device_cb(zb_bufid_t bufid)
 	zb_zcl_device_callback_param_t *device_cb_param =
 		ZB_BUF_GET_PARAM(bufid, zb_zcl_device_callback_param_t);
 
-	if (device_cb_param->device_cb_id == ZB_ZCL_OTA_UPGRADE_VALUE_CB_ID) {
+	if (device_cb_param->device_cb_id == ZB_ZCL_OTA_UPGRADE_VALUE_CB_ID) 
+    {
         LOG_WRN("ZCL OTA upgrade value callback");
-		zigbee_fota_zcl_cb(bufid);
-	} else {
+        zb_zcl_ota_upgrade_value_param_t * p_ota_upgrade_value = &(device_cb_param->cb_param.ota_value_param);
+        switch (p_ota_upgrade_value->upgrade_status)
+        {
+            case ZB_ZCL_OTA_UPGRADE_STATUS_START:
+                LOG_WRN("ZCL OTA upgrade status start");
+                /* Check if OTA client is in the middle of image download.
+                If so, silently ignore the second QueryNextImageResponse packet from OTA server. */
+                if (zb_zcl_ota_upgrade_get_ota_status(device_cb_param->endpoint) != ZB_ZCL_OTA_UPGRADE_IMAGE_STATUS_NORMAL)
+                {
+                    LOG_WRN("OTA client is busy. Ignoring QueryNextImageResponse.");
+                }
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_APPLY:
+                LOG_WRN("ZCL OTA upgrade status apply");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_RECEIVE:
+                LOG_WRN("ZCL OTA upgrade status receive");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_FINISH:
+                LOG_WRN("ZCL OTA upgrade status finish");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_ABORT:
+                LOG_WRN("ZCL OTA upgrade status abort");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_CHECK:
+                LOG_WRN("ZCL OTA upgrade status check");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_OK:
+                LOG_WRN("ZCL OTA upgrade status OK");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_ERROR:
+                LOG_WRN("ZCL OTA upgrade status error");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_REQUIRE_MORE_IMAGE:
+                LOG_WRN("ZCL OTA upgrade status require more image");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_BUSY:
+                LOG_WRN("ZCL OTA upgrade status busy");
+                break;
+            case ZB_ZCL_OTA_UPGRADE_STATUS_SERVER_NOT_FOUND:
+                LOG_WRN("ZCL OTA upgrade status server not found");
+                break;
+	    } 
+        zigbee_fota_zcl_cb(bufid);
+    }
+    else 
+    {
         LOG_WRN("ZCL device callback not implemented");
 		device_cb_param->status = RET_NOT_IMPLEMENTED;
 	}
@@ -1122,9 +1180,9 @@ int main(void)
 
     /* Initialize clusters attributes. */
     LOG_WRN("Initializing clusters attributes");
-	//ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(APP_TEMPLATE_ENDPOINT, identify_cb);
+	ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(APP_TEMPLATE_ENDPOINT, identify_cb);
 
-    //ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(CONFIG_ZIGBEE_FOTA_ENDPOINT, identify_cb);
+    ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(CONFIG_ZIGBEE_FOTA_ENDPOINT, identify_cb);
 
     LOG_WRN("Starting Zigbee Router");
     zigbee_configuration(); //Zigbee configuration
