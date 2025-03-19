@@ -275,7 +275,7 @@ void digi_at_reply_action_command(uint8_t at_command)
         break;
     case AT_NR: //Reset the Xbee module
         digi_at_reply_ok();
-        g_b_reset_cmd = true;
+        g_b_reset_zigbee_cmd = true;
         break;
      default:
         digi_at_reply_error(); // Command not supported (It should never happen)
@@ -351,7 +351,10 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
                 }
                 break;
              case AT_ID: // Valid range is [0, 0xFFFFFFFFFFFFFFFF]
-                xbee_parameters.at_id = command_data;
+                if (command_data <= 0xFFFFFFFFFFFFFFFF) {
+                    xbee_parameters.at_id = command_data;
+                    return_value = true;
+                }
                 return_value = true; 
                 break;
              case AT_CE:
@@ -380,7 +383,6 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
 
     if( return_value )
     {
-        //g_b_flash_write_cmd = true;
         digi_at_reply_ok();
     }
     else

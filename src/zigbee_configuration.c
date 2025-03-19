@@ -211,6 +211,7 @@ void zb_conf_write_to_nvram (void)
     LOG_WRN(" Checksum: %d", checksum);
 
     g_b_nvram_write_done = true;
+    g_b_reset_zigbee_cmd = true;
 }
 
 //------------------------------------------------------------------------------
@@ -371,7 +372,6 @@ void nvram_manager(void)
         zb_conf_update(); // Update the values in the zb_user_conf structure
         zb_conf_write_to_nvram(); // Write the new values to NVRAM
         g_b_flash_write_cmd = false;
-        g_b_reset_zigbee_cmd = true;
     }     
 }
 
@@ -387,7 +387,7 @@ void zigbee_thread_manager(void)
     if (g_b_reset_cmd)
     {
         g_b_reset_cmd = false;
-        LOG_WRN("Reset coomadn received from TCU, rebooting...");
+        LOG_WRN("Reset command received from TCU, rebooting...");
         sys_reboot(SYS_REBOOT_COLD);
     }
 }
