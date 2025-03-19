@@ -57,7 +57,7 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_ch = 0;     // Operation channel
     xbee_parameters.at_my = 0;     // Short address
     xbee_parameters.at_ee = 1;     // Encryption enable
-    xbee_parameters.at_eo = 2;     // Encryption options
+    xbee_parameters.at_eo = 0;     // Encryption options
     memset(xbee_parameters.at_ky, 0, sizeof(xbee_parameters.at_ky));     // Link Encryption Key
     xbee_parameters.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
     xbee_parameters.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
