@@ -18,6 +18,7 @@ target_sources(app PRIVATE
   src/zigbee_configuration.c
   src/Digi_node_discovery.c
   src/Digi_At_commands.c
+  src/Digi_wireless_at_commands.c
   src/nvram.c
 )
 

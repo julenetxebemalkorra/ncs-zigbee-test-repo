@@ -38,6 +38,7 @@
 #include "zigbee_aps.h"
 #include "Digi_At_commands.h"
 #include "Digi_node_discovery.h"
+#include "Digi_wireless_at_commands.h"
 #include "nvram.h"
 
 #include <zephyr/drivers/watchdog.h>
@@ -321,6 +322,24 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             if( is_a_digi_node_discovery_request((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
             {
                 if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee Node Discovery Device Request");
+            }
+        }
+        else if( ( ind->clusterid == DIGI_AT_COMMAND_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_AT_COMMAND_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_AT_COMMAND_DESTINATION_ENDPOINT ) )
+        {
+            if( is_a_digi_read_at_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            {
+                if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee read AT command received");
+            }
+        }
+        else if( ( ind->clusterid == DIGI_AT_PING_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_AT_PING_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_AT_PING_DESTINATION_ENDPOINT ) )
+        {
+            if( is_a_ping_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            {
+                if(PRINT_ZIGBEE_INFO) LOG_DBG("PING");
             }
         }
         else
@@ -900,6 +919,7 @@ int main(void)
 
         tcu_uart_transparent_mode_manager();   // Manage the frames received from the TCU uart when module is in transparent mode
         digi_node_discovery_request_manager(); // Manage the device discovery requests
+        digi_wireless_read_at_command_manager(); // Manage the read AT commands received through Zigbee
         zigbee_aps_manager();                  // Manage the aps output frame queue
         nvram_manager();                       // Manage the NVRAM
         tcu_uart_manager();                   // Manage the TCU UART

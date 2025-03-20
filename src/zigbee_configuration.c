@@ -336,8 +336,10 @@ uint32_t zb_get_mac_addr_high (void)
  *        It gets stored in the buffer passed as argument
  *
  * @param  ni  Pointer to buffer where the node identifier will be stored.
+ *
+ * @retval Size of node identifier string
  */
-void zb_conf_get_extended_node_identifier (uint8_t *ni)
+uint8_t zb_conf_get_extended_node_identifier (uint8_t *ni)
 {
     uint8_t i;
     for(i=0; i < MAXIMUM_SIZE_NODE_IDENTIFIER; i++)
@@ -345,8 +347,9 @@ void zb_conf_get_extended_node_identifier (uint8_t *ni)
         ni[i] = zb_user_conf.at_ni[i];
         if( ni[i] == '\0' ) break;
     }
-    if( ni[i] != '\0' ) ni[i+1] = '\0';
+    if( ni[i] != '\0' ) ni[i] = '\0';
     LOG_WRN("Node Identifier: %s", ni);
+    return(i);
 }
 
 //------------------------------------------------------------------------------
