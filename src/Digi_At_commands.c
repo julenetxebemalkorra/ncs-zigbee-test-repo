@@ -155,8 +155,10 @@ int8_t digi_at_read_ky(uint8_t* buffer)
     uint8_t i = 0;
     for(i=0; i<= STANDARD_SIZE_LINK_KEY ; i++)
     {
-            buffer[i] = xbee_parameters.at_ni[i];
+            buffer[i] = xbee_parameters.at_ky[i];
     }
+    buffer[i] = '\r';
+    return(i+1);
 }
 
 
@@ -299,7 +301,7 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
 
     if( at_command == AT_NI ) // The data for that command is a string
     {   
-        LOG_WRN("Received string size at_command WRITE== AT_KN: %d\n", string_size);
+        LOG_WRN("Received string size at_command WRITE== AT_NI: %d\n", string_size);
         LOG_HEXDUMP_DBG(command_data_string, string_size, "Received string in hex:");
 
         if( string_size <= MAXIMUM_SIZE_NODE_IDENTIFIER )
