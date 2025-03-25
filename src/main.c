@@ -635,7 +635,7 @@ void zigbee_configuration()
  */
 void diagnostic_toogle_pin()
 {
-    if(debug_led_ms_x10 >= 10000)
+    if(debug_led_ms_x10 >= 1000)
     {
         debug_led_ms_x10 = 0;
         gpio_pin_toggle_dt(&led);
