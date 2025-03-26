@@ -1,0 +1,4 @@
+source "Kconfig.zephyr"
+config PAN1770EVB
+	bool "The evaluation board is PAN1770EVB"
+	default n
