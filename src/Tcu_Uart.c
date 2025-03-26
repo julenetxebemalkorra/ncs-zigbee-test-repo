@@ -69,7 +69,11 @@ static uint64_t uart_idle_start_time = 0;
 static uint64_t uart_idle_duration = 0;
 
 /* Get the device pointer of the UART hardware */
+#ifdef CONFIG_PAN1770EVB
+static const struct device *dev_tcu_uart= DEVICE_DT_GET(DT_NODELABEL(uart1));
+#else
 static const struct device *dev_tcu_uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
+#endif
 
 // Create a configuration structure for the UART used to communicate with the TCU
 static struct uart_config tcu_uart_config = {
