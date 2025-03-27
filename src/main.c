@@ -118,7 +118,7 @@ int task_wdt_id;
 /* Zigbee messagge info*/
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
 
-LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 // boolean flags for detecting modbus request handling
 bool b_Zigbe_Connected = false;
@@ -388,7 +388,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	//Read signal description out of memory buffer. */
 	zb_zdo_app_signal_hdr_t *sg_p = NULL;
 	zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
-    int ret = 0;
 
     if(ZB_GET_APP_SIGNAL_STATUS(bufid) != 0)
     {
