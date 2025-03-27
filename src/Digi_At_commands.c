@@ -22,6 +22,7 @@
 #include <stddef.h>
 #include <ctype.h>
 #include <zephyr/kernel.h>
+#include "app_version.h"
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
 #include "tcu_uart.h"
@@ -44,7 +45,7 @@ void digi_at_init(void)
  */
 void digi_at_init_xbee_parameters(void)
 {
-    xbee_parameters.at_vr = 1;     // Xbee's FW version
+    xbee_parameters.at_vr = ((uint16_t)APP_VERSION_MAJOR << 8) + APP_VERSION_MINOR; // Xbee's FW version
     xbee_parameters.at_hv = 1;     // Xbee's HW version
     xbee_parameters.at_sh = zb_get_mac_addr_high(); // High part of the MAC address
     xbee_parameters.at_sl = zb_get_mac_addr_low(); // Low part of the MAC address
@@ -72,6 +73,15 @@ void digi_at_init_xbee_parameters(void)
 uint64_t digi_at_get_parameter_id(void)
 {
     return(xbee_parameters.at_id);
+}
+
+/**@brief This function returns the value of the ATVR
+ *
+ * @retval Value of ATVR parameter [uint16_t]
+ */
+uint16_t digi_at_get_parameter_vr(void)
+{
+    return(xbee_parameters.at_vr);
 }
 
 //------------------------------------------------------------------------------
@@ -275,7 +285,7 @@ void digi_at_reply_action_command(uint8_t at_command)
      case AT_CN: //Leave command mode
         digi_at_reply_ok();
         break;
-    case AT_NR: //Reset the Xbee module
+    case AT_NR: //Reset the network
         digi_at_reply_ok();
         g_b_reset_zigbee_cmd = true;
         break;
@@ -300,14 +310,14 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
     bool return_value = false;
 
     if( at_command == AT_NI ) // The data for that command is a string
-    {   
+    {
         LOG_WRN("Received string size at_command WRITE== AT_NI: %d\n", string_size);
         LOG_HEXDUMP_DBG(command_data_string, string_size, "Received string in hex:");
 
         if( string_size <= MAXIMUM_SIZE_NODE_IDENTIFIER )
         {
             uint8_t i;
-            for(i = 0; i<string_size; i++)
+            for (i = 0; i < string_size; i++)
             {
                 xbee_parameters.at_ni[i] = command_data_string[i];
             }
@@ -555,8 +565,26 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
 
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'I' ) )
         {
-            if( digi_at_reply_write_command(AT_NI, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
-            else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+            bool b_valid_character_found = false;
+            uint8_t i;
+            for (i = 4; i < size_input_data; i++) // Ignore leading whitespace characters in the input value
+            {
+                if (input_data[i] != ' ') // Find first no whitespace character
+                {
+                    b_valid_character_found = true;
+                    command_data_size = (uint8_t)size_input_data - i;
+                    break;
+                }
+            }
+            if (b_valid_character_found)
+            {
+                if( digi_at_reply_write_command(AT_NI, &input_data[i], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+                else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+            }
+            else
+            {
+                return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+            }
         }
         if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
         {

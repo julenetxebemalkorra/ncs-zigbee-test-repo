@@ -646,10 +646,11 @@ bool is_a_digi_read_at_command(uint8_t* input_data, int16_t size_of_input_data)
                 }
                 else if (input_data[15] == 'R')
                 {
-                    received_cmd = EXT_READ_AT_VR;  //TODO
+                    received_cmd = EXT_READ_AT_VR;
                     read_cmd_reply_size = 2;
-                    read_cmd_reply[0] = 0x00;
-                    read_cmd_reply[1] = 0x01;
+                    uitemp = digi_at_get_parameter_vr();
+                    read_cmd_reply[0] = (uint8_t)(uitemp >> 8);
+                    read_cmd_reply[1] = (uint8_t)uitemp;
                 }
             }
             else if (input_data[14] == 'W')
