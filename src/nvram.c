@@ -41,7 +41,7 @@ uint8_t init_nvram(void)
 
     /* define the nvs file system by settings with:
 	 *	sector_size equal to the pagesize,
-	 *	3 sectors
+	 *	2 sectors
 	 *	starting at NVS_PARTITION_OFFSET
 	 */
 	fs.flash_device = NVS_PARTITION_DEVICE;
@@ -69,9 +69,11 @@ uint8_t init_nvram(void)
         return rc;
     }
 
-    // Set the sector size and count
+    // Set the sector default size 4096 bytes, TO DO, could be 256, 512, 1024, 2048, 4096 bytes.
+    // The sector size is the size of the flash page, which is the smallest unit of erase in flash memory.
 	fs.sector_size = info.size;
-	fs.sector_count = 3U;
+    // is the number of sectors, it is at least 2, one sector is always kept empty to allow copying of existing data.
+	fs.sector_count = NVS_SECTOR_COUNT;
 
     // Mount the NVRAM file system
     // 0 – Success

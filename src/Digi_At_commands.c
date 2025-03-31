@@ -58,7 +58,7 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_my = 0;     // Short address
     xbee_parameters.at_ee = 1;     // Encryption enable
     xbee_parameters.at_eo = 0;     // Encryption options
-    memset(xbee_parameters.at_ky, 0, sizeof(xbee_parameters.at_ky));     // Link Encryption Key
+    zb_conf_get_network_link_key(&xbee_parameters.at_ky[0]); // Link Encryption Key; It is user configurable, get it from NVRAM
     xbee_parameters.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
     xbee_parameters.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
     xbee_parameters.at_nb = 0;     // Xbee's UART parity (0 = None)
@@ -555,8 +555,26 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
 
         if( ( input_data[2] == 'N' ) && ( input_data[3] == 'I' ) )
         {
-            if( digi_at_reply_write_command(AT_NI, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
+            bool b_valid_character_found = false;
+            uint8_t i;
+            for (i = 4; i < size_input_data; i++) // Ignore leading whitespace characters in the input value
+            {
+                if (input_data[i] != ' ') // Find first no whitespace character
+                {
+                    b_valid_character_found = true;
+                    command_data_size = (uint8_t)size_input_data - i;
+                    break;
+                }
+            }
+            if (b_valid_character_found)
+            {
+                if( digi_at_reply_write_command(AT_NI, &input_data[i], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;
             else return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+        }
+            else
+            {
+                return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
+            }
         }
         if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
         {
