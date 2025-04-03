@@ -63,7 +63,7 @@ void check_scheduling_cb_timeout(void)
         if (scheduling_cb_timer <= 0)
         {
             b_scheduling_cb_pending = false;
-            LOG_DBG("Scheduling callback flag reset after timeout");
+            LOG_ERR("Scheduling callback flag reset after timeout");
         }
     }
 }

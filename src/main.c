@@ -67,15 +67,9 @@
  */
 #define TEMPLATE_INIT_BASIC_POWER_SOURCE    ZB_ZCL_BASIC_POWER_SOURCE_DC_SOURCE
 
-/* Button used to enter the Identify mode. */
-#define IDENTIFY_MODE_BUTTON             1
-
 /* Flag  used to print zigbee info once the device joins a network. */
 #define PRINT_ZIGBEE_INFO                ZB_TRUE
 #define PRINT_UART_INFO                  ZB_TRUE
-#define CRYPTO_ENABLE                    ZB_TRUE
-#define DEFAULT_ENCRIPTION_KEY           0
-#define NEW_ENCRIPTION_KEY               1
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
@@ -238,6 +232,24 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         LOG_ERR("Error: bufid is NULL data_indication_cb beggining: bufid status %d", zb_buf_get_status(bufid));
         return ZB_TRUE;
     } 
+    // Check if the buffer is in a low memory state or out of memory state 
+    // We have seen this error in the lab a couple of times, so we need to check it and handle it properly
+    // This is a workaround to avoid the system to crash when the buffer pool is out of memory
+    // and the buffer is not NULL. We need to free the buffer and set the g_b_reset_zigbee_cmd flag to true.
+    else if (zb_buf_memory_low() || zb_buf_is_oom_state()) 
+    {
+        // Handle Out Of Memory state
+        LOG_ERR("Buffer pool is out of memory!\n");
+        if (bufid)
+        {
+            // safe way to free buffer
+            zb_osif_disable_all_inter();
+            zb_buf_free(bufid);
+            zb_osif_enable_all_inter();
+            g_b_reset_zigbee_cmd = true;
+            return ZB_TRUE;
+        }
+    }
     else
 	{
         zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
@@ -391,7 +403,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
 			if( sig == ZB_BDB_SIGNAL_DEVICE_FIRST_START ) LOG_WRN( "SIGNAL 5: Device started for the first time after the NVRAM erase");
             else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
 			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
-            else if( sig == ZB_ZDO_SIGNAL_LEAVE ) LOG_WRN( "SIGNAL 3: The device has left the network");
             else if( sig == ZB_ZDO_SIGNAL_DEVICE_ANNCE ) LOG_WRN(" SIGNAL 2:  Notifies the application about the new device appearance.");
             else if( sig == ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED) LOG_WRN(" SIGNAL 47: Notifies the Zigbee Trust center application about a new device is authorized in the network");
 			else
@@ -399,8 +410,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
                 if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
                 {
                     LOG_WRN( "SIGNAL %d , state OK",sig);
-                    soft_reset_counter = 0;
-                    hard_reset_counter = 0;
                 }
                 else
                 {
@@ -411,10 +420,10 @@ void zboss_signal_handler(zb_bufid_t bufid)
     }
 
 
-    if(sig == ZB_BDB_SIGNAL_STEERING || sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT)
+    if(sig == ZB_BDB_SIGNAL_STEERING || sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT || sig == ZB_ZDO_SIGNAL_LEAVE)
     {
         soft_reset_counter++;
-        LOG_WRN("Device is encountering issues during steering.");
+        LOG_WRN("Device is encountering issues during steering. %d; counter %d", sig, soft_reset_counter);
         if (soft_reset_counter >= SIGNAL_STEERING_ATEMP_COUNT_MAX)
         {
  			if(PRINT_ZIGBEE_INFO)
@@ -430,14 +439,8 @@ void zboss_signal_handler(zb_bufid_t bufid)
                 }
         	}	
 
-            ret = ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
-            if(ret != RET_OK)
-            {
-                LOG_ERR("zb_bdb_reset_via_local_action failed, ret %d", ret);
-            }
-
             LOG_WRN( "The device will perform the NLME leave and clean all Zigbee persistent data except the outgoing NWK frame counter and application datasets");
-
+            g_b_reset_zigbee_cmd = ZB_TRUE;
             soft_reset_counter = 0;
             hard_reset_counter++;
         }
@@ -446,8 +449,7 @@ void zboss_signal_handler(zb_bufid_t bufid)
             LOG_ERR( "device restarted since it is not able to join any network");
             
             // Reboot the device
-		    sys_reboot(0);
-            g_b_reset_zigbee_cmd = ZB_TRUE;
+            g_b_reset_cmd = ZB_TRUE;
             hard_reset_counter = 0;
         }
     }
@@ -591,13 +593,7 @@ void set_extended_pan_id_in_stack(void)
 void zigbee_configuration()
 {
     /* disable NVRAM erasing on every application startup*/
-    zb_set_nvram_erase_at_start(ZB_TRUE);
-
-    if(!CRYPTO_ENABLE)
-    {
-        zb_disable_nwk_security();
-        zb_nwk_set_ieee_policy(ZB_FALSE);
-    }
+    zb_set_nvram_erase_at_start(ZB_FALSE);
 
     //TRUE to disable trust center, FALSE to enable trust center
     zb_bdb_set_legacy_device_support(ZB_FALSE);
@@ -619,12 +615,12 @@ void zigbee_configuration()
     zb_zdo_setup_network_as_distributed();
 
     // Set the network key Only for development proccess
-    zb_secur_setup_nwk_key(network_key, DEFAULT_ENCRIPTION_KEY);
+    zb_secur_setup_nwk_key(network_key, 0);
 
     set_extended_pan_id_in_stack();
 
     // Set the device nwkey. This action can help us choose between different nwk keys
-    zb_secur_nwk_key_switch_procedure(DEFAULT_ENCRIPTION_KEY);
+    zb_secur_nwk_key_switch_procedure(0);
 
     // Set the device link key. This action can help us choose between different link keys it has to be distributed TC to all devices
     if(zb_is_network_distributed()) LOG_WRN("Network key is distributed");

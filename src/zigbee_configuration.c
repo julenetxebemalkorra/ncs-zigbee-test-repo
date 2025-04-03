@@ -380,17 +380,23 @@ void nvram_manager(void)
 
 void zigbee_thread_manager(void)
 {
+    // The flag g_b_reset_zigbee_cmd realices the reset of the zigbee stack
+    // and the g_b_reset_cmd realices the reset of the whole system
     if(g_b_reset_zigbee_cmd)
     {
         g_b_reset_zigbee_cmd = false;
+        int ret = ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
+        if(ret != RET_OK)
+        {
+            LOG_ERR("zb_bdb_reset_via_local_action failed, ret %d", ret);
+        }
         LOG_WRN("Zigbee reset");
-        zb_reset(true);
     }
 
     if (g_b_reset_cmd)
     {
         g_b_reset_cmd = false;
         LOG_WRN("Reset command received from TCU, rebooting...");
-        sys_reboot(SYS_REBOOT_COLD);
+        zb_reset(true);
     }
 }
