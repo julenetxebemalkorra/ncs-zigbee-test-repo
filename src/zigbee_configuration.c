@@ -84,13 +84,25 @@ int8_t zb_nvram_check_usage(void)
         else
         {
             LOG_WRN("NVRAM read data is not correct, write again and work with the default configuration");
-            zb_user_conf.extended_pan_id = 0x0000000000000000;
-            zb_user_conf.at_ni[0] = ' ';
-            zb_user_conf.at_ni[1] = 0;
-            uint8_t network_link_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};   // defalut Zigbee Alliance key
-            memcpy(zb_user_conf.network_link_key, network_link_key, sizeof(network_link_key));
-            write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
-            return NVRAM_WRONG_DATA;
+            /* Get the device pointer of the UART hardware */
+            #ifdef CONFIG_PAN1770EVB
+                zb_user_conf.extended_pan_id = 0x0000000000000000;
+                const char *node_identifier = "pan1780_dk";
+                strncpy(zb_user_conf.at_ni, node_identifier, sizeof(zb_user_conf.at_ni) - 1);
+                zb_user_conf.at_ni[sizeof(zb_user_conf.at_ni) - 1] = '\0';
+                uint8_t network_link_key[16] = {0x88, 0x88, 0x99, 0x99, 0x88, 0x89, 0x45, 0x67, 0xAC, 0xCD, 0xA7, 0xA7, 0x66, 0xD3, 0xD3, 0xD6};   // custom Zigbee key
+                memcpy(zb_user_conf.network_link_key, network_link_key, sizeof(network_link_key));
+                write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
+                return NVRAM_WRONG_DATA;            
+            #else
+                zb_user_conf.extended_pan_id = 0x0000000000000000;
+                zb_user_conf.at_ni[0] = ' ';
+                zb_user_conf.at_ni[1] = 0;
+                uint8_t network_link_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};   // defalut Zigbee Alliance key
+                memcpy(zb_user_conf.network_link_key, network_link_key, sizeof(network_link_key));
+                write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
+                return NVRAM_WRONG_DATA;
+            #endif
         }
     }
     else
