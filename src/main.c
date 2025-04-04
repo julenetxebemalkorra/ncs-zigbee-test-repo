@@ -102,6 +102,8 @@ static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the 
 
 bool g_b_flash_error = false; //   Flag to indicate if there was an error when reading the NVRAM
 
+static k_tid_t my_tid;
+
 /*
  * A build error on this line means your board is unsupported.
  * See the sample documentation for information on how to fix this.
@@ -113,7 +115,7 @@ static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
 // Get reference to watchdog device
 static const struct device *const hw_wdt_dev = DEVICE_DT_GET_OR_NULL(WDT_NODE);
-int task_wdt_id;
+static int task_wdt_id = -1; // Task watchdog ID
 
 /* Zigbee messagge info*/
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
@@ -470,6 +472,24 @@ void zboss_signal_handler(zb_bufid_t bufid)
     }
 }
 
+
+static void task_wdt_callback(int channel_id, void *user_data)
+{
+    LOG_WRN("Task watchdog channel %d callback, thread: %s\n",
+        channel_id, k_thread_name_get((k_tid_t)user_data));
+
+    /*
+     * If the issue could be resolved, call task_wdt_feed(channel_id) here
+     * to continue operation.
+     *
+     * Otherwise we can perform some cleanup and reset the device.
+     */
+
+    LOG_WRN("Resetting device...\n");
+
+    sys_reboot(SYS_REBOOT_COLD);
+}
+
 // Interrupt handler for the timer
 // NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
@@ -562,14 +582,25 @@ static int8_t watchdog_init(void)
     ret = task_wdt_init(hw_wdt_dev);
 	if (ret != 0) {
 		LOG_ERR("task wdt init failure: %d\n", ret);
-		return ret;
 	}
+
+    // Register this thread
+    k_tid_t my_tid = k_current_get();
+
+    LOG_INF("Registering task watchdog for thread: %p", my_tid);
+    LOG_INF("Thread name: %s", k_thread_name_get(my_tid));
 
     /*
 	 * Add a new task watchdog channel with custom callback function and
 	 * the current thread ID as user data.
 	 */
-	task_wdt_id = task_wdt_add(1000U, NULL, NULL);
+	task_wdt_id = task_wdt_add(60000U, task_wdt_callback , my_tid);
+    if (task_wdt_id < 0) {
+		LOG_ERR("task_wdt_add failed: %d", task_wdt_id);
+		return task_wdt_id;
+	}
+
+	LOG_INF("Task WDT initialized with channel %d", task_wdt_id);
 
     return 0;
 }
@@ -910,7 +941,8 @@ int main(void)
             display_counters();
         }
 
-		task_wdt_feed(task_wdt_id); // Feed the watchdog
+		int err = task_wdt_feed(task_wdt_id); // Feed the watchdog
+    
 
         tcu_uart_transparent_mode_manager();   // Manage the frames received from the TCU uart when module is in transparent mode
         digi_node_discovery_request_manager(); // Manage the device discovery requests
