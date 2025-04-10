@@ -40,6 +40,7 @@
 #include "Digi_node_discovery.h"
 #include "Digi_wireless_at_commands.h"
 #include "nvram.h"
+#include "Digi_fota.h"
 
 #include <zephyr/drivers/watchdog.h>
 #include <zephyr/task_wdt/task_wdt.h>
@@ -347,7 +348,15 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                 if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee read AT command received");
             }
         }
-        else if( ( ind->clusterid == DIGI_AT_PING_CLUSTER ) &&
+        else if( ( ind->clusterid == DIGI_FOTA_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) )
+        {
+            if( is_a_digi_fota_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            {
+                if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee read AT command received");
+            }
+        }else if( ( ind->clusterid == DIGI_AT_PING_CLUSTER ) &&
             ( ind->src_endpoint == DIGI_AT_PING_SOURCE_ENDPOINT ) &&
             ( ind->dst_endpoint == DIGI_AT_PING_DESTINATION_ENDPOINT ) )
         {
@@ -900,6 +909,7 @@ int main(void)
     zigbee_aps_init();
     digi_at_init();
     digi_node_discovery_init();
+    digi_fota_init();
 
     ret = watchdog_init();
     if( ret < 0)
@@ -947,6 +957,7 @@ int main(void)
         tcu_uart_transparent_mode_manager();   // Manage the frames received from the TCU uart when module is in transparent mode
         digi_node_discovery_request_manager(); // Manage the device discovery requests
         digi_wireless_read_at_command_manager(); // Manage the read AT commands received through Zigbee
+        digi_fota_command_manager();            // Manage the FOTA commands received through Zigbee
         zigbee_aps_manager();                  // Manage the aps output frame queue
         nvram_manager();                       // Manage the NVRAM
         tcu_uart_manager();                   // Manage the TCU UART

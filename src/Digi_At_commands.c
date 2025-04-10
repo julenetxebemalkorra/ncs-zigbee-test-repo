@@ -46,7 +46,7 @@ void digi_at_init(void)
 void digi_at_init_xbee_parameters(void)
 {
     xbee_parameters.at_vr = ((uint16_t)APP_VERSION_MAJOR << 8) + APP_VERSION_MINOR; // Xbee's FW version
-    xbee_parameters.at_hv = 1;     // Xbee's HW version
+    xbee_parameters.at_hv = 0x5242;     // Xbee's HW version
     xbee_parameters.at_sh = zb_get_mac_addr_high(); // High part of the MAC address
     xbee_parameters.at_sl = zb_get_mac_addr_low(); // Low part of the MAC address
     xbee_parameters.at_jv = HARDCODED_ATJV_VALUE;     // Node join verification

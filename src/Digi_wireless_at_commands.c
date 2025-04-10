@@ -291,8 +291,8 @@ bool is_a_digi_read_at_command(uint8_t* input_data, int16_t size_of_input_data)
                 {
                     received_cmd = EXT_READ_AT_HV;  //TODO
                     read_cmd_reply_size = 2;
-                    read_cmd_reply[0] = 0x00;
-                    read_cmd_reply[1] = 0x01;
+                    read_cmd_reply[0] = 0x52;
+                    read_cmd_reply[1] = 0x42;
                 }
             }
             else if (input_data[14] == 'I')

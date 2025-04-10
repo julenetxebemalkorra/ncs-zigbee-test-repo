@@ -30,6 +30,9 @@
 #define DIGI_AT_PONG_SOURCE_ENDPOINT 232
 #define DIGI_AT_PONG_DESTINATION_ENDPOINT 219
 
+#define DIGI_FOTA_CLUSTER 0x0019
+
+
 #define PRODUCT_TYPE     0x00000001 // I will assign that value as product type of the Fanstel BT840E
 #define MANUFACTURED_ID  0x0001     // I will assign that value as manufactured ID of the Fanstel BT840E
 
