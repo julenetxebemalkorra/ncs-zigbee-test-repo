@@ -41,6 +41,7 @@
 #include "Digi_wireless_at_commands.h"
 #include "nvram.h"
 #include "Digi_fota.h"
+#include "OTA_dfu_target.h"
 
 #include <zephyr/drivers/watchdog.h>
 #include <zephyr/task_wdt/task_wdt.h>
@@ -54,6 +55,13 @@
 #include "zboss_api_zgp.h"
 
 #include <zephyr/debug/coredump.h>
+
+#include <zephyr/dfu/mcuboot.h>
+#include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
+#include <dfu/dfu_target.h>
+#include <dfu/dfu_target_mcuboot.h>
+#include <zephyr/sys/reboot.h>
 
 #define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
 
@@ -102,8 +110,7 @@ uint8_t hard_reset_counter = 0;
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
 bool g_b_flash_error = false; //   Flag to indicate if there was an error when reading the NVRAM
-
-static k_tid_t my_tid;
+bool g_b_dfu_target_init_done = false;
 
 /*
  * A build error on this line means your board is unsupported.
@@ -354,9 +361,10 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
         {
             if( is_a_digi_fota_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
             {
-                if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee read AT command received");
+                if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee read FOTA related command received");
             }
-        }else if( ( ind->clusterid == DIGI_AT_PING_CLUSTER ) &&
+        }
+        else if( ( ind->clusterid == DIGI_AT_PING_CLUSTER ) &&
             ( ind->src_endpoint == DIGI_AT_PING_SOURCE_ENDPOINT ) &&
             ( ind->dst_endpoint == DIGI_AT_PING_DESTINATION_ENDPOINT ) )
         {
@@ -481,7 +489,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
     }
 }
 
-
 static void task_wdt_callback(int channel_id, void *user_data)
 {
     LOG_WRN("Task watchdog channel %d callback, thread: %s\n",
@@ -602,7 +609,11 @@ static int8_t watchdog_init(void)
     /*
 	 * Add a new task watchdog channel with custom callback function and
 	 * the current thread ID as user data.
-	 */
+	*/
+    // 60000U - 60 seconds timeout
+    // task_wdt_callback - callback function to be called when the watchdog expires
+    // my_tid - thread ID of the current thread
+    
 	task_wdt_id = task_wdt_add(60000U, task_wdt_callback , my_tid);
     if (task_wdt_id < 0) {
 		LOG_ERR("task_wdt_add failed: %d", task_wdt_id);
@@ -674,7 +685,7 @@ void zigbee_configuration()
  */
 void diagnostic_toogle_pin()
 {
-    if(debug_led_ms_x10 >= 1000)
+    if(debug_led_ms_x10 >= 10000)
     {
         debug_led_ms_x10 = 0;
         gpio_pin_toggle_dt(&led);
@@ -804,11 +815,16 @@ void send_lqi_request(zb_bufid_t buf)
  */
 void display_counters(void)
 {
-    static uint64_t time_last_ms = 0;
+    static uint64_t time_last_ms_counter = 0;
+    static uint64_t time_last_ms_thread_manager = 0;
+    static uint64_t time_last_ms_wdt = 0;
+    static uint64_t time_last_ms_dfu_target = 0;
+
+
     uint64_t time_now_ms = k_uptime_get();
-    if( (uint64_t)( time_now_ms - time_last_ms ) > 60000 )
+    if( (uint64_t)( time_now_ms - time_last_ms_counter ) > 60000 )
     {
-        time_last_ms = time_now_ms;
+        time_last_ms_counter = time_now_ms;
         LOG_DBG("APS RX COUNTERS: Total %d, Binary %d, Commis %d",
                                aps_frames_received_total_counter,
                                aps_frames_received_binary_cluster_counter,
@@ -832,11 +848,35 @@ void display_counters(void)
         */
     }
 
-    if( (uint64_t)( time_now_ms - time_last_ms ) > 1000 )
+    if( (uint64_t)( time_now_ms - time_last_ms_thread_manager ) > 1000 )
     {
         zigbee_thread_manager();               // Manage the Zigbee thread
+        time_last_ms_thread_manager = time_now_ms;
     }
-
+/*
+    if ( (uint64_t)( time_now_ms - time_last_ms_wdt ) > 10000 )
+    {
+        int err = task_wdt_feed(task_wdt_id); // Feed the watchdog
+        if (err != 0) {
+            LOG_ERR("task_wdt_feed failed: %d", err);
+        }
+        time_last_ms_wdt = time_now_ms;
+    }
+ */   
+    if (( (uint64_t)( time_now_ms - time_last_ms_dfu_target ) > 50000) &&  !g_b_dfu_target_init_done)
+    {
+        int ret = OTA_dfu_target_init(); // Initialize the OTA DFU target
+        if (ret)
+        {
+            LOG_ERR("OTA DFU target initialization failed: %d", ret);
+            time_last_ms_dfu_target = time_now_ms;
+        } 
+        else 
+        {
+            LOG_INF("OTA DFU target initialized successfully");
+            g_b_dfu_target_init_done = ZB_TRUE;
+        }
+    }
 
     if (zb_buf_is_oom_state()) {
         // Handle Out Of Memory state
@@ -851,6 +891,61 @@ void display_counters(void)
     zb_buf_oom_trace();
 }
 
+void check_boot_status(void)
+{
+    int swap_type = mcuboot_swap_type();
+    switch (swap_type) {
+        case BOOT_SWAP_TYPE_NONE:
+            LOG_WRN("No swap pending.\n");
+            break;
+        case BOOT_SWAP_TYPE_TEST:
+            LOG_WRN("New image in slot1 is scheduled for test.\n");
+            break;
+        case BOOT_SWAP_TYPE_PERM:
+            LOG_WRN("New image will be made permanent.\n");
+            break;
+        case BOOT_SWAP_TYPE_REVERT:
+            LOG_WRN("Reverting to previous image.\n");
+            break;
+        default:
+            LOG_WRN("Unknown swap type: %d\n", swap_type);
+            break;
+    }
+}
+
+/**
+ * @brief Confirms the current firmware image.
+    int swap_type = mcuboot_swap_type();
+    if (swap_type < 0) {
+        LOG_ERR("Failed to get swap type: %d\n", swap_type);
+    } else if (swap_type == BOOT_SWAP_TYPE_REVERT) {
+        int rc = boot_write_img_confirmed();
+        LOG_WRN("Confirmed image: %d\n", rc);
+    }
+ */
+static void confirm_image(void)
+{
+    int swap_type = mcuboot_swap_type();
+    LOG_INF("MCUboot swap type: %d", swap_type);
+
+    if (swap_type == BOOT_SWAP_TYPE_REVERT || swap_type == BOOT_SWAP_TYPE_TEST) {
+        int rc = boot_write_img_confirmed();
+        if (rc == 0) {
+            LOG_INF("Image confirmed successfully.");
+        } else {
+            LOG_ERR("Image confirmation failed: %d", rc);
+        }
+    } else {
+        LOG_INF("Image already confirmed or not in test/revert mode.");
+    }
+
+    int rc = boot_write_img_confirmed();
+    if (rc == 0) {
+        LOG_INF("Image confirmed successfully.");
+    } else {
+        LOG_ERR("Image confirmation failed: %d", rc);
+    }
+}
 
 //------------------------------------------------------------------------------
 /**@brief Main function
@@ -909,14 +1004,15 @@ int main(void)
     zigbee_aps_init();
     digi_at_init();
     digi_node_discovery_init();
+    digi_wireless_at_init();
     digi_fota_init();
-
+/*
     ret = watchdog_init();
     if( ret < 0)
     {
         LOG_ERR("watchdog_init error %d", ret);
     }
-
+*/
     ret = tcu_uart_init();
     if( ret < 0)
     {
@@ -932,6 +1028,10 @@ int main(void)
     {
         LOG_ERR("gpio_init error %d", ret);
     }
+
+    confirm_image(); // Confirm the image if it is not already confirmed
+
+    check_boot_status(); // Check the boot status
 
     LOG_WRN("Starting Zigbee Router");
     zigbee_configuration(); //Zigbee configuration
@@ -949,18 +1049,15 @@ int main(void)
             diagnostic_toogle_pin();
             diagnostic_zigbee_info();
             display_counters();
-        }
+        }    
 
-		int err = task_wdt_feed(task_wdt_id); // Feed the watchdog
-    
-
-        tcu_uart_transparent_mode_manager();   // Manage the frames received from the TCU uart when module is in transparent mode
-        digi_node_discovery_request_manager(); // Manage the device discovery requests
+        tcu_uart_transparent_mode_manager();     // Manage the frames received from the TCU uart when module is in transparent mode
+        digi_node_discovery_request_manager();  // Manage the device discovery requests
         digi_wireless_read_at_command_manager(); // Manage the read AT commands received through Zigbee
         digi_fota_command_manager();            // Manage the FOTA commands received through Zigbee
-        zigbee_aps_manager();                  // Manage the aps output frame queue
-        nvram_manager();                       // Manage the NVRAM
-        tcu_uart_manager();                   // Manage the TCU UART
+        zigbee_aps_manager();                    // Manage the aps output frame queue
+        nvram_manager();                         // Manage the NVRAM
+        tcu_uart_manager();                     // Manage the TCU UART
 
         k_sleep(K_MSEC(5));                    // Required to see log messages on console
     }

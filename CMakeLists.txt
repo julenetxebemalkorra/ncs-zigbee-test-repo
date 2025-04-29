@@ -21,6 +21,7 @@ target_sources(app PRIVATE
   src/Digi_wireless_at_commands.c
   src/nvram.c
   src/Digi_fota.c
+  src/OTA_dfu_target.c
 )
 
 target_include_directories(app PRIVATE include)

@@ -21,6 +21,8 @@
 #define MANUFACTORER_CODE 0x1E10
 #define FILE_VERSION 0x02001012
 #define NEXT_IMAGE_SIZE 0xee
+#define FOTA_FIRST_BLOCK_HEADER_SIZE 79 // Adjust based on actual protocol
+#define FOTA_BLOCK_HEADER_SIZE 17 // Adjust based on actual protocol
 
 
 
