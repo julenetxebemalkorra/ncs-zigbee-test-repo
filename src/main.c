@@ -1054,7 +1054,7 @@ int main(void)
         tcu_uart_transparent_mode_manager();     // Manage the frames received from the TCU uart when module is in transparent mode
         digi_node_discovery_request_manager();  // Manage the device discovery requests
         digi_wireless_read_at_command_manager(); // Manage the read AT commands received through Zigbee
-        digi_fota_command_manager();            // Manage the FOTA commands received through Zigbee
+        digi_fota_manager();                     // FUOTA state machine
         zigbee_aps_manager();                    // Manage the aps output frame queue
         nvram_manager();                         // Manage the NVRAM
         tcu_uart_manager();                     // Manage the TCU UART
