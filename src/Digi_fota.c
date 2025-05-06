@@ -24,13 +24,13 @@ LOG_MODULE_REGISTER(Digi_fota, LOG_LEVEL_INF);
 
 static enum fuota_state_machine_e fuota_state;     // FUOTA state machine state
 static uint64_t time_last_state_transition_ms;     // Time of FUOTA last state transition
+static uint64_t time_last_attempt_ms;              // Time of FUOTA last attempt to make an action
 static struct firmware_image_t firmware_image;     // Structure describing firmware image
 static uint8_t command_sequence_number;
 static uint32_t file_offset;
-
-static bool b_pending_read_cmd;             // A read AT command has been received and is pending to be replied
-static bool b_first_block_request = false; // Flag to check if the DFU target has been initialized
-static enum digi_fota_read_cmd_e read_cmd;       // Enumerative of read AT command
+static uint32_t requested_file_offset;
+static bool b_dfu_target_init_done;
+static bool b_dfu_target_reset_done;
 
 /**@brief This function initializes the Digi_fota firmware module
  *
@@ -39,8 +39,10 @@ void digi_fota_init(void)
 {
     fuota_state = FUOTA_INIT_STATE_ST;
     time_last_state_transition_ms = k_uptime_get();
+    time_last_attempt_ms = 0;
     command_sequence_number = 0;
-    b_pending_read_cmd = false;
+    b_dfu_target_init_done = false;
+    b_dfu_target_reset_done = false;
 }
 
 /**@brief This function evaluates if the last received APS frame is a Digi's read AT command
@@ -54,7 +56,6 @@ void digi_fota_init(void)
 bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
 {
     bool b_return = false;
-    enum digi_fota_read_cmd_e received_cmd = NO_SUPPORTED_FOTA_CMD;
 
     //LOG_WRN("Received fota command %d", size_of_input_data);
     //LOG_HEXDUMP_DBG(input_data, size_of_input_data, "Received fota command in hex:");
@@ -62,9 +63,7 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
     if ((size_of_input_data == IMAGE_NOTIFY_CMD_SIZE) && (input_data[2] == IMAGE_NOTIFY_CMD))
     {
         LOG_WRN("Received fota command READ_FOTA_IMAGE_NOTIFY");
-        received_cmd = READ_FOTA_IMAGE_NOTIFY;
         command_sequence_number = 0;
-        b_pending_read_cmd = true;
         digi_fota_switch_state(FUOTA_IMAGE_NOTIFY_RECEIVED_ST);
         b_return = true;
     }
@@ -76,11 +75,8 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
 
         LOG_WRN("Received fota command QUERY NEXT IMAGE RESPONSE");
-        received_cmd = BLOCK_REQUEST;
         command_sequence_number = input_data[1];
-        file_offset = 62; // We do not need the first 62 bytes. They contain metadata.
-        b_pending_read_cmd = true;
-        b_first_block_request = true;
+        file_offset = 0;
         digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
         b_return = true;
     }
@@ -94,35 +90,19 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         command_sequence_number = input_data[1];
 
         // Check if file offset has the expected value
-        if (received_file_offset == file_offset)  // Don't do anything with this frame if offset is not correct.
+        if (received_file_offset == requested_file_offset)  // Don't do anything with this frame if offset is not correct.
         {   
-            // Check if dfu target is initialized correctly
-            if (g_b_dfu_target_init_done == false)
+            const uint8_t *chunk_data = &input_data[IMAGE_BLOCK_RESPONSE_HEADER_SIZE];  // Remove the header from the received payload
+            int ret = handle_fota_chunk(chunk_data, chunk_len, &file_offset); //Store the chuck in NVRAM and update file_offset
+            if (ret != 0)
             {
-                int ret = OTA_dfu_target_init();
-                if (ret) {
-                    LOG_ERR("dfu_target_init error: %d", ret);
-                }
-                else
-                {
-                    LOG_WRN("init ok");
-                    g_b_dfu_target_init_done = true;
-                }
+                LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
+                LOG_ERR("handle_fota_chunk error: %d", ret);
             }
             else
             {
-                const uint8_t *chunk_data = &input_data[IMAGE_BLOCK_RESPONSE_HEADER_SIZE];  // Remove the header from the received payload
-                int ret = handle_fota_chunk(chunk_data, chunk_len, &file_offset); //Store the chuck in NVRAM and update file_offset
-                if (ret != 0)
-                {
-                    LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                    LOG_ERR("handle_fota_chunk error: %d", ret);
-                }
-                else
-                {
-                    LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                    LOG_WRN("handle_fota_chunk ok");
-                }
+                LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
+                LOG_WRN("handle_fota_chunk ok");
             }
             digi_fota_switch_state(FUOTA_IMAGE_BLOCK_RESPONDED_ST);
         }
@@ -138,10 +118,8 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
     else
     {
         LOG_WRN("Received unkown fota command");
-        received_cmd = NO_SUPPORTED_FOTA_CMD;
         b_return = false;
     }
-    read_cmd = received_cmd;
     return b_return;
 }
 
@@ -190,6 +168,7 @@ bool digi_fota_send_query_next_image_request_cmd(void)
 bool digi_fota_send_image_block_request_cmd(void)
 {
     bool b_return = false;
+    requested_file_offset = file_offset + DIGI_FILE_HEADER_SIZE;  // Correct the offset. The first 62 bytes of the file are metadata.
 
     if (zigbee_aps_get_output_frame_buffer_free_space())
     {
@@ -213,10 +192,10 @@ bool digi_fota_send_image_block_request_cmd(void)
         element.payload[i++] = (uint8_t)((FILE_VERSION >> 8) & 0xFF);
         element.payload[i++] = (uint8_t)((FILE_VERSION >> 16) & 0xFF);
         element.payload[i++] = (uint8_t)(FILE_VERSION >> 24); // High byte of file version
-        element.payload[i++] = (uint8_t)(file_offset & 0xFF); // Low byte of file offset
-        element.payload[i++] = (uint8_t)((file_offset >> 8) & 0xFF);
-        element.payload[i++] = (uint8_t)((file_offset >> 16) & 0xFF);
-        element.payload[i++] = (uint8_t)((file_offset >> 24) & 0xFF); // High byte of file offset
+        element.payload[i++] = (uint8_t)(requested_file_offset & 0xFF); // Low byte of file offset
+        element.payload[i++] = (uint8_t)((requested_file_offset >> 8) & 0xFF);
+        element.payload[i++] = (uint8_t)((requested_file_offset >> 16) & 0xFF);
+        element.payload[i++] = (uint8_t)((requested_file_offset >> 24) & 0xFF); // High byte of file offset
         element.payload[i++] = FILE_BLOCK_MAX_SIZE;
         element.payload_size = (zb_uint8_t)i;
 
@@ -269,6 +248,7 @@ bool digi_fota_send_upgrade_end_request_cmd(void)
 void digi_fota_manager(void)
 {
     uint64_t time_now_ms = k_uptime_get();
+    int ret;
 
     switch(fuota_state)
     {
@@ -278,7 +258,42 @@ void digi_fota_manager(void)
         case FUOTA_NO_UPGRADE_IN_PROCESS_ST:
             break;
         case FUOTA_IMAGE_NOTIFY_RECEIVED_ST:
-            digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
+            if (!b_dfu_target_reset_done) // We should reset previous dfu
+            {
+                ret = dfu_target_reset();
+                if (ret)
+                {
+                    LOG_ERR("dfu_target_reset error: %d", ret);
+                }
+                else
+                {
+                    LOG_WRN("dfu_target_reset success: %d", ret);
+                }
+                b_dfu_target_reset_done = true;
+            }
+            else
+            {
+                if (b_dfu_target_init_done == false) // Do not leave this state unless dfu target has been initiated
+                {
+                    if ((time_now_ms - time_last_attempt_ms) > 5000) // Leave 5 seconds between attempts
+                    {
+                        ret = OTA_dfu_target_init();
+                        if (ret) {
+                            LOG_ERR("dfu_target_init error: %d", ret);
+                        }
+                        else
+                        {
+                            LOG_WRN("dfu_target_init ok");
+                            b_dfu_target_init_done = true;
+                        }
+                        time_last_attempt_ms = time_now_ms;
+                    }
+                }
+                else
+                {
+                    digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
+                }
+            }
             break;
         case FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST:
             if (digi_fota_send_query_next_image_request_cmd())
@@ -360,4 +375,5 @@ void digi_fota_switch_state(enum fuota_state_machine_e new_state)
 {
     fuota_state = new_state;
     time_last_state_transition_ms = k_uptime_get();
+    time_last_attempt_ms = 0;
 }

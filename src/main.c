@@ -110,7 +110,6 @@ uint8_t hard_reset_counter = 0;
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
 bool g_b_flash_error = false; //   Flag to indicate if there was an error when reading the NVRAM
-bool g_b_dfu_target_init_done = false;
 
 /*
  * A build error on this line means your board is unsupported.
@@ -818,7 +817,6 @@ void display_counters(void)
     static uint64_t time_last_ms_counter = 0;
     static uint64_t time_last_ms_thread_manager = 0;
     static uint64_t time_last_ms_wdt = 0;
-    static uint64_t time_last_ms_dfu_target = 0;
 
 
     uint64_t time_now_ms = k_uptime_get();
@@ -862,21 +860,7 @@ void display_counters(void)
         }
         time_last_ms_wdt = time_now_ms;
     }
- */   
-    if (( (uint64_t)( time_now_ms - time_last_ms_dfu_target ) > 50000) &&  !g_b_dfu_target_init_done)
-    {
-        int ret = OTA_dfu_target_init(); // Initialize the OTA DFU target
-        if (ret)
-        {
-            LOG_ERR("OTA DFU target initialization failed: %d", ret);
-            time_last_ms_dfu_target = time_now_ms;
-        } 
-        else 
-        {
-            LOG_INF("OTA DFU target initialized successfully");
-            g_b_dfu_target_init_done = ZB_TRUE;
-        }
-    }
+ */
 
     if (zb_buf_is_oom_state()) {
         // Handle Out Of Memory state

@@ -18,6 +18,7 @@
 #define UPGRADE_AND_RESPONSE 0x07
 #define MANUFACTORER_CODE 0x1E10
 #define FILE_VERSION 0x02001012
+#define DIGI_FILE_HEADER_SIZE 62 // A 62 byte header has been added to the bin file to be compatible with DIGI
 #define FILE_BLOCK_MAX_SIZE 49 // With this size, the file fragment can be sent in a single Zigbee packet.
 #define FOTA_FIRST_BLOCK_HEADER_SIZE 79 // Adjust based on actual protocol
 #define FOTA_BLOCK_HEADER_SIZE 17 // Adjust based on actual protocol
@@ -69,16 +70,6 @@ enum fuota_state_machine_e{
     FUOTA_WAITING_FOR_UPGRADE_END_RESPONSE_ST,
     FUOTA_UPGRADE_END_RESPONDED_ST,
     FUOTA_NUMBER_OF_STATES
-};
-
-/* Enumerative with the supported Xbee wireless AT commands used to read parameters */
-enum digi_fota_read_cmd_e{
-    READ_FOTA_IMAGE_NOTIFY,
-    READ_FOTA_QUERY_NEXT_IMAGE_REQUEST,
-    BLOCK_REQUEST,
-    LAST_BLOCK_REQUEST_COMMAND,
-    NUMBER_OF_FOTA_COMMANDS,
-    NO_SUPPORTED_FOTA_CMD
 };
 
 void digi_fota_init(void);
