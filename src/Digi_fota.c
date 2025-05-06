@@ -260,7 +260,7 @@ void digi_fota_manager(void)
         case FUOTA_IMAGE_NOTIFY_RECEIVED_ST:
             if (!b_dfu_target_reset_done) // We should reset previous dfu
             {
-                ret = dfu_target_reset();
+                ret = dfu_target_mcuboot_reset();
                 if (ret)
                 {
                     LOG_ERR("dfu_target_reset error: %d", ret);
@@ -277,7 +277,7 @@ void digi_fota_manager(void)
                 {
                     if ((time_now_ms - time_last_attempt_ms) > 5000) // Leave 5 seconds between attempts
                     {
-                        ret = OTA_dfu_target_init();
+                        ret = OTA_dfu_target_init(0x1000);
                         if (ret) {
                             LOG_ERR("dfu_target_init error: %d", ret);
                         }
@@ -346,7 +346,7 @@ void digi_fota_manager(void)
             break;
         case FUOTA_UPGRADE_END_RESPONDED_ST:
             //digi_fota_switch_state(FUOTA_INIT_STATE_ST);
-            int ret = dfu_target_done(true);
+            int ret = dfu_target_mcuboot_done(true);
             if (ret)
             {
                 LOG_ERR("dfu done failed: 0x%x\n", ret);
@@ -355,7 +355,7 @@ void digi_fota_manager(void)
             else
             {
                 LOG_WRN("dfu done ok\n");
-                dfu_target_schedule_update(0);  // Schedule the update image 0
+                dfu_target_mcuboot_schedule_update(0);  // Schedule the update image 0
                 sys_reboot(SYS_REBOOT_COLD);
             }
             break;

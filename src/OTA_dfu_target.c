@@ -23,12 +23,8 @@
 
 LOG_MODULE_REGISTER(OTA_dfu_target, LOG_LEVEL_DBG);
 
-static char bin_header[512] = {0x3D, 0xB8, 0xF3, 0x96, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x51, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
 #define STAGING_BUF_SIZE 512
 static uint8_t staging_buf[STAGING_BUF_SIZE];
-
 
 int_fast8_t check_flash_area(void)
 {
@@ -67,17 +63,16 @@ static void dfu_target_callback_handler(int evt)
 /**@brief This function initializes the Digi_wireless_at_commands firmware module
  *
  */
-int OTA_dfu_target_init()
+int OTA_dfu_target_init(size_t file_size)
 {
-
     int ret = 0;
 
     ret = check_flash_area();
     if(ret != 0) {
         LOG_ERR("check_flash_area error: %d", ret);
-        return;
+        return ret;
     }
-    
+
     // Just for sanity
     LOG_WRN("staging_buf addr: %p, size: %d\n", staging_buf, STAGING_BUF_SIZE);
     ret = dfu_target_mcuboot_set_buf(staging_buf, STAGING_BUF_SIZE);
@@ -85,20 +80,7 @@ int OTA_dfu_target_init()
         LOG_WRN("set_buf failed: 0x%x", ret);
     }
 
-    int img_type = dfu_target_img_type(bin_header, sizeof(bin_header));
-    if (img_type < 0) {
-        LOG_WRN("error: 0x%x\n", img_type);
-    }
-    else if (DFU_TARGET_IMAGE_TYPE_MCUBOOT == img_type)
-    {
-        LOG_WRN("image type: mcuboot\n");
-    }
-    else
-    {
-        LOG_WRN("image type: 0x%x\n", img_type);
-    }
-
-    ret = dfu_target_init(img_type, 0, 0x1000, dfu_target_callback_handler);
+    ret = dfu_target_mcuboot_init(file_size, 0, dfu_target_callback_handler);
     if (ret) {
         LOG_WRN("dfu_target_init error: 0x%x\n", ret);
     }
@@ -118,7 +100,7 @@ int handle_fota_chunk(uint8_t *payload, size_t len, uint32_t *file_offset)
         return -1;
     }
 
-    int ret = dfu_target_offset_get(&offset_before);
+    int ret = dfu_target_mcuboot_offset_get(&offset_before);
     if (ret != 0) {
         LOG_ERR("error: failed to get offset before write\n");
     } else {
@@ -131,7 +113,7 @@ int handle_fota_chunk(uint8_t *payload, size_t len, uint32_t *file_offset)
         return -1;
     }
 
-    ret = dfu_target_write(payload, len);
+    ret = dfu_target_mcuboot_write(payload, len);
     if (ret != 0) {
         LOG_ERR("dfu_target_write failed: %d", ret);
         *file_offset = offset_before;  // Update file_offset to match the current offset
@@ -140,7 +122,7 @@ int handle_fota_chunk(uint8_t *payload, size_t len, uint32_t *file_offset)
         LOG_WRN("FOTA chunk written: 0x%2x bytes", len);
     }
 
-    ret = dfu_target_offset_get(&offset_after);
+    ret = dfu_target_mcuboot_offset_get(&offset_after);
     if (ret != 0) {
         LOG_WRN("error: failed to get offset after write\n");
     } else {
