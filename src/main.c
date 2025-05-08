@@ -63,6 +63,8 @@
 #include <dfu/dfu_target_mcuboot.h>
 #include <zephyr/sys/reboot.h>
 
+#include <zephyr/storage/flash_map.h>
+
 #define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
 
 /* Device endpoint, used to receive ZCL commands. */
@@ -162,26 +164,27 @@ void get_reset_reason(void)
 
     if (result == 0) // Success, reset_cause now contains the reset cause flags
 	{
-        LOG_ERR("RESET");
+        LOG_ERR("RESET:");    
+        if (reset_cause & RESET_PIN)              LOG_WRN("Reset cause: RESET_PIN");
+        if (reset_cause & RESET_SOFTWARE)         LOG_WRN("Reset cause: RESET_SOFTWARE");
+        if (reset_cause & RESET_BROWNOUT)         LOG_WRN("Reset cause: RESET_BROWNOUT");
+        if (reset_cause & RESET_POR)              LOG_WRN("Reset cause: RESET_POR");
+        if (reset_cause & RESET_WATCHDOG)         LOG_WRN("Reset cause: RESET_WATCHDOG");
+        if (reset_cause & RESET_DEBUG)            LOG_WRN("Reset cause: RESET_DEBUG");
+        if (reset_cause & RESET_SECURITY)         LOG_WRN("Reset cause: RESET_SECURITY");
+        if (reset_cause & RESET_LOW_POWER_WAKE)   LOG_WRN("Reset cause: RESET_LOW_POWER_WAKE");
+        if (reset_cause & RESET_CPU_LOCKUP)       LOG_WRN("Reset cause: RESET_CPU_LOCKUP");
+        if (reset_cause & RESET_PARITY)           LOG_WRN("Reset cause: RESET_PARITY");
+        if (reset_cause & RESET_PLL)              LOG_WRN("Reset cause: RESET_PLL");
+        if (reset_cause & RESET_CLOCK)            LOG_WRN("Reset cause: RESET_CLOCK");
+        if (reset_cause & RESET_HARDWARE)         LOG_WRN("Reset cause: RESET_HARDWARE");
+        if (reset_cause & RESET_USER)             LOG_WRN("Reset cause: RESET_USER");
+        if (reset_cause & RESET_TEMPERATURE)      LOG_WRN("Reset cause: RESET_TEMPERATURE");
+    
+        if (reset_cause == 0) {
+            LOG_WRN("No known reset causes detected");
+        }
 
-		if (reset_cause & RESET_BROWNOUT) LOG_WRN("Reset cause is: RESET_BROWNOUT\n"); // 2
-        else if (reset_cause & RESET_PIN) LOG_DBG("Reset cause is: RESET_PIN\n"); // 0
-		else if(reset_cause & RESET_POR) LOG_DBG("Reset cause is: RESET_POR\n"); // 3
-		else if(reset_cause & RESET_WATCHDOG) LOG_DBG("Reset cause is: RESET_WATCHDOG\n"); // 4
-		else if(reset_cause & RESET_DEBUG) LOG_DBG("Reset cause is: RESET_DEBUG\n"); // 5
-    	else if(reset_cause & RESET_SECURITY) LOG_DBG("Reset cause is: RESET_SECURITY\n"); // 6
-		else if(reset_cause & RESET_LOW_POWER_WAKE) LOG_DBG("Reset cause is: RESET_LOW_POWER_WAKE\n"); // 7
-		else if(reset_cause & RESET_CPU_LOCKUP) LOG_DBG("Reset cause is: RESET_CPU_LOCKUP\n"); // 8
-		else if(reset_cause & RESET_PARITY) LOG_DBG("Reset cause is: RESET_PARITY\n"); // 9
-		else if(reset_cause & RESET_PLL) LOG_DBG("Reset cause is: RESET_PLL\n"); // 10
-		else if(reset_cause & RESET_CLOCK) LOG_DBG("Reset cause is: RESET_CLOCK\n"); // 11
-		else if(reset_cause & RESET_HARDWARE) LOG_DBG("Reset cause is: RESET_HARDWARE\n"); // 12
-		else if(reset_cause & RESET_USER) LOG_DBG("Reset cause is: RESET_USER\n"); // 13
-		else if (reset_cause & RESET_TEMPERATURE) LOG_DBG("Reset cause is: RESET_TEMPERATURE\n\n"); // 14
-        else if (reset_cause & RESET_SOFTWARE) LOG_DBG("Reset cause is: RESET_SOFTWARE\n"); // 1
-		else LOG_DBG("\n\n reset cause is: %d\n\n",reset_cause);
-
-    	hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset
     } 
     else if (result == -ENOSYS) 
 	{
@@ -213,6 +216,8 @@ void get_reset_reason(void)
         write_nvram(RBT_CNT_REASON, (uint8_t *)&reset_cause, sizeof(reset_cause));
         LOG_WRN("reset_cause_flags, %d\n", reset_cause_flags[0]);
     }
+
+    hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset
 
 }
 
@@ -410,6 +415,14 @@ void zboss_signal_handler(zb_bufid_t bufid)
     if(ZB_GET_APP_SIGNAL_STATUS(bufid) != 0)
     {
         LOG_ERR("Signal %d failed, status %d", sig, ZB_GET_APP_SIGNAL_STATUS(bufid));
+        if (bufid)
+        {
+            LOG_ERR("Error: bufid is not NULL zboss_signal_handler end");
+            // safe way to free buffer
+            zb_osif_disable_all_inter();
+            zb_buf_free(bufid);
+            zb_osif_enable_all_inter();    
+        }
         return;
     }
 
@@ -895,6 +908,34 @@ void check_boot_status(void)
             LOG_WRN("Unknown swap type: %d\n", swap_type);
             break;
     }
+
+    struct mcuboot_img_header header;
+    size_t header_size = sizeof(header);
+
+    int ret = boot_read_bank_header(FIXED_PARTITION_ID(slot0_partition), &header, header_size);
+    if (ret == 0) {
+        if (header.mcuboot_version == 1) {
+            LOG_INF("MCUBoot image header (v1):");
+            LOG_INF("  Version: %d.%d.%d+%d",
+                    header.h.v1.sem_ver.major,
+                    header.h.v1.sem_ver.minor,
+                    header.h.v1.sem_ver.revision,
+                    header.h.v1.sem_ver.build_num);
+            LOG_INF("  Image size:  %u bytes", header.h.v1.image_size);
+        } else {
+            LOG_WRN("Unsupported mcuboot_version: %u", header.mcuboot_version);
+        }
+    } else {
+        LOG_ERR("Failed to read MCUBoot header, error: %d", ret);
+    }
+
+    // Optionally log trailer offset
+    ssize_t trailer_offset = boot_get_area_trailer_status_offset(0);
+    if (trailer_offset >= 0) {
+        LOG_INF("Trailer status offset: 0x%08zx", trailer_offset);
+    } else {
+        LOG_ERR("Failed to get trailer offset");
+    }
 }
 
 /**
@@ -912,14 +953,20 @@ static void confirm_image(void)
     int swap_type = mcuboot_swap_type();
     LOG_INF("MCUboot swap type: %d", swap_type);
 
-    if (swap_type == BOOT_SWAP_TYPE_REVERT || swap_type == BOOT_SWAP_TYPE_TEST) {
-        int rc = boot_write_img_confirmed();
-        if (rc == 0) {
-            LOG_INF("Image confirmed successfully.");
+    if (swap_type == BOOT_SWAP_TYPE_REVERT || swap_type == BOOT_SWAP_TYPE_TEST) 
+    {
+        LOG_INF("Image in test/revert mode. Confirming image...\n");
+
+        int ret = boot_request_upgrade(BOOT_UPGRADE_PERMANENT); // Request upgrade if needed
+        if (ret < 0) {
+            LOG_ERR("Failed to request upgrade: %d\n", ret);
         } else {
-            LOG_ERR("Image confirmation failed: %d", rc);
+            LOG_INF("Upgrade requested successfully.\n");
         }
-    } else {
+
+    } 
+    else 
+    {
         LOG_INF("Image already confirmed or not in test/revert mode.");
     }
 
