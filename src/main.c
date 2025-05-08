@@ -415,14 +415,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
     if(ZB_GET_APP_SIGNAL_STATUS(bufid) != 0)
     {
         LOG_ERR("Signal %d failed, status %d", sig, ZB_GET_APP_SIGNAL_STATUS(bufid));
-        if (bufid)
-        {
-            LOG_ERR("Error: bufid is not NULL zboss_signal_handler end");
-            // safe way to free buffer
-            zb_osif_disable_all_inter();
-            zb_buf_free(bufid);
-            zb_osif_enable_all_inter();    
-        }
         return;
     }
 
