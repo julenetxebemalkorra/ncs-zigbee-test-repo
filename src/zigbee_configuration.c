@@ -49,6 +49,10 @@ int8_t zb_nvram_check_usage(void)
     uint8_t nvram_first_id_expected[6];
     uint8_t number_restarts[1] = {0};
     uint8_t reset_reason[1] = {0};
+    uint8_t DFUOTA_status[1] = {0};
+    uint32_t firmware_version[1] = {0};
+    uint32_t firmware_size[1] = {0};
+
 
     // Expected values for the first 6 bytes of the NVRAM
     nvram_first_id_expected[0] = 0xAA;
@@ -64,14 +68,21 @@ int8_t zb_nvram_check_usage(void)
     if (rc != sizeof(nvram_first_id)) 
     {
         LOG_WRN("NVRAM first id is missing, write the default values");
-        zb_user_conf.extended_pan_id = 0x0000000000000000;
-        zb_user_conf.at_ni[0] = ' ';
-        zb_user_conf.at_ni[1] = 0;
-        uint8_t network_link_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};  // defalut Zigbee Alliance key
-        memcpy(zb_user_conf.network_link_key, network_link_key, sizeof(network_link_key));
+        zb_user_conf.extended_pan_id = 0x000000000000abce;
+        const char *node_identifier = "pan1780_julen_dk";
+        strncpy(zb_user_conf.at_ni, node_identifier, sizeof(zb_user_conf.at_ni) - 1);
+        zb_user_conf.at_ni[sizeof(zb_user_conf.at_ni) - 1] = '\0';
+        uint8_t network_link_key[16] = {0x88, 0x88, 0x99, 0x99, 0x88, 0x89, 0x45, 0x67, 0xAC, 0xCD, 0xA7, 0xA7, 0x66, 0xD3, 0xD3, 0xD6};   // custom Zigbee key 
+        memcpy(zb_user_conf.network_link_key, network_link_key, sizeof(network_link_key));        
         write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
         write_nvram(RBT_CNT_ID, number_restarts, sizeof(number_restarts));
         write_nvram(RBT_CNT_REASON, reset_reason, sizeof(reset_reason));
+        write_nvram(ZB_EXT_PANID, &zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
+        write_nvram(ZB_NODE_IDENTIFIER, &zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
+        write_nvram(ZB_NETWORK_ENCRYPTION_KEY, &zb_user_conf.network_link_key, sizeof(zb_user_conf.network_link_key));
+        write_nvram(DUFOTA_STATUS, DFUOTA_status, sizeof(DFUOTA_status));
+        write_nvram(DUFOTA_FW_VERSION, firmware_version, sizeof(firmware_version));
+        write_nvram(DUFOTA_FW_SIZE, firmware_size, sizeof(firmware_size));
         return NVRAM_NOT_WRITTEN;
     }
     else if (rc == sizeof(nvram_first_id))
@@ -83,18 +94,29 @@ int8_t zb_nvram_check_usage(void)
         }
         else
         {
+            // TO DO what to do here??
+            // The first 6 bytes of the NVRAM are not correct, write the expected values to the NVRAM
+            // and work with the default configuration but what i if this happens after months of working??
+            // tell to the PIC24 about the error and restore the desired values, for now we write the default values          
             LOG_WRN("NVRAM read data is not correct, write again and work with the default configuration");
-            /* Get the device pointer of the UART hardware */
             #ifdef CONFIG_PAN1770EVB
-                zb_user_conf.extended_pan_id = 0x0000000000000000;
+                zb_user_conf.extended_pan_id = 0x000000000000abce;
                 const char *node_identifier = "pan1780_dk";
                 strncpy(zb_user_conf.at_ni, node_identifier, sizeof(zb_user_conf.at_ni) - 1);
                 zb_user_conf.at_ni[sizeof(zb_user_conf.at_ni) - 1] = '\0';
                 uint8_t network_link_key[16] = {0x88, 0x88, 0x99, 0x99, 0x88, 0x89, 0x45, 0x67, 0xAC, 0xCD, 0xA7, 0xA7, 0x66, 0xD3, 0xD3, 0xD6};   // custom Zigbee key
                 memcpy(zb_user_conf.network_link_key, network_link_key, sizeof(network_link_key));
                 write_nvram(ZB_NVRAM_CHECK_ID, nvram_first_id_expected, sizeof(nvram_first_id_expected));
+                write_nvram(RBT_CNT_ID, number_restarts, sizeof(number_restarts));
+                write_nvram(RBT_CNT_REASON, reset_reason, sizeof(reset_reason));
+                write_nvram(ZB_EXT_PANID, &zb_user_conf.extended_pan_id, sizeof(zb_user_conf.extended_pan_id));
+                write_nvram(ZB_NODE_IDENTIFIER, &zb_user_conf.at_ni, sizeof(zb_user_conf.at_ni));
+                write_nvram(ZB_NETWORK_ENCRYPTION_KEY, &zb_user_conf.network_link_key, sizeof(zb_user_conf.network_link_key));
+                write_nvram(DUFOTA_STATUS, DFUOTA_status, sizeof(DFUOTA_status));
+                write_nvram(DUFOTA_FW_VERSION, firmware_version, sizeof(firmware_version));
+                write_nvram(DUFOTA_FW_SIZE, firmware_size, sizeof(firmware_size));
                 return NVRAM_WRONG_DATA;            
-            #else
+            #else   
                 zb_user_conf.extended_pan_id = 0x0000000000000000;
                 zb_user_conf.at_ni[0] = ' ';
                 zb_user_conf.at_ni[1] = 0;
@@ -106,7 +128,7 @@ int8_t zb_nvram_check_usage(void)
         }
     }
     else
-    {
+    {   
         LOG_ERR("Unkwon error reading NVRAM first id");
         return NVRAM_UNKNOWN_ERR;
     }
