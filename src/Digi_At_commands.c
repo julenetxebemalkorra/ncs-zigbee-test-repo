@@ -586,10 +586,6 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
                 return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
             }
         }
-        else
-        {
-            return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
-        }
         if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
         {
             if( digi_at_reply_write_command(AT_JV, &input_data[4], command_data_size) ) return AT_CMD_OK_STAY_IN_CMD_MODE;

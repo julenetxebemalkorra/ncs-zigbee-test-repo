@@ -415,7 +415,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
     if(ZB_GET_APP_SIGNAL_STATUS(bufid) != 0)
     {
         LOG_ERR("Signal %d failed, status %d", sig, ZB_GET_APP_SIGNAL_STATUS(bufid));
-        return;
     }
 
     if( PRINT_ZIGBEE_INFO )
