@@ -9,8 +9,7 @@
 #include "global_defines.h"
 
 #define MINIMUM_SIZE_AT_COMMAND 4
-#define MAXIMUM_SIZE_AT_COMMAND 4 + 1 + MAXIMUM_SIZE_LINK_KEY //Write command + blank + size of node identifier
-#define STANDARD_SIZE_LINK_KEY 16
+#define MAXIMUM_SIZE_AT_COMMAND 4 + 1 + SIZE_LINK_KEY + SIZE_LINK_KEY //Write command + blank + link key (two characters per byte)
 
 #define HARDCODED_ATJV_VALUE 1
 #define HARDCODED_ATNJ_VALUE 0xFF
@@ -71,7 +70,7 @@ struct xbee_parameters_t {
     uint16_t at_my;   // Short address parameter (read only)
     uint8_t at_ee;   // Encryption enable parameter
     uint8_t at_eo;   // Encryption options parameter
-    uint8_t at_ky[MAXIMUM_SIZE_LINK_KEY];   // Link Encryption Key parameter
+    uint8_t at_ky[SIZE_LINK_KEY];   // Link Encryption Key parameter
     uint8_t at_zs;   // Xbee's Zigbee stack profile parameter
     uint8_t at_bd;   // Xbee's UART baud rate parameter
     uint8_t at_nb;   // Xbee's UART parity parameter

@@ -110,7 +110,7 @@ void digi_at_get_parameter_ni(uint8_t *ni)
 void digi_at_get_parameter_ky(uint8_t *ky)
 {
     uint8_t i;
-    for(i=0; i < MAXIMUM_SIZE_LINK_KEY; i++)
+    for(i=0; i < SIZE_LINK_KEY; i++)
     {
         ky[i] = xbee_parameters.at_ky[i];
     }
@@ -157,15 +157,15 @@ int8_t digi_at_read_ni(uint8_t* buffer)
     return(i+1);
 }
 
-/**@brief This function places the node identifier string into a buffer
- * We have considered that the maximum size of the identifier is 32 characters
+/**@brief This function places the link key into a buffer
+ * The link key has 16 bytes
  */
 int8_t digi_at_read_ky(uint8_t* buffer)
 {
     uint8_t i = 0;
-    for(i=0; i<= STANDARD_SIZE_LINK_KEY ; i++)
+    for (i = 0; i < SIZE_LINK_KEY; i++)
     {
-            buffer[i] = xbee_parameters.at_ky[i];
+        buffer[i] = xbee_parameters.at_ky[i];
     }
     buffer[i] = '\r';
     return(i+1);
@@ -325,20 +325,20 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
             return_value = true;
         }
     }
-    if( at_command == AT_KY ) // The data for that command is a string
+    else if( at_command == AT_KY ) // The data for that command is 16 byte number
     {
         LOG_WRN("Received string size at_command WRITE == AT_KY: %d\n", string_size);
         LOG_HEXDUMP_DBG(command_data_string, string_size, "Received string in hex:");
 
-        uint8_t link_key[STANDARD_SIZE_LINK_KEY];
-        ascii_to_hex(command_data_string, link_key, STANDARD_SIZE_LINK_KEY);
+        uint8_t link_key[SIZE_LINK_KEY];
+        ascii_to_hex(command_data_string, link_key, SIZE_LINK_KEY);
 
         LOG_WRN("Link key size: %d\n", string_size);
-        LOG_HEXDUMP_DBG(link_key, STANDARD_SIZE_LINK_KEY, "Link key in hex:");
+        LOG_HEXDUMP_DBG(link_key, SIZE_LINK_KEY, "Link key in hex:");
 
-        if( string_size <= STANDARD_SIZE_LINK_KEY * 2 )
+        if( string_size <= SIZE_LINK_KEY * 2 )
         {
-            memcpy(xbee_parameters.at_ky, link_key, STANDARD_SIZE_LINK_KEY);
+            memcpy(xbee_parameters.at_ky, link_key, SIZE_LINK_KEY);
             return_value = true;
         }
     } 
@@ -585,10 +585,6 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
             {
                 return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
             }
-        }
-        else
-        {
-            return AT_CMD_ERROR_WRITE_DATA_NOT_VALID;
         }
         if( ( input_data[2] == 'J' ) && ( input_data[3] == 'V' ) ) // ATJV
         {

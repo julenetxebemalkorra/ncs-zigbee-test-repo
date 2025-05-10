@@ -7,7 +7,7 @@
 #define GLOBAL_DEFINES_H_
 
 #define MAXIMUM_SIZE_NODE_IDENTIFIER 20
-#define MAXIMUM_SIZE_LINK_KEY 32
+#define SIZE_LINK_KEY 16
 
 //Indicadores de alarma     
 extern bool g_b_flash_error;

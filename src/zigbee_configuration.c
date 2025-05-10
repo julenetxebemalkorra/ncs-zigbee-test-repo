@@ -262,7 +262,7 @@ uint64_t zb_conf_get_extended_pan_id (void)
  */
 void zb_conf_get_network_link_key (uint8_t *network_key)
 {
-    for(uint8_t i = 0; i < MAXIMUM_SIZE_LINK_KEY; i++)
+    for(uint8_t i = 0; i < SIZE_LINK_KEY; i++)
     {
         network_key[i] = zb_user_conf.network_link_key[i];
     }
