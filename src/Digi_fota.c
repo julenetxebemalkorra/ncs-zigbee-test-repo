@@ -14,6 +14,7 @@
 
 #include <zboss_api.h>
 #include <dfu/dfu_target.h>
+#include <dfu/dfu_target_mcuboot.h>
 
 #include "Digi_profile.h"
 #include "zigbee_aps.h"
@@ -24,13 +25,12 @@ LOG_MODULE_REGISTER(Digi_fota, LOG_LEVEL_INF);
 
 static enum fuota_state_machine_e fuota_state;     // FUOTA state machine state
 static uint64_t time_last_state_transition_ms;     // Time of FUOTA last state transition
-static uint64_t time_last_attempt_ms;              // Time of FUOTA last attempt to make an action
+static uint64_t time_last_attempt_ms;              // Time of FUOTA last attempt to perform an action
+static uint16_t attempt_counter;                   // Number of attempts to perform an action in the FUOTA process
 static struct firmware_image_t firmware_image;     // Structure describing firmware image
 static uint8_t command_sequence_number;
 static uint32_t file_offset;
 static uint32_t requested_file_offset;
-static bool b_dfu_target_init_done;
-static bool b_dfu_target_reset_done;
 
 /**@brief This function initializes the Digi_fota firmware module
  *
@@ -40,9 +40,8 @@ void digi_fota_init(void)
     fuota_state = FUOTA_INIT_STATE_ST;
     time_last_state_transition_ms = k_uptime_get();
     time_last_attempt_ms = 0;
+    attempt_counter = 0;
     command_sequence_number = 0;
-    b_dfu_target_init_done = false;
-    b_dfu_target_reset_done = false;
 }
 
 /**@brief This function evaluates if the last received APS frame is a Digi's read AT command
@@ -258,42 +257,7 @@ void digi_fota_manager(void)
         case FUOTA_NO_UPGRADE_IN_PROCESS_ST:
             break;
         case FUOTA_IMAGE_NOTIFY_RECEIVED_ST:
-            if (!b_dfu_target_reset_done) // We should reset previous dfu
-            {
-                ret = dfu_target_mcuboot_reset();
-                if (ret)
-                {
-                    LOG_ERR("dfu_target_reset error: %d", ret);
-                }
-                else
-                {
-                    LOG_WRN("dfu_target_reset success: %d", ret);
-                }
-                b_dfu_target_reset_done = true;
-            }
-            else
-            {
-                if (b_dfu_target_init_done == false) // Do not leave this state unless dfu target has been initiated
-                {
-                    if ((time_now_ms - time_last_attempt_ms) > 5000) // Leave 5 seconds between attempts
-                    {
-                        ret = OTA_dfu_target_init(0x1000);
-                        if (ret) {
-                            LOG_ERR("dfu_target_init error: %d", ret);
-                        }
-                        else
-                        {
-                            LOG_WRN("dfu_target_init ok");
-                            b_dfu_target_init_done = true;
-                        }
-                        time_last_attempt_ms = time_now_ms;
-                    }
-                }
-                else
-                {
-                    digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
-                }
-            }
+            digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
             break;
         case FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST:
             if (digi_fota_send_query_next_image_request_cmd())
@@ -308,7 +272,27 @@ void digi_fota_manager(void)
             }
             break;
         case FUOTA_NEXT_IMAGE_RESPONDED_ST:
-            digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
+            digi_fota_switch_state(FUOTA_INIT_DFU_TARGET);
+            break;
+        case FUOTA_INIT_DFU_TARGET:
+            if ((time_now_ms - time_last_attempt_ms) > 2000) // Leave 2 seconds between attempts
+            {
+                time_last_attempt_ms = time_now_ms;
+                ret = OTA_dfu_target_init(firmware_image.file_size);
+                if (ret == 0)
+                {
+                    LOG_WRN("OTA_dfu_target_init() succeeded");
+                    digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
+                }
+                else
+                {
+                    attempt_counter++;
+                    if (attempt_counter >= 3) // Maximum 3 attempts
+                    {
+                        digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                    }
+                }
+            }
             break;
         case FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST:
             if (digi_fota_send_image_block_request_cmd())
@@ -376,4 +360,5 @@ void digi_fota_switch_state(enum fuota_state_machine_e new_state)
     fuota_state = new_state;
     time_last_state_transition_ms = k_uptime_get();
     time_last_attempt_ms = 0;
+    attempt_counter = 0;
 }

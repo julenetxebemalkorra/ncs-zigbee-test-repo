@@ -23,8 +23,8 @@
 
 LOG_MODULE_REGISTER(OTA_dfu_target, LOG_LEVEL_DBG);
 
-#define STAGING_BUF_SIZE 512
-static uint8_t staging_buf[STAGING_BUF_SIZE];
+#define STAGING_BUF_SIZE 512                                // Multiple of 4
+static uint8_t staging_buf[STAGING_BUF_SIZE] __aligned(32); // The array should be aligned to 32 bits,
 
 int_fast8_t check_flash_area(void)
 {
@@ -41,57 +41,67 @@ int_fast8_t check_flash_area(void)
     return rc;
 }
 
-static void dfu_target_callback_handler(int evt)
-{
-    switch (evt) {
-    case DFU_TARGET_EVT_TIMEOUT:
-        LOG_WRN("DFU target timeout event");
-		break;
-	case DFU_TARGET_EVT_ERASE_DONE:
-        LOG_WRN("DFU target erase done event");
-		break;
-    case DFU_TARGET_EVT_ERASE_PENDING:
-        LOG_WRN("DFU target erase pending event");
-        break;
-    default:
-        LOG_WRN("DFU target unknown event: %d", evt);
-        break;
-	}
-}
-
-
-/**@brief This function initializes the Digi_wireless_at_commands firmware module
+/**@brief Initialization of dfu target
  *
+ * @param[in] file_size of the file is getting downloaded.
+ *
+ * @retval 0 If successful, negative error code otherwise.
  */
 int OTA_dfu_target_init(size_t file_size)
 {
-    int ret = 0;
+    int ret;
+    size_t initial_offset;
 
     ret = check_flash_area();
-    if(ret != 0) {
-        LOG_ERR("check_flash_area error: %d", ret);
-        return ret;
-    }
-
-    // Just for sanity
-    LOG_WRN("staging_buf addr: %p, size: %d\n", staging_buf, STAGING_BUF_SIZE);
-    ret = dfu_target_mcuboot_set_buf(staging_buf, STAGING_BUF_SIZE);
-    if (ret < 0) {
-        LOG_WRN("set_buf failed: 0x%x", ret);
-    }
-
-    ret = dfu_target_mcuboot_init(file_size, 0, dfu_target_callback_handler);
-    if (ret) {
-        LOG_WRN("dfu_target_init error: 0x%x\n", ret);
-    }
-    else
+    if (ret != 0)
     {
-        LOG_WRN("init ok\n");
+        LOG_ERR("check_flash_area() failed: %d", ret);
+        return -1;
     }
-    return ret;
+    ret = dfu_target_mcuboot_set_buf(staging_buf, STAGING_BUF_SIZE);
+    if (ret != 0)
+    {
+        LOG_ERR("dfu_target_mcuboot_set_buf() failed: %d", ret);
+        return -2;
+    }
+    ret = dfu_target_mcuboot_init(file_size, 0, NULL);
+    if (ret != 0)
+    {
+        LOG_ERR("dfu_target_mcuboot_init() failed: %d", ret);
+        return -3;
+    }
+    ret = dfu_target_mcuboot_reset();
+    if (ret != 0)
+    {
+        LOG_ERR("dfu_target_mcuboot_reset() failed: %d", ret);
+        dfu_target_mcuboot_done(false); // Cancel upgrade and release resources
+        return -4;
+    }
+    ret = dfu_target_mcuboot_offset_get(&initial_offset);
+    if (ret != 0)
+    {
+        LOG_ERR("dfu_target_mcuboot_offset_get() failed: %d", ret);
+        dfu_target_mcuboot_done(false); // Cancel upgrade and release resources
+        return -5;
+    }
+    if (initial_offset != 0)
+    {
+        LOG_ERR("The initial dfu target offset is not 0");
+        dfu_target_mcuboot_done(false); // Cancel upgrade and release resources
+        return -6;
+    }
+    return 0;
 }
 
-int handle_fota_chunk(uint8_t *payload, size_t len, uint32_t *file_offset)
+/**@brief Store the last received file chunk
+ *
+ * @param[in] Pointer to buffer containing the chunk
+ * @param[in] Size of the chunk
+ * @param[out] Offset value after writting the chunk
+ *
+ * @retval 0 If successful, negative error code otherwise.
+ */
+int handle_fota_chunk(const uint8_t *payload, size_t len, uint32_t *file_offset)
 {
     size_t offset_before, offset_after;
 
