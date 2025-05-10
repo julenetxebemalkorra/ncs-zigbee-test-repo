@@ -942,32 +942,15 @@ void check_boot_status(void)
  */
 static void confirm_image(void)
 {
-    int swap_type = mcuboot_swap_type();
-    LOG_INF("MCUboot swap type: %d", swap_type);
+	if (!boot_is_img_confirmed()) {
+		int ret = boot_write_img_confirmed();
 
-    if (swap_type == BOOT_SWAP_TYPE_REVERT || swap_type == BOOT_SWAP_TYPE_TEST) 
-    {
-        LOG_INF("Image in test/revert mode. Confirming image...\n");
-
-        int ret = boot_request_upgrade(BOOT_UPGRADE_PERMANENT); // Request upgrade if needed
-        if (ret < 0) {
-            LOG_ERR("Failed to request upgrade: %d\n", ret);
-        } else {
-            LOG_INF("Upgrade requested successfully.\n");
-        }
-
-    } 
-    else 
-    {
-        LOG_INF("Image already confirmed or not in test/revert mode.");
-    }
-
-    int rc = boot_write_img_confirmed();
-    if (rc == 0) {
-        LOG_INF("Image confirmed successfully.");
-    } else {
-        LOG_ERR("Image confirmation failed: %d", rc);
-    }
+		if (ret) {
+			LOG_ERR("Couldn't confirm image: %d", ret);
+		} else {
+			LOG_INF("Marked image as OK");
+		}
+	}
 }
 
 //------------------------------------------------------------------------------
