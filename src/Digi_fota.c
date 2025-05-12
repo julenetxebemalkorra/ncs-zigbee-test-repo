@@ -167,12 +167,13 @@ bool digi_fota_send_query_next_image_request_cmd(void)
         element.payload[i++] = FIELD_CONTROL_HW_VERSION_NO_PRESENT;
         element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID & 0xFF); // Low byte of manufacturer code
         element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID >> 8); // High byte of manufacturer code
-        element.payload[i++] = DFU_TARGET_IMAGE_TYPE_MCUBOOT;
-        element.payload[i++] = 0x00;   // file version different may not work neither
-        element.payload[i++] = 0x0e;
-        element.payload[i++] = 0x10;
+        element.payload[i++] = 0x01; // Image type 0x0001
         element.payload[i++] = 0x00;
-        element.payload[i++] = 0x00;
+        element.payload[i++] = (uint8_t)(CURRENT_FW_VERSION & 0xFF);
+        element.payload[i++] = (uint8_t)((CURRENT_FW_VERSION >> 8) & 0xFF);
+        element.payload[i++] = (uint8_t)((CURRENT_FW_VERSION >> 16) & 0xFF);
+        element.payload[i++] = (uint8_t)(CURRENT_FW_VERSION >> 24);
+
         element.payload_size = (zb_uint8_t)i;
         if( enqueue_aps_frame(&element) ) b_return = true;
     }
@@ -205,12 +206,12 @@ bool digi_fota_send_image_block_request_cmd(void)
         element.payload[i++] = FOTA_STATUS_SUCCESS;
         element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID & 0xFF); // Low byte of manufacturer code
         element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID >> 8); // High byte of manufacturer code
-        element.payload[i++] = DFU_TARGET_IMAGE_TYPE_MCUBOOT;
+        element.payload[i++] = 0x01; // Image type 0x0001
         element.payload[i++] = 0x00;
-        element.payload[i++] = (uint8_t)(FILE_VERSION & 0xFF);
-        element.payload[i++] = (uint8_t)((FILE_VERSION >> 8) & 0xFF);
-        element.payload[i++] = (uint8_t)((FILE_VERSION >> 16) & 0xFF);
-        element.payload[i++] = (uint8_t)(FILE_VERSION >> 24); // High byte of file version
+        element.payload[i++] = (uint8_t)(firmware_image.firmware_version & 0xFF);
+        element.payload[i++] = (uint8_t)((firmware_image.firmware_version >> 8) & 0xFF);
+        element.payload[i++] = (uint8_t)((firmware_image.firmware_version >> 16) & 0xFF);
+        element.payload[i++] = (uint8_t)(firmware_image.firmware_version >> 24);
         element.payload[i++] = (uint8_t)(requested_file_offset & 0xFF); // Low byte of file offset
         element.payload[i++] = (uint8_t)((requested_file_offset >> 8) & 0xFF);
         element.payload[i++] = (uint8_t)((requested_file_offset >> 16) & 0xFF);
@@ -248,12 +249,12 @@ bool digi_fota_send_upgrade_end_request_cmd(void)
         element.payload[i++] = FOTA_STATUS_SUCCESS;
         element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID & 0xFF); // Low byte of manufacturer code
         element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID >> 8); // High byte of manufacturer code
-        element.payload[i++] = DFU_TARGET_IMAGE_TYPE_NONE;
+        element.payload[i++] = 0x01; // Image type 0x0001
         element.payload[i++] = 0x00;
-        element.payload[i++] = (uint8_t)(FILE_VERSION & 0xFF);
-        element.payload[i++] = (uint8_t)((FILE_VERSION >> 8) & 0xFF);
-        element.payload[i++] = (uint8_t)((FILE_VERSION >> 16) & 0xFF);
-        element.payload[i++] = (uint8_t)(FILE_VERSION >> 24); // High byte of file version
+        element.payload[i++] = (uint8_t)(firmware_image.firmware_version & 0xFF);
+        element.payload[i++] = (uint8_t)((firmware_image.firmware_version >> 8) & 0xFF);
+        element.payload[i++] = (uint8_t)((firmware_image.firmware_version >> 16) & 0xFF);
+        element.payload[i++] = (uint8_t)(firmware_image.firmware_version >> 24);
         element.payload_size = (zb_uint8_t)i;
 
         if( enqueue_aps_frame(&element) ) b_return = true;
