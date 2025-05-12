@@ -68,23 +68,35 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
     }
     else if ((size_of_input_data == QUERY_NEXT_IMAGE_RESPONDE_CMD_SIZE) && (input_data[2] == QUERY_NEXT_IMAGE_RESPONDE_CMD) && (input_data[3] == FOTA_STATUS_SUCCESS))
     {
-        firmware_image.manufacturer_code = (input_data[5] << 8) | input_data[4];
-        firmware_image.image_type = (input_data[7] << 8) | input_data[6];
-        firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
-        firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
-        if (firmware_image.file_size > DIGI_FILE_HEADER_SIZE)
-        {
-            firmware_image.file_size = firmware_image.file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
-        }
-        else
-        {
-            firmware_image.file_size = 0;
-        }
-
         LOG_WRN("Received fota command QUERY NEXT IMAGE RESPONSE");
-        command_sequence_number = input_data[1];
-        file_offset = 0;
-        digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
+        if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST)
+        {
+            firmware_image.manufacturer_code = (input_data[5] << 8) | input_data[4];
+            firmware_image.image_type = (input_data[7] << 8) | input_data[6];
+            firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
+            firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
+            if (firmware_image.file_size > DIGI_FILE_HEADER_SIZE)
+            {
+                firmware_image.file_size = firmware_image.file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
+            }
+            else
+            {
+                firmware_image.file_size = 0;
+            }
+            command_sequence_number = input_data[1];
+            if ((firmware_image.manufacturer_code == DIGI_MANUFACTURER_ID) && (firmware_image.file_size > 0))
+            {
+                LOG_WRN("It is a valid image for this device");
+                file_offset = 0;
+                digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
+
+            }
+            else
+            {
+                LOG_WRN("It is not a valid image for this device");
+                digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+            }
+        }
         b_return = true;
     }
     else if ((size_of_input_data <= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MAX) && (size_of_input_data >= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MIN) &&
@@ -153,8 +165,8 @@ bool digi_fota_send_query_next_image_request_cmd(void)
         element.payload[i++] = command_sequence_number;
         element.payload[i++] = QUERY_NEXT_IMAGE_REQUEST_CMD;
         element.payload[i++] = FIELD_CONTROL_HW_VERSION_NO_PRESENT;
-        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE & 0xFF); // Low byte of manufacturer code
-        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE >> 8); // High byte of manufacturer code
+        element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID >> 8); // High byte of manufacturer code
         element.payload[i++] = DFU_TARGET_IMAGE_TYPE_MCUBOOT;
         element.payload[i++] = 0x00;   // file version different may not work neither
         element.payload[i++] = 0x0e;
@@ -191,8 +203,8 @@ bool digi_fota_send_image_block_request_cmd(void)
         element.payload[i++] = command_sequence_number +1;
         element.payload[i++] = IMAGE_BLOCK_REQUEST_CMD;
         element.payload[i++] = FOTA_STATUS_SUCCESS;
-        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE & 0xFF); // Low byte of manufacturer code
-        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE >> 8); // High byte of manufacturer code
+        element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID >> 8); // High byte of manufacturer code
         element.payload[i++] = DFU_TARGET_IMAGE_TYPE_MCUBOOT;
         element.payload[i++] = 0x00;
         element.payload[i++] = (uint8_t)(FILE_VERSION & 0xFF);
@@ -234,8 +246,8 @@ bool digi_fota_send_upgrade_end_request_cmd(void)
         element.payload[i++] = command_sequence_number + 1;
         element.payload[i++] = UPGRADE_END_REQUEST_CMD;
         element.payload[i++] = FOTA_STATUS_SUCCESS;
-        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE & 0xFF); // Low byte of manufacturer code
-        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE >> 8); // High byte of manufacturer code
+        element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID >> 8); // High byte of manufacturer code
         element.payload[i++] = DFU_TARGET_IMAGE_TYPE_NONE;
         element.payload[i++] = 0x00;
         element.payload[i++] = (uint8_t)(FILE_VERSION & 0xFF);
