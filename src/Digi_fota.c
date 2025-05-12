@@ -72,6 +72,14 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         firmware_image.image_type = (input_data[7] << 8) | input_data[6];
         firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
         firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
+        if (firmware_image.file_size > DIGI_FILE_HEADER_SIZE)
+        {
+            firmware_image.file_size = firmware_image.file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
+        }
+        else
+        {
+            firmware_image.file_size = 0;
+        }
 
         LOG_WRN("Received fota command QUERY NEXT IMAGE RESPONSE");
         command_sequence_number = input_data[1];
