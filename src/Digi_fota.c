@@ -153,8 +153,8 @@ bool digi_fota_send_query_next_image_request_cmd(void)
         element.payload[i++] = command_sequence_number;
         element.payload[i++] = QUERY_NEXT_IMAGE_REQUEST_CMD;
         element.payload[i++] = FIELD_CONTROL_HW_VERSION_NO_PRESENT;
-        element.payload[i++] = (uint8_t)(MANUFACTORER_CODE >> 8); // High byte of manufacturer code
-        element.payload[i++] = (uint8_t)(MANUFACTORER_CODE & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE >> 8); // High byte of manufacturer code
         element.payload[i++] = DFU_TARGET_IMAGE_TYPE_MCUBOOT;
         element.payload[i++] = 0x00;   // file version different may not work neither
         element.payload[i++] = 0x0e;
@@ -191,8 +191,8 @@ bool digi_fota_send_image_block_request_cmd(void)
         element.payload[i++] = command_sequence_number +1;
         element.payload[i++] = IMAGE_BLOCK_REQUEST_CMD;
         element.payload[i++] = FOTA_STATUS_SUCCESS;
-        element.payload[i++] = (uint8_t)(MANUFACTORER_CODE >> 8); // High byte of manufacturer code
-        element.payload[i++] = (uint8_t)(MANUFACTORER_CODE & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE >> 8); // High byte of manufacturer code
         element.payload[i++] = DFU_TARGET_IMAGE_TYPE_MCUBOOT;
         element.payload[i++] = 0x00;
         element.payload[i++] = (uint8_t)(FILE_VERSION & 0xFF);
@@ -234,8 +234,8 @@ bool digi_fota_send_upgrade_end_request_cmd(void)
         element.payload[i++] = command_sequence_number + 1;
         element.payload[i++] = UPGRADE_END_REQUEST_CMD;
         element.payload[i++] = FOTA_STATUS_SUCCESS;
-        element.payload[i++] = (uint8_t)(MANUFACTORER_CODE >> 8); // High byte of manufacturer code
-        element.payload[i++] = (uint8_t)(MANUFACTORER_CODE & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE & 0xFF); // Low byte of manufacturer code
+        element.payload[i++] = (uint8_t)(MANUFACTURER_CODE >> 8); // High byte of manufacturer code
         element.payload[i++] = DFU_TARGET_IMAGE_TYPE_NONE;
         element.payload[i++] = 0x00;
         element.payload[i++] = (uint8_t)(FILE_VERSION & 0xFF);
