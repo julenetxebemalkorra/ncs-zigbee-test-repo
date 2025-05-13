@@ -35,6 +35,7 @@
 #include "zigbee_configuration.h"
 #include "tcu_Uart.h"
 #include "Digi_profile.h"
+#include "zigbee_bdb.h"
 #include "zigbee_aps.h"
 #include "Digi_At_commands.h"
 #include "Digi_node_discovery.h"
@@ -94,9 +95,6 @@
 /*UART Modbus and zigbee buffer size definitions*/
 #define MODBUS_MIN_RX_LENGTH                8   // if the messagge has 8 bytes we consider it a modbus frame
 
-#define SIGNAL_STEERING_ATEMP_COUNT_MAX     3  // Number of steering attempts before local reset
-#define RESTART_ATEMP_COUNT_MAX             3  // Number of restart attempts before hardware reset
-
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
 uint16_t aps_frames_received_total_counter = 0;
@@ -106,8 +104,6 @@ uint16_t aps_frames_received_commissioning_cluster_counter = 0;
 uint16_t tcu_uart_frames_transmitted_counter = 0;
 uint16_t tcu_uart_frames_received_counter = 0;
 
-uint8_t soft_reset_counter = 0;
-uint8_t hard_reset_counter = 0;
 
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
@@ -400,97 +396,6 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 	}
     LOG_ERR("Error: bufid is NULL data_indication_cb end");
 	return ZB_TRUE;
-}
-
-/**@brief Zigbee stack event handler.
- *
- * @param[in]   bufid   Reference to the Zigbee stack buffer used to pass signal.
- */
-void zboss_signal_handler(zb_bufid_t bufid)
-{
-	//Read signal description out of memory buffer. */
-	zb_zdo_app_signal_hdr_t *sg_p = NULL;
-	zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
-
-    if(ZB_GET_APP_SIGNAL_STATUS(bufid) != 0)
-    {
-        LOG_ERR("Signal %d failed, status %d", sig, ZB_GET_APP_SIGNAL_STATUS(bufid));
-        return;
-    }
-
-    if( PRINT_ZIGBEE_INFO )
-    {
-        if( sig != ZB_COMMON_SIGNAL_CAN_SLEEP ) // Do not show information about this one, it happens too often!
-        {
-			if( sig == ZB_BDB_SIGNAL_DEVICE_FIRST_START ) LOG_WRN( "SIGNAL 5: Device started for the first time after the NVRAM erase");
-            else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
-			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
-            else if( sig == ZB_ZDO_SIGNAL_DEVICE_ANNCE ) LOG_WRN(" SIGNAL 2:  Notifies the application about the new device appearance.");
-            else if( sig == ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED) LOG_WRN(" SIGNAL 47: Notifies the Zigbee Trust center application about a new device is authorized in the network");
-			else
-			{
-                if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
-                {
-                    LOG_WRN( "SIGNAL %d , state OK",sig);
-                }
-                else
-                {
-                    LOG_WRN( "SIGNAL %d , state not OK",sig);
-                }
-			}
-        }
-    }
-
-
-    if(sig == ZB_BDB_SIGNAL_STEERING || sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT || sig == ZB_ZDO_SIGNAL_LEAVE)
-    {
-        soft_reset_counter++;
-        LOG_WRN("Device is encountering issues during steering. %d; counter %d", sig, soft_reset_counter);
-        if (soft_reset_counter >= SIGNAL_STEERING_ATEMP_COUNT_MAX)
-        {
- 			if(PRINT_ZIGBEE_INFO)
- 			{	
-            	zb_uint16_t parnet_node = zb_nwk_get_parent();
-                if(parnet_node != 0xffff)
-                {
-                    LOG_WRN("Device has joined a coordinator, but there might be an issue. Parent Node: 0x%04x", parnet_node);
-                }
-                else
-                {
-                    LOG_WRN( "device has not joined a coordinator.");
-                }
-        	}	
-
-            LOG_WRN( "The device will perform the NLME leave and clean all Zigbee persistent data except the outgoing NWK frame counter and application datasets");
-            g_b_reset_zigbee_cmd = ZB_TRUE;
-            soft_reset_counter = 0;
-            hard_reset_counter++;
-        }
-        if(hard_reset_counter >= RESTART_ATEMP_COUNT_MAX)
-        {
-            LOG_ERR( "device restarted since it is not able to join any network");
-            
-            // Reboot the device
-            g_b_reset_cmd = ZB_TRUE;
-            hard_reset_counter = 0;
-        }
-    }
-
-	/* No application-specific behavior is required.
-	 * Call default signal handler.
-	 */
-    ZB_ERROR_CHECK(zigbee_default_signal_handler(bufid));
-
-	/* All callbacks should either reuse or free passed buffers.
-	 * If bufid == 0, the buffer is invalid (not passed).
-	 */
-	if (bufid)
-	{
-		// safe way to free buffer
-        zb_osif_disable_all_inter();
-        zb_buf_free(bufid);
-        zb_osif_enable_all_inter();	
-    }
 }
 
 static void task_wdt_callback(int channel_id, void *user_data)

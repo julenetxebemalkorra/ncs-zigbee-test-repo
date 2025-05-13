@@ -13,6 +13,7 @@ project(dual_wireless_test_uart)
 # NORDIC SDK APP START
 target_sources(app PRIVATE
   src/main.c
+  src/zigbee_bdb.c
   src/Tcu_Uart.c
   src/zigbee_aps.c
   src/zigbee_configuration.c
