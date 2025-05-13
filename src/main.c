@@ -654,7 +654,7 @@ void zigbee_configuration()
 
     // Define a distributed key thsi is Zigbee Alliance key
     zb_uint8_t network_key[16] = {0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39};
-    zb_uint8_t network_link_key[16] = {0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39};
+    zb_uint8_t network_link_key[16];
 
     zb_conf_get_network_link_key(network_link_key);
 
@@ -755,56 +755,6 @@ void log_ext_address(zb_uint8_t *addr)
 {
     LOG_INF("%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x", 
         addr[7], addr[6], addr[5], addr[4], addr[3], addr[2], addr[1], addr[0]);
-}
-
-/* Callback for neighbor table response */
-void get_lqi_cb(zb_uint8_t param)
-{
-    zb_bufid_t buf = param;
-    zb_uint8_t *zdp_cmd = zb_buf_begin(buf);
-    zb_zdo_mgmt_lqi_resp_t *resp = (zb_zdo_mgmt_lqi_resp_t *)(zdp_cmd);
-    zb_zdo_neighbor_table_record_t *record = (zb_zdo_neighbor_table_record_t *)(resp + 1);
-    zb_uint_t i;
-
-    LOG_INF("LQI callback status: %hd, neighbor_table_entries: %hd, start_index: %hd, neighbor_table_list_count: %d",
-        resp->status, resp->neighbor_table_entries, resp->start_index, resp->neighbor_table_list_count);
-
-    /* Iterate over the list of neighbors */
-    for (i = 0; i < resp->neighbor_table_list_count; i++)
-    {
-        LOG_INF("#%hd: Long Addr: ", i);
-        log_ext_address(record->ext_addr);  // Print extended address
-        LOG_INF("PAN ID: ");
-        log_ext_address(record->ext_pan_id);  // Print PAN ID
-
-        LOG_INF("Network Addr: %d, Dev Type: %hd, Rx On Idle: %hd, Relationship: %hd, Permit Join: %hd, Depth: %hd, LQI: %hd",
-            record->network_addr,
-            ZB_ZDO_RECORD_GET_DEVICE_TYPE(record->type_flags),
-            ZB_ZDO_RECORD_GET_RX_ON_WHEN_IDLE(record->type_flags),
-            ZB_ZDO_RECORD_GET_RELATIONSHIP(record->type_flags),
-            record->permit_join,
-            record->depth,
-            record->lqi);
-
-        record++;
-    }
-
-    zb_buf_free(buf);  // Free buffer after processing
-}
-
-
-/* Send LQI (Neighbor Table) request */
-void send_lqi_request(zb_bufid_t buf)
-{
-    zb_uint8_t tsn;
-    zb_zdo_mgmt_lqi_param_t *req_param;
-
-    req_param = ZB_BUF_GET_PARAM(buf, zb_zdo_mgmt_lqi_param_t);
-    req_param->start_index = 0;
-    req_param->dst_addr = ZIGBEE_COORDINATOR_SHORT_ADDR;
-
-    tsn = zb_zdo_mgmt_lqi_req(buf, get_lqi_cb);
-    LOG_INF("LQI request sent, TSN: %d", tsn);
 }
 
 //------------------------------------------------------------------------------
