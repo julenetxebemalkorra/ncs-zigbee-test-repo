@@ -75,6 +75,7 @@ bool is_a_digi_read_at_command(uint8_t* input_data, int16_t size_of_input_data)
     enum wireless_at_read_cmd_e received_cmd = NO_SUPPORTED_EXT_READ_AT_CMD;
     uint8_t i, j;
     uint16_t uitemp;
+    uint64_t ultemp;
     if (size_of_input_data == 16) // We got this value with the sniffer and reverse engineering
     {
         if ((input_data[1] == 0) && (input_data[2] == 2) && (input_data[12] == 0) && (input_data[13] == 0))
@@ -126,9 +127,9 @@ bool is_a_digi_read_at_command(uint8_t* input_data, int16_t size_of_input_data)
                 }
                 else if (input_data[15] == 'H')
                 {
-                    received_cmd = EXT_READ_AT_CH;  //TODO
+                    received_cmd = EXT_READ_AT_CH;
                     read_cmd_reply_size = 1;
-                    read_cmd_reply[0] = 0x17;
+                    read_cmd_reply[0] = (uint8_t)zb_get_current_channel();
                 }
                 else if (input_data[15] == 'I')
                 {
@@ -306,16 +307,17 @@ bool is_a_digi_read_at_command(uint8_t* input_data, int16_t size_of_input_data)
                 }
                 else if (input_data[15] == 'D')
                 {
-                    received_cmd = EXT_READ_AT_ID; //TODO
+                    received_cmd = EXT_READ_AT_ID;
                     read_cmd_reply_size = 8;
-                    read_cmd_reply[0] = 0x00;
-                    read_cmd_reply[1] = 0x00;
-                    read_cmd_reply[2] = 0x00;
-                    read_cmd_reply[3] = 0x00;
-                    read_cmd_reply[4] = 0x00;
-                    read_cmd_reply[5] = 0x00;
-                    read_cmd_reply[6] = 0x00;
-                    read_cmd_reply[7] = 0x00;
+                    ultemp = digi_at_get_parameter_id();
+                    read_cmd_reply[0] = (uint8_t)((ultemp >> 56) & 0x00000000000000FF);
+                    read_cmd_reply[1] = (uint8_t)((ultemp >> 48) & 0x00000000000000FF);
+                    read_cmd_reply[2] = (uint8_t)((ultemp >> 40) & 0x00000000000000FF);
+                    read_cmd_reply[3] = (uint8_t)((ultemp >> 32) & 0x00000000000000FF);
+                    read_cmd_reply[4] = (uint8_t)((ultemp >> 24) & 0x00000000000000FF);
+                    read_cmd_reply[5] = (uint8_t)((ultemp >> 16) & 0x00000000000000FF);
+                    read_cmd_reply[6] = (uint8_t)((ultemp >> 8)  & 0x00000000000000FF);
+                    read_cmd_reply[7] = (uint8_t)(ultemp & 0x00000000000000FF);
                 }
                 else if (input_data[15] == 'I')
                 {
