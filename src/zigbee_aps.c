@@ -204,21 +204,6 @@ void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
     ZVUNUSED(param);
     zb_ret_t zb_err_code;
 
-    if (zb_buf_is_oom_state()) {
-        // Handle Out Of Memory state
-        LOG_ERR("Buffer pool is out of memory!\n");
-        return;
-    }
-    if (zb_buf_memory_low()) 
-    {
-        // Handle low memory state
-        LOG_WRN("Warning: Buffer pool memory is running low!\n");
-        return;
-    }
-
-    // Trace the buffer statistics for debugging purposes
-    zb_buf_oom_trace();
-
     zb_bufid_t bufid = zb_buf_get_out();
 
     if( bufid ) // If buffer could be allocated, generate frame and schedule the transmission

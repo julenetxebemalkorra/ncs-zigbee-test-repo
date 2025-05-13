@@ -226,40 +226,10 @@ void get_reset_reason(void)
 zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 {
     if(!bufid)
-    {
-        if (zb_buf_is_oom_state()) {
-        // Handle Out Of Memory state
-        LOG_ERR("Buffer pool is out of memory!\n");
-        }
-        if (zb_buf_memory_low()) 
-        {
-            // Handle low memory state
-            LOG_WRN("Warning: Buffer pool memory is running low!\n");
-        }
-    
-        // Trace the buffer statistics for debugging purposes
-        zb_buf_oom_trace();
-        LOG_ERR("Error: bufid is NULL data_indication_cb beggining: bufid status %d", zb_buf_get_status(bufid));
+    {    
+        LOG_ERR("Error: bufid is NULL data_indication_cb beggining");
         return ZB_TRUE;
     } 
-    // Check if the buffer is in a low memory state or out of memory state 
-    // We have seen this error in the lab a couple of times, so we need to check it and handle it properly
-    // This is a workaround to avoid the system to crash when the buffer pool is out of memory
-    // and the buffer is not NULL. We need to free the buffer and set the g_b_reset_zigbee_cmd flag to true.
-    else if (zb_buf_memory_low() || zb_buf_is_oom_state()) 
-    {
-        // Handle Out Of Memory state
-        LOG_ERR("Buffer pool is out of memory!\n");
-        if (bufid)
-        {
-            // safe way to free buffer
-            zb_osif_disable_all_inter();
-            zb_buf_free(bufid);
-            zb_osif_enable_all_inter();
-            g_b_reset_zigbee_cmd = true;
-            return ZB_TRUE;
-        }
-    }
     else
 	{
         zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
@@ -275,26 +245,6 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             LOG_DBG("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes, status %d",
                                                     (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,
                                                     (uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload, zb_buf_get_status(bufid));
-            ////LOG_DBG("  Rx APS Frame:\n");
-            //LOG_DBG("  Frame control (fc): %d\n", ind->fc);
-            ////LOG_DBG("  Destination address: 0x%04X\n", ind->dst_addr);
-            ////LOG_DBG("  Group address: 0x%04X\n", ind->group_addr);
-            //LOG_DBG("  APS counter: %d\n", ind->aps_counter);
-            ////LOG_DBG("  MAC source address: 0x%04X\n", ind->mac_src_addr);
-            ////LOG_DBG("  MAC destination address: 0x%04X\n", ind->mac_dst_addr);
-            ////LOG_DBG("  LQI: %d\n", ind->lqi);
-            ////LOG_DBG("  RSSI: %d\n", ind->rssi);
-            ////LOG_DBG("  APS key source: %d\n", ind->aps_key_source);
-            ////LOG_DBG("  APS key attributes: %d\n", ind->aps_key_attrs);
-            ////LOG_DBG("  APS key from TC: %d\n", ind->aps_key_from_tc);
-            //LOG_DBG("  Extended frame control: %d\n", ind->extended_fc);
-            //LOG_DBG("  Reserved: %d\n", ind->reserved);
-            //LOG_DBG("  Transaction sequence number (TSN): %d\n", ind->tsn);
-            //LOG_DBG("  Block number: %d\n", ind->block_num);
-            //LOG_DBG("  Block acknowledgment: %d\n", ind->block_ack);
-            ////LOG_DBG("  Radius: %d\n", ind->radius);
-            ////LOG_DBG("  Payload size: %d bytes\n", sizeOfPayload);
-            ////LOG_DBG("  Status: %d\n", zb_buf_get_status(bufid));
         }
 
         aps_frames_received_total_counter++;
@@ -384,18 +334,12 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
                     LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
                 }
         }
-	}
-
-    if (bufid)
-    {
-    	// safe way to free buffer
+        // safe way to free buffer
         zb_osif_disable_all_inter();
         zb_buf_free(bufid);
         zb_osif_enable_all_inter();
     	return ZB_TRUE;
 	}
-    LOG_ERR("Error: bufid is NULL data_indication_cb end");
-	return ZB_TRUE;
 }
 
 static void task_wdt_callback(int channel_id, void *user_data)
@@ -682,19 +626,6 @@ void display_counters(void)
                                tcu_uart_frames_transmitted_counter,
                                tcu_uart_frames_received_counter);
 
-        /* Create buffer to send LQI request */
-        /*
-        zb_bufid_t buf = zb_buf_get_out();
-        if (buf)
-        {
-            //Send LQI request to coordinator to get neighbor table
-            send_lqi_request(buf);
-        }
-        else
-        {
-            LOG_ERR("Failed to get buffer for LQI request");
-        }
-        */
     }
 
     if( (uint64_t)( time_now_ms - time_last_ms_thread_manager ) > 1000 )
@@ -713,17 +644,8 @@ void display_counters(void)
     }
  */
 
-    if (zb_buf_is_oom_state()) {
-        // Handle Out Of Memory state
-        LOG_ERR("Buffer pool is out of memory!\n");
-    }
-    if (zb_buf_memory_low()) {
-        // Handle low memory state
-        LOG_WRN("Warning: Buffer pool memory is running low!\n");
-    }
 
-    // Trace the buffer statistics for debugging purposes
-    zb_buf_oom_trace();
+
 }
 
 void check_boot_status(void)
