@@ -646,15 +646,12 @@ void set_extended_pan_id_in_stack(void)
 // Function for initializing the Zigbee configuration
 void zigbee_configuration()
 {
+    zb_uint8_t network_link_key[16];
     /* disable NVRAM erasing on every application startup*/
     zb_set_nvram_erase_at_start(ZB_FALSE);
 
     //TRUE to disable trust center, FALSE to enable trust center
     zb_bdb_set_legacy_device_support(ZB_FALSE);
-
-    // Define a distributed key thsi is Zigbee Alliance key
-    zb_uint8_t network_key[16] = {0x5A, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6C, 0x6C, 0x69, 0x61, 0x6E, 0x63, 0x65, 0x30, 0x39};
-    zb_uint8_t network_link_key[16];
 
     zb_conf_get_network_link_key(network_link_key);
 
@@ -668,13 +665,7 @@ void zigbee_configuration()
     zb_enable_distributed();
     zb_zdo_setup_network_as_distributed();
 
-    // Set the network key Only for development proccess
-    zb_secur_setup_nwk_key(network_key, 0);
-
     set_extended_pan_id_in_stack();
-
-    // Set the device nwkey. This action can help us choose between different nwk keys
-    zb_secur_nwk_key_switch_procedure(0);
 
     // Set the device link key. This action can help us choose between different link keys it has to be distributed TC to all devices
     if(zb_is_network_distributed()) LOG_WRN("Network key is distributed");
