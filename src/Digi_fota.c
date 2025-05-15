@@ -506,14 +506,27 @@ void digi_fota_manager(void)
             {
                 if ((time_now_ms - time_last_attempt_ms) > 5000) // Leave 5 seconds between attempts
                 {
-                    LOG_WRN("Trying to init dfu target; file size: %d", firmware_image.file_size);
+                    LOG_INF("Trying to init dfu target; file size: %d", firmware_image.file_size);
                     ret = OTA_dfu_target_init(firmware_image.file_size);
                     if (ret) {
                         LOG_ERR("dfu_target_init error: %d", ret);
                     }
                     else
                     {
-                        LOG_WRN("dfu_target_init ok");
+                        LOG_INF("dfu_target_init ok");
+                        if(DFUOTA_status[0] == 0x01) // OTA ongoing
+                        {
+                            ret = OTA_dfu_target_get_offset(&file_offset);
+                            if (ret) {
+                                file_offset = 0;
+                                LOG_ERR("dfu_target_get_offset error: %d", ret);
+                            }
+                            else
+                            {
+                                //file_offset = file_offset - 2*STAGING_BUF_SIZE; // Remove the header from the file offset
+                                LOG_WRN("file offset after reset and OTA_dfu_target_init: 0x%2x\n", file_offset);
+                            }
+                        }
                         b_dfu_target_init_done = true;
                     }
                     time_last_attempt_ms = time_now_ms;

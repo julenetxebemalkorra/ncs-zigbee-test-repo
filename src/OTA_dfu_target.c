@@ -23,7 +23,6 @@
 
 LOG_MODULE_REGISTER(OTA_dfu_target, LOG_LEVEL_DBG);
 
-#define STAGING_BUF_SIZE 512
 static uint8_t staging_buf[STAGING_BUF_SIZE];
 
 int_fast8_t check_flash_area(void)
@@ -57,6 +56,17 @@ static void dfu_target_callback_handler(int evt)
         LOG_ERR("DFU target unknown event: %d", evt);
         break;
 	}
+}
+
+int OTA_dfu_target_get_offset(uint32_t *file_offset)
+{
+    int ret = dfu_target_mcuboot_offset_get(file_offset);
+    if (ret != 0) {
+        LOG_ERR("dfu_target_get_offset error: %d", ret);
+    } else {
+        LOG_WRN("file offset: 0x%2x\n", *file_offset);
+    }
+    return ret;
 }
 
 
@@ -93,7 +103,8 @@ int OTA_dfu_target_init(size_t file_size)
 
 int handle_fota_chunk(uint8_t *payload, size_t len, uint32_t *file_offset)
 {
-    size_t offset_before, offset_after;
+    size_t offset_before = 0;
+    size_t offset_after = 0;
 
     if (len <= 0) {
         LOG_ERR("FOTA chunk too short");
