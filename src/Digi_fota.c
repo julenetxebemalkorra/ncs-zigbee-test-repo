@@ -61,17 +61,27 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
 {
     bool b_return = false;
 
-    LOG_WRN("Received fota command size %d", size_of_input_data);
-    //LOG_HEXDUMP_DBG(input_data, size_of_input_data, "Received fota command in hex:");
-
-    if ((size_of_input_data == IMAGE_NOTIFY_CMD_SIZE) && (input_data[2] == IMAGE_NOTIFY_CMD))
+    if ((size_of_input_data == FOTA_STATUS_NOT_OK_CMD_SIZE) && (input_data[4] == NO_IMAGE_AVAILABLE_CMD))
+    {
+        LOG_WRN("Received fota command NO_IMAGE_AVAILABLE_CMD");
+        //digi_fota_switch_state(FUOTA_INIT_STATE_ST);
+    }
+    else if ((size_of_input_data == FOTA_STATUS_NOT_OK_CMD_SIZE) && (input_data[4] == SERVER_NOT_AUTHORIZED_CMD))
+    {
+        LOG_WRN("Received fota command SERVER_NOT_AUTHORIZED_CMD");
+        //digi_fota_switch_state(FUOTA_INIT_STATE_ST);
+    }
+    else if ((size_of_input_data == FOTA_STATUS_NOT_OK_CMD_SIZE) && (input_data[4] == UNSUP_CLUSTER_COMMAND))
+    {
+        LOG_WRN("Received fota command SERVER_NOT_AUTHORIZED_CMD: : unexpected direction in the Frame Control Field of the ZCL Header; unexpected command identifier code value in the ZCL header");
+        //digi_fota_switch_state(FUOTA_INIT_STATE_ST);
+    } 
+    else if ((size_of_input_data == IMAGE_NOTIFY_CMD_SIZE) && (input_data[2] == IMAGE_NOTIFY_CMD))
     {
         LOG_WRN("Received fota command READ_FOTA_IMAGE_NOTIFY");
-        LOG_WRN("Received fota command %d", size_of_input_data);
-        LOG_HEXDUMP_DBG(input_data, size_of_input_data, "Received fota command in hex:");
         command_sequence_number = 0;
         firmware_image.firmware_version = (input_data[12] << 24) | (input_data[11] << 16) | (input_data[10] << 8) | input_data[9];
-        LOG_WRN("firmware version: %d", firmware_image.firmware_version);
+        LOG_INF("firmware version: %d", firmware_image.firmware_version);
         digi_fota_switch_state(FUOTA_IMAGE_NOTIFY_RECEIVED_ST);
         b_return = true;
     }
@@ -81,14 +91,13 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         firmware_image.image_type = (input_data[7] << 8) | input_data[6];
         firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
         firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
-        LOG_WRN("firmware image size: %d", firmware_image.file_size);
-        LOG_WRN("firmware image type: %d", firmware_image.image_type);
-        LOG_WRN("firmware image manufacturer code: %d", firmware_image.manufacturer_code);
-        LOG_WRN("firmware image version: %d", firmware_image.firmware_version);
+        LOG_INF("firmware image size: 0x%08X", firmware_image.file_size);
+        LOG_INF("firmware image type: %d", firmware_image.image_type);
+        LOG_INF("firmware image manufacturer code: %d", firmware_image.manufacturer_code);
+        LOG_INF("firmware image version: %d", firmware_image.firmware_version);
 
-        LOG_WRN("Received fota command QUERY NEXT IMAGE RESPONSE");
+        LOG_INF("Received fota command QUERY NEXT IMAGE RESPONSE");
         command_sequence_number = input_data[1];
-        file_offset = 0;
         digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
         b_return = true;
     }
@@ -101,20 +110,22 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         firmware_image.image_type = (input_data[7] << 8) | input_data[6];
         firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
 
-        LOG_WRN("firmware image size: %d", firmware_image.file_size);
-        LOG_WRN("firmware image type: %d", firmware_image.image_type);
-        LOG_WRN("firmware image manufacturer code: %d", firmware_image.manufacturer_code);
-        LOG_WRN("firmware image version: %d", firmware_image.firmware_version);
-        LOG_WRN("Received file offset: %d", received_file_offset);
+        LOG_INF("firmware image size: 0x%08X", firmware_image.file_size);
+        LOG_INF("firmware image type: %d", firmware_image.image_type);
+        LOG_INF("firmware image manufacturer code: %d", firmware_image.manufacturer_code);
+        LOG_INF("firmware image version: %d", firmware_image.firmware_version);
+        LOG_WRN("Received file offset: 0x%08X", received_file_offset);
         // Calculate and log the OTA progress percentage
         if (firmware_image.file_size > 0) {
             uint8_t progress_percentage = (received_file_offset * 100) / firmware_image.file_size;
             LOG_WRN("OTA Progress: %d%%", progress_percentage);
         } else {
             LOG_ERR("Invalid firmware image size, cannot calculate progress");
+            b_return = true;
+            return;
         }
 
-        LOG_WRN("Received fota command IMAGE BLOCK RESPONSE");
+        LOG_INF("Received fota command IMAGE BLOCK RESPONSE");
         command_sequence_number = input_data[1];
 
         // Check if file offset has the expected value
@@ -124,20 +135,20 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
             int ret = handle_fota_chunk(chunk_data, chunk_len, &file_offset); //Store the chuck in NVRAM and update file_offset
             if (ret != 0)
             {
-                LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
+                LOG_ERR("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
                 LOG_ERR("handle_fota_chunk error: %d", ret);
             }
             else
             {
-                LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                LOG_WRN("handle_fota_chunk ok");
+                LOG_INF("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
+                LOG_INF("handle_fota_chunk ok");
             }
             digi_fota_switch_state(FUOTA_IMAGE_BLOCK_RESPONDED_ST);
         }
         else
         {
-            LOG_WRN("Received fota command IMAGE BLOCK RESPONSE with wrong file offset %d", received_file_offset);
-            LOG_WRN("Expected file offset %d", requested_file_offset);
+            LOG_ERR("Received fota command IMAGE BLOCK RESPONSE with wrong file offset %d", received_file_offset);
+            LOG_ERR("Expected file offset 0x%08X", requested_file_offset);
             digi_fota_switch_state(FUOTA_IMAGE_BLOCK_RESPONDED_ST);
         }
         b_return = true;
@@ -202,7 +213,10 @@ bool digi_fota_send_query_next_image_request_cmd(void)
 bool digi_fota_send_image_block_request_cmd(void)
 {
     bool b_return = false;
+
     requested_file_offset = file_offset + DIGI_FILE_HEADER_SIZE;  // Correct the offset. The first 62 bytes of the file are metadata.
+
+    LOG_WRN("Requested file offset: 0x%08X", requested_file_offset);
 
     if (zigbee_aps_get_output_frame_buffer_free_space())
     {
@@ -320,7 +334,7 @@ void digi_fota_manager(void)
                     }
                     else
                     {
-                        LOG_WRN("Read firmware version succesfully from nvram");
+                        LOG_INF("Read firmware version succesfully from nvram");
                     }
                     ret = read_nvram(DUFOTA_FW_SIZE, firmware_size, sizeof(firmware_size));
                     if (ret <= 0)     
@@ -360,17 +374,17 @@ void digi_fota_manager(void)
         case FUOTA_IMAGE_NOTIFY_RECEIVED_ST:
             if(DFUOTA_status[0] == 0x01) // OTA ongoing
             {
-                LOG_WRN("OTA ongoing already, no need to start it again. check FW version and size");
+                LOG_INF("OTA ongoing already, no need to start it again. check FW version and size");
                 // Check if the image is the same as the one we have, if not, then we can start the download
                 if(firmware_version[0] == firmware_image.firmware_version) // Check if the firmware version is the same
                 {
-                    LOG_WRN("Firmware version is the same, no need to start OTA again");
+                    LOG_INF("Firmware version is the same, no need to start OTA again");
                     digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
                     // Do nothing, wait for a new image
                 }
                 else 
                 {
-                    LOG_WRN("Firmware version installed is different, start OTA again");
+                    LOG_ERR("Firmware version installed is different, start OTA again");
                     firmware_version[0] = firmware_image.firmware_version;
                     write_nvram(DUFOTA_FW_VERSION, firmware_version, sizeof(firmware_version));
                     b_dfu_target_reset_done = false; // Reset the flag to false, we need to reset the dfu target
@@ -380,7 +394,7 @@ void digi_fota_manager(void)
             }
             else if (DFUOTA_status[0] == 0x00) 
             {
-                LOG_WRN("No OTA ongoing, starting it now");
+                LOG_INF("No OTA ongoing, starting it now");
                 b_dfu_target_reset_done = false; // Reset the flag to false, we need to reset the dfu target
                 firmware_version[0] = firmware_image.firmware_version;
                 write_nvram(DUFOTA_FW_VERSION, firmware_version, sizeof(firmware_version));
@@ -408,7 +422,7 @@ void digi_fota_manager(void)
                 ret = dfu_target_mcuboot_reset();
                 if (ret == -ENOENT) 
                 {
-                    LOG_WRN("No existing DFU progress found (nothing to delete)");
+                    LOG_INF("No existing DFU progress found (nothing to delete)");
                     b_dfu_target_reset_done = true;
                 } 
                 else if (ret != 0) 
@@ -423,13 +437,13 @@ void digi_fota_manager(void)
                 }
                 else
                 {
-                    LOG_WRN("dfu_target_mcuboot_reset ok");
+                    LOG_INF("dfu_target_mcuboot_reset ok");
                     b_dfu_target_reset_done = true;
                 }
             }
             else
             {
-                LOG_WRN("dfu_target_mcuboot_reset already done");
+                LOG_INF("dfu_target_mcuboot_reset already done");
                 digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
             }
             break;
@@ -451,16 +465,16 @@ void digi_fota_manager(void)
         case FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST:
             if(DFUOTA_status[0] == 0x01) // OTA ongoing
             {
-                LOG_WRN("OTA ongoing already, no need to start it again. check FW version and size");
+                LOG_INF("OTA ongoing already, no need to start it again. check FW version and size");
                 // Check if the image is the same as the one we have, if not, then we can start the download
                 if(firmware_size[0] == firmware_image.file_size) // Check if the firmware version is the same
                 {
-                    LOG_WRN("Firmware size is the same, no need to start OTA again");
+                    LOG_INF("Firmware size is the same, no need to start OTA again");
                     // Do nothing, wait for a new image
                 }
                 else 
                 {
-                    LOG_WRN("Firmware version installed is different, start OTA again");
+                    LOG_ERR("Firmware version installed is different, start OTA again");
                     firmware_size[0] = firmware_image.file_size;
                     write_nvram(DUFOTA_FW_SIZE, firmware_size, sizeof(firmware_size));
                     b_dfu_target_reset_done = false; // Reset the flag to false, we need to reset the dfu target
@@ -470,7 +484,7 @@ void digi_fota_manager(void)
             }
             else if (DFUOTA_status[0] == 0x00) 
             {
-                LOG_WRN("No OTA ongoing, starting it now");
+                LOG_INF("No OTA ongoing, starting it now");
                 DFUOTA_status[0] = 0x01; // OTA ongoing                    
                 write_nvram(DUFOTA_STATUS, DFUOTA_status, sizeof(DFUOTA_status));
                 firmware_size[0] = firmware_image.file_size;
@@ -483,7 +497,7 @@ void digi_fota_manager(void)
                 LOG_ERR("Unknown OTA status: %d", DFUOTA_status[0]);
                 if ((time_now_ms - time_last_state_transition_ms) > 30000) // More than 30 seconds waiting for reply
                 {
-                    LOG_ERR("NVRAM error, starting OTA fro teh beggining");
+                    LOG_ERR("NVRAM error, starting OTA for the beggining");
                     b_dfu_target_reset_done = false; // Reset the flag to false, we need to reset the dfu target
                     digi_fota_switch_state(FUOTA_INIT_FUOTA_ST);
                 }
@@ -509,7 +523,7 @@ void digi_fota_manager(void)
             {
                 if (digi_fota_send_image_block_request_cmd())
                 {
-                    LOG_WRN("digi_fota_send_image_block_request_cmd ok");
+                    LOG_INF("digi_fota_send_image_block_request_cmd ok");
                     digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST);
                 }
             }
@@ -527,6 +541,8 @@ void digi_fota_manager(void)
             }
             else
             {
+                LOG_WRN("File offset: 0x%08X", file_offset);
+                LOG_WRN("Firmware image size: 0x%08X", firmware_image.file_size);
                 digi_fota_switch_state(FUOTA_MAKE_AN_UPGRADE_END_REQUEST_ST);
             }
             break;
@@ -553,16 +569,16 @@ void digi_fota_manager(void)
             else
             {
                 LOG_WRN("dfu done ok\n");
+                DFUOTA_status[0] = 0x00; // OTA ongoing                    
+                write_nvram(DUFOTA_STATUS, DFUOTA_status, sizeof(DFUOTA_status));
                 dfu_target_mcuboot_schedule_update(0);  // Schedule the update image 0
                 sys_reboot(SYS_REBOOT_COLD);
             }
-            DFUOTA_status[0] = 0x00; // OTA ongoing                    
-            write_nvram(DUFOTA_STATUS, DFUOTA_status, sizeof(DFUOTA_status));
             break;
         case FUOTA_PROCESSING_ERROR_ST:
             // TO DO what if the proccess goes to error state? we need to reset the dfu target and start again
             LOG_ERR("FUOTA_PROCESSING_ERROR_ST, starting OTA from the beggining");
-            digi_fota_switch_state(FUOTA_INIT_STATE_ST);
+            digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
             break;
         default:
             digi_fota_switch_state(FUOTA_INIT_STATE_ST);

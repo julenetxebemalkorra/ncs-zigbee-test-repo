@@ -45,16 +45,16 @@ static void dfu_target_callback_handler(int evt)
 {
     switch (evt) {
     case DFU_TARGET_EVT_TIMEOUT:
-        LOG_WRN("DFU target timeout event");
+        LOG_ERR("DFU target timeout event");
 		break;
 	case DFU_TARGET_EVT_ERASE_DONE:
-        LOG_WRN("DFU target erase done event");
+        LOG_ERR("DFU target erase done event");
 		break;
     case DFU_TARGET_EVT_ERASE_PENDING:
-        LOG_WRN("DFU target erase pending event");
+        LOG_ERR("DFU target erase pending event");
         break;
     default:
-        LOG_WRN("DFU target unknown event: %d", evt);
+        LOG_ERR("DFU target unknown event: %d", evt);
         break;
 	}
 }
@@ -77,12 +77,12 @@ int OTA_dfu_target_init(size_t file_size)
     LOG_WRN("staging_buf addr: %p, size: %d\n", staging_buf, STAGING_BUF_SIZE);
     ret = dfu_target_mcuboot_set_buf(staging_buf, STAGING_BUF_SIZE);
     if (ret < 0) {
-        LOG_WRN("set_buf failed: 0x%x", ret);
+        LOG_ERR("set_buf failed: 0x%x", ret);
     }
 
     ret = dfu_target_mcuboot_init(file_size, 0, dfu_target_callback_handler);
     if (ret) {
-        LOG_WRN("dfu_target_init error: 0x%x\n", ret);
+        LOG_ERR("dfu_target_init error: 0x%x\n", ret);
     }
     else
     {
@@ -124,21 +124,21 @@ int handle_fota_chunk(uint8_t *payload, size_t len, uint32_t *file_offset)
 
     ret = dfu_target_mcuboot_offset_get(&offset_after);
     if (ret != 0) {
-        LOG_WRN("error: failed to get offset after write\n");
+        LOG_ERR("error: failed to get offset after write\n");
     } else {
-        LOG_WRN("offset after write: 0x%2x\n", offset_after);
+        LOG_INF("offset after write: 0x%2x\n", offset_after);
     }
 
     if (offset_after != offset_before + len) {
         *file_offset = offset_before;  // Update file_offset to match the current offset
-        LOG_WRN("error: offset mismatch after write\n");
+        LOG_ERR("error: offset mismatch after write\n");
         ret = -1;  // Indicate error
     } else {
-        LOG_WRN("offset match after write\n");
+        LOG_INF("offset match after write\n");
     }
 
     *file_offset = offset_after;  // Update file_offset for next chunk
-    LOG_WRN("file_offset updated: 0x%2x\n", *file_offset);
+    LOG_WRN("file_offset updated succesfully: 0x%2x\n", *file_offset);
 
     return ret;
 }
