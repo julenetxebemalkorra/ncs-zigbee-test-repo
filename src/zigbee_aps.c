@@ -86,6 +86,7 @@ void check_scheduling_cb_timeout(void)
  */
 void zigbee_aps_user_data_tx_cb(zb_bufid_t bufid)
 {
+    zb_ret_t buf_status;
     if( bufid )
     {
         zb_uint8_t *pointerToBeginOfBuffer;
@@ -100,6 +101,22 @@ void zigbee_aps_user_data_tx_cb(zb_bufid_t bufid)
         nwk_sequence_number = pointerToBeginOfBuffer[16];
         aps_counter = pointerToBeginOfBuffer[24];
         LOG_DBG("Transmission completed, MAC seq = %d, NWK seq = %d, APS counter = %d", mac_sequence_number, nwk_sequence_number, aps_counter);
+
+        buf_status = zb_buf_get_status(bufid);
+        switch ((zb_aps_user_payload_cb_status_t)buf_status)
+        {
+          case ZB_APS_USER_PAYLOAD_CB_STATUS_SUCCESS:
+            LOG_DBG("Transmission status: SUCCESS");
+            break;
+
+          case ZB_APS_USER_PAYLOAD_CB_STATUS_NO_APS_ACK:
+            LOG_WRN("Transmission status: NO APS ACK");
+            break;
+
+          default:
+            LOG_WRN("Transmission status: INVALID");
+            break;
+        }
 
         // safe way to free buffer
         zb_osif_disable_all_inter();
