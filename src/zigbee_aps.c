@@ -216,7 +216,7 @@ uint16_t zigbee_aps_get_output_frame_buffer_free_space(void)
  *
  *
  */
-void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
+/*void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
 {
     ZVUNUSED(param);
     zb_ret_t zb_err_code;
@@ -265,6 +265,53 @@ void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
     }
 
     b_scheduling_cb_pending = false;
+}*/
+
+void zigbee_aps_frame_scheduling_cb2(zb_uint8_t bufid)
+{
+    zb_ret_t zb_err_code;
+
+    if( bufid ) // If buffer could be allocated, generate frame and schedule the transmission
+    {
+        aps_output_frame_t aps_frame;
+        if( dequeue_aps_frame(&aps_frame) ) // First pending frame from the queue
+        {
+            zb_ret_t ret = zb_aps_send_user_payload(bufid,
+                                                    aps_frame.dst_addr,
+                                                    DIGI_PROFILE_ID,
+                                                    aps_frame.cluster_id,
+                                                    aps_frame.src_endpoint,
+                                                    aps_frame.dst_endpoint,
+                                                    ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+                                                    #ifdef APS_ACK_REQUIRED
+                                                    ZB_TRUE,
+                                                    #else
+                                                    ZB_FALSE,
+                                                    #endif
+                                                    aps_frame.payload,
+                                                    aps_frame.payload_size);
+            if(ret == RET_OK) LOG_WRN("Scheduled APS Frame with cluster 0x%x and payload %d bytes", aps_frame.cluster_id, (uint16_t)aps_frame.payload_size);
+            else if(ret == RET_INVALID_PARAMETER_1) LOG_ERR("Transmission could not be scheduled: The buffer is invalid");
+            else if(ret == RET_INVALID_PARAMETER_2) LOG_ERR("Transmission could not be scheduled: The payload_ptr parameter is invalid");
+            else if(ret == RET_INVALID_PARAMETER_3) LOG_ERR("Transmission could not be scheduled: The payload_size parameter is too large");
+            else LOG_ERR("Transmission could not be scheduled: Unkown error");
+        }
+        else
+        {
+            zb_osif_disable_all_inter();
+            zb_buf_free(bufid); // No need to use the buffer is there was not a pending frame in the queue.
+            zb_osif_enable_all_inter();
+            LOG_ERR("Transmission could not be scheduled: No pending output frame in queue");
+        }
+    }
+    else
+    {
+        aps_output_frame_t aps_frame;
+        dequeue_aps_frame(&aps_frame);
+        LOG_ERR("Transmission could not be scheduled: Zigbee Out buffer not allocated");
+    }
+
+    b_scheduling_cb_pending = false;
 }
 
 //------------------------------------------------------------------------------
@@ -281,8 +328,8 @@ void zigbee_aps_manager(void)
         {        
             b_scheduling_cb_pending = true;
             scheduling_cb_timer = SCHEDULING_CB_TIMEOUT_MS;
-
-            ret = ZB_SCHEDULE_APP_CALLBACK(zigbee_aps_frame_scheduling_cb,0);
+            //ret = ZB_SCHEDULE_APP_CALLBACK(zigbee_aps_frame_scheduling_cb,0);
+            ret = zb_buf_get_out_delayed(zigbee_aps_frame_scheduling_cb2);
             if(ret == RET_OK) LOG_DBG("Transmission scheduled");
             else if(ret == RET_OVERFLOW) LOG_ERR("Transmission could not be scheduled: Scheduling failed RET_OVERFLOW");
             else LOG_ERR("Transmission could not be scheduled: Unkown error");
