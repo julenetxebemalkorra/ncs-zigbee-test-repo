@@ -218,7 +218,11 @@ void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
                                                     aps_frame.src_endpoint,
                                                     aps_frame.dst_endpoint,
                                                     ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
+                                                    #ifdef APS_ACK_REQUIRED
                                                     ZB_TRUE,
+                                                    #else
+                                                    ZB_FALSE,
+                                                    #endif
                                                     aps_frame.payload,
                                                     aps_frame.payload_size);
             if(ret == RET_OK) LOG_WRN("Scheduled APS Frame with cluster 0x%x and payload %d bytes", aps_frame.cluster_id, (uint16_t)aps_frame.payload_size);
