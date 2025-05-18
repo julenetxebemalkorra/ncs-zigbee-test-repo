@@ -8,7 +8,7 @@
 
 #define MAXIMUM_SIZE_NODE_IDENTIFIER 20
 #define SIZE_LINK_KEY 16
-//#define APS_ACK_REQUIRED 1
+#define APS_ACK_REQUIRED 1
 
 //Indicadores de alarma     
 extern bool g_b_flash_error;

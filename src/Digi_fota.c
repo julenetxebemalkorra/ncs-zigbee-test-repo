@@ -316,13 +316,16 @@ void digi_fota_manager(void)
             }
             break;
         case FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST:
-            if (digi_fota_send_image_block_request_cmd())
+            if ((time_now_ms - time_last_state_transition_ms) > 200) // Artificial delay of 200 ms to avoid network congestion
             {
-                digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST);
+                if (digi_fota_send_image_block_request_cmd())
+                {
+                    digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST);
+                }
             }
             break;
         case FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST:
-            if ((time_now_ms - time_last_state_transition_ms) > 30000) // More than 30 seconds waiting for reply
+            if ((time_now_ms - time_last_state_transition_ms) > 5000) // More than 5 seconds waiting for reply
             {
                 digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
             }

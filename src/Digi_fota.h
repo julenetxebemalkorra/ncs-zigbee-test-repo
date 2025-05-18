@@ -19,7 +19,7 @@
 #define DIGI_MANUFACTURER_ID 0x101E
 #define CURRENT_FW_VERSION 0x02001010
 #define DIGI_FILE_HEADER_SIZE 62 // A 62 byte header has been added to the bin file to be compatible with DIGI
-#define FILE_BLOCK_MAX_SIZE 49 // With this size, the file fragment can be sent in a single Zigbee packet.
+#define FILE_BLOCK_MAX_SIZE 47 // With this size, the file fragment can be sent in a single Zigbee packet.
 #define FOTA_FIRST_BLOCK_HEADER_SIZE 79 // Adjust based on actual protocol
 #define FOTA_BLOCK_HEADER_SIZE 17 // Adjust based on actual protocol
 
