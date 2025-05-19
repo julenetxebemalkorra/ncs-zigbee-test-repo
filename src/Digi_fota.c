@@ -66,10 +66,11 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         digi_fota_switch_state(FUOTA_IMAGE_NOTIFY_RECEIVED_ST);
         b_return = true;
     }
-    else if ((size_of_input_data == QUERY_NEXT_IMAGE_RESPONDE_CMD_SIZE) && (input_data[2] == QUERY_NEXT_IMAGE_RESPONDE_CMD) && (input_data[3] == FOTA_STATUS_SUCCESS))
+    else if ((input_data[2] == QUERY_NEXT_IMAGE_RESPONDE_CMD) && (input_data[3] == FOTA_STATUS_SUCCESS) &&
+             (size_of_input_data == QUERY_NEXT_IMAGE_RESPONDE_CMD_SIZE))
     {
         LOG_WRN("Received fota command QUERY NEXT IMAGE RESPONSE");
-        if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST)
+        if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST) // Ignore the command if we were not expecting its reception
         {
             firmware_image.manufacturer_code = (input_data[5] << 8) | input_data[4];
             firmware_image.image_type = (input_data[7] << 8) | input_data[6];
@@ -99,31 +100,33 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         }
         b_return = true;
     }
-    else if ((size_of_input_data <= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MAX) && (size_of_input_data >= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MIN) &&
-             (input_data[2] == IMAGE_BLOCK_RESPONSE_CMD) && (input_data[3] == FOTA_STATUS_SUCCESS))
+    else if ((input_data[2] == IMAGE_BLOCK_RESPONSE_CMD) && (input_data[3] == FOTA_STATUS_SUCCESS) &&
+             (size_of_input_data <= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MAX) && (size_of_input_data >= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MIN))
     {
-        uint8_t chunk_len = size_of_input_data - IMAGE_BLOCK_RESPONSE_HEADER_SIZE;
-        uint32_t received_file_offset = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
-
         LOG_WRN("Received fota command IMAGE BLOCK RESPONSE");
-        command_sequence_number = input_data[1];
+        if (fuota_state == FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST) // Ignore the command if we were not expecting its reception
+        {
+            uint8_t chunk_len = size_of_input_data - IMAGE_BLOCK_RESPONSE_HEADER_SIZE;
+            uint32_t received_file_offset = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
+            command_sequence_number = input_data[1];
 
-        // Check if file offset has the expected value
-        if (received_file_offset == requested_file_offset)  // Don't do anything with this frame if offset is not correct.
-        {   
-            const uint8_t *chunk_data = &input_data[IMAGE_BLOCK_RESPONSE_HEADER_SIZE];  // Remove the header from the received payload
-            int ret = handle_fota_chunk(chunk_data, chunk_len, &file_offset); //Store the chuck in NVRAM and update file_offset
-            if (ret != 0)
+            // Check if file offset has the expected value
+            if (received_file_offset == requested_file_offset)  // Ignore the command if the offset is not correct
             {
-                LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                LOG_ERR("handle_fota_chunk error: %d", ret);
+                const uint8_t *chunk_data = &input_data[IMAGE_BLOCK_RESPONSE_HEADER_SIZE];  // Remove the header from the received payload
+                int ret = handle_fota_chunk(chunk_data, chunk_len, &file_offset); //Store the chuck in NVRAM and update file_offset
+                if (ret != 0)
+                {
+                    LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
+                    LOG_ERR("handle_fota_chunk error: %d", ret);
+                }
+                else
+                {
+                    LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
+                    LOG_WRN("handle_fota_chunk ok");
+                }
+                digi_fota_switch_state(FUOTA_IMAGE_BLOCK_RESPONDED_ST);
             }
-            else
-            {
-                LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                LOG_WRN("handle_fota_chunk ok");
-            }
-            digi_fota_switch_state(FUOTA_IMAGE_BLOCK_RESPONDED_ST);
         }
         b_return = true;
     }
