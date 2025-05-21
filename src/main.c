@@ -467,7 +467,7 @@ static int8_t watchdog_init(void)
     // task_wdt_callback - callback function to be called when the watchdog expires
     // my_tid - thread ID of the current thread
     
-	task_wdt_id = task_wdt_add(60000U, task_wdt_callback , my_tid);
+	task_wdt_id = task_wdt_add(2000U, task_wdt_callback , my_tid);
     if (task_wdt_id < 0) {
 		LOG_ERR("task_wdt_add failed: %d", task_wdt_id);
 		return task_wdt_id;
@@ -633,8 +633,8 @@ void display_counters(void)
         zigbee_thread_manager();               // Manage the Zigbee thread
         time_last_ms_thread_manager = time_now_ms;
     }
-/*
-    if ( (uint64_t)( time_now_ms - time_last_ms_wdt ) > 10000 )
+
+    if ( (uint64_t)( time_now_ms - time_last_ms_wdt ) > 1000 )
     {
         int err = task_wdt_feed(task_wdt_id); // Feed the watchdog
         if (err != 0) {
@@ -642,8 +642,6 @@ void display_counters(void)
         }
         time_last_ms_wdt = time_now_ms;
     }
- */
-
 
 
 }
@@ -780,13 +778,13 @@ int main(void)
     digi_node_discovery_init();
     digi_wireless_at_init();
     digi_fota_init();
-/*
+
     ret = watchdog_init();
     if( ret < 0)
     {
         LOG_ERR("watchdog_init error %d", ret);
     }
-*/
+
     ret = tcu_uart_init();
     if( ret < 0)
     {
