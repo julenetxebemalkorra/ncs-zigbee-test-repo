@@ -94,8 +94,11 @@
 /*UART Modbus and zigbee buffer size definitions*/
 #define MODBUS_MIN_RX_LENGTH                8   // if the messagge has 8 bytes we consider it a modbus frame
 
-#define SIGNAL_STEERING_ATEMP_COUNT_MAX     3  // Number of steering attempts before local reset
-#define RESTART_ATEMP_COUNT_MAX             3  // Number of restart attempts before hardware reset
+#define SIGNAL_STEERING_ATEMP_COUNT_MAX     5  // Number of steering attempts before local reset
+#define RESTART_ATEMP_COUNT_MAX             5  // Number of restart attempts before hardware reset
+
+#define BAD_KEY_SEQ_THRESHOLD 5
+static uint8_t bad_key_seq_counter = 0;
 
 uint32_t reset_cause; // Bit register containg the last reset cause.
 
@@ -402,6 +405,53 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 	return ZB_TRUE;
 }
 
+void simple_desc_response_cb(zb_bufid_t bufid)
+{
+    if (!bufid)
+    {
+        if (zb_buf_is_oom_state()) {
+        // Handle Out Of Memory state
+        LOG_ERR("Buffer pool is out of memory!\n");
+        }
+        if (zb_buf_memory_low()) 
+        {
+            // Handle low memory state
+            LOG_WRN("Warning: Buffer pool memory is running low!\n");
+        }
+    
+        // Trace the buffer statistics for debugging purposes
+        zb_buf_oom_trace();
+        LOG_ERR("Error: bufid is NULL simple_desc_response_cb beggining: bufid status %d", zb_buf_get_status(bufid));
+        return ;
+    }
+    else
+    {
+        zb_zdo_simple_desc_resp_t *resp = (zb_zdo_simple_desc_resp_t *)zb_buf_begin(bufid);
+
+        if (resp->hdr.status != ZB_ZDP_STATUS_SUCCESS)
+        {
+            LOG_WRN("Device seems disconnected. Initiating TC rejoin...");
+            zb_bdb_initiate_tc_rejoin(bufid);
+        }
+        else
+        {
+            LOG_INF("Device is still connected. Resetting bad key counter");
+            bad_key_seq_counter = 0;
+        }
+
+        if (bufid)
+        {
+        	// safe way to free buffer
+            zb_osif_disable_all_inter();
+            zb_buf_free(bufid);
+            zb_osif_enable_all_inter();
+        	return ;
+	    }
+
+    }
+
+}
+
 /**@brief Zigbee stack event handler.
  *
  * @param[in]   bufid   Reference to the Zigbee stack buffer used to pass signal.
@@ -409,28 +459,29 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 void zboss_signal_handler(zb_bufid_t bufid)
 {
 	//Read signal description out of memory buffer. */
-	zb_zdo_app_signal_hdr_t *sg_p = NULL;
-	zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
+    zb_zdo_app_signal_hdr_t *sg_p = NULL;
+    zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, &sg_p);
+    zb_ret_t status = ZB_GET_APP_SIGNAL_STATUS(bufid);
 
-    if(ZB_GET_APP_SIGNAL_STATUS(bufid) != 0)
+    if(status != 0)
     {
-        LOG_ERR("Signal %d failed, status %d", sig, ZB_GET_APP_SIGNAL_STATUS(bufid));
+        LOG_INF("Signal %d failed, status %d", sig, ZB_GET_APP_SIGNAL_STATUS(bufid));
     }
 
     if( PRINT_ZIGBEE_INFO )
     {
         if( sig != ZB_COMMON_SIGNAL_CAN_SLEEP ) // Do not show information about this one, it happens too often!
         {
-			if( sig == ZB_BDB_SIGNAL_DEVICE_FIRST_START ) LOG_WRN( "SIGNAL 5: Device started for the first time after the NVRAM erase");
-            else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_WRN( "SIGNAL 6: Device started using the NVRAM contents");
+			if( sig == ZB_BDB_SIGNAL_DEVICE_FIRST_START ) LOG_INF( "SIGNAL 5: Device started for the first time after the NVRAM erase");
+            else if( sig == ZB_BDB_SIGNAL_DEVICE_REBOOT ) LOG_INF( "SIGNAL 6: Device started using the NVRAM contents");
 			else if( sig == ZB_BDB_SIGNAL_STEERING_CANCELLED ) LOG_WRN( "SIGNAL 55: BDB steering cancel request processed");
-            else if( sig == ZB_ZDO_SIGNAL_DEVICE_ANNCE ) LOG_WRN(" SIGNAL 2:  Notifies the application about the new device appearance.");
-            else if( sig == ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED) LOG_WRN(" SIGNAL 47: Notifies the Zigbee Trust center application about a new device is authorized in the network");
+            else if( sig == ZB_ZDO_SIGNAL_DEVICE_ANNCE ) LOG_INF(" SIGNAL 2:  Notifies the application about the new device appearance.");
+            else if( sig == ZB_ZDO_SIGNAL_DEVICE_AUTHORIZED) LOG_INF(" SIGNAL 47: Notifies the Zigbee Trust center application about a new device is authorized in the network");
 			else
 			{
                 if (ZB_GET_APP_SIGNAL_STATUS(bufid) == 0)
                 {
-                    LOG_WRN( "SIGNAL %d , state OK",sig);
+                    LOG_INF( "SIGNAL %d , state OK",sig);
                 }
                 else
                 {
@@ -440,8 +491,64 @@ void zboss_signal_handler(zb_bufid_t bufid)
         }
     }
 
+    // https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/releases_and_maturity/known_issues.html#zigbee
+    // NCSIDB-1411: Clearing configuration data is not fully performed when processing the Leave Network command
 
-    if(sig == ZB_BDB_SIGNAL_STEERING || sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT || sig == ZB_ZDO_SIGNAL_LEAVE)
+
+    if(sig == ZB_ZDO_SIGNAL_LEAVE)
+    // Device leaves the network.
+    if (status == RET_OK) 
+    {
+        LOG_WRN("Device leaves the network");
+        zb_zdo_signal_leave_params_t *leave_params =
+            ZB_ZDO_SIGNAL_GET_PARAMS(sig, zb_zdo_signal_leave_params_t);
+
+        if (leave_params->leave_type == ZB_NWK_LEAVE_TYPE_RESET) {
+           // Workaround for NCSIDB-1411 - clearing ZCL Reporting parameters. 
+           LOG_WRN("Clearing ZCL Reporting parameters");
+           zb_zcl_init_reporting_info();
+        }
+    }
+   
+
+    if(sig == ZB_NLME_STATUS_INDICATION)
+    {
+        zb_zdo_signal_nlme_status_indication_params_t *nlme_status_ind =
+            ZB_ZDO_SIGNAL_GET_PARAMS(sig, zb_zdo_signal_nlme_status_indication_params_t);
+        /* Device leaves the network. */
+        if (status == RET_OK) 
+        {
+
+
+            if (nlme_status_ind->nlme_status.status == ZB_NWK_COMMAND_STATUS_BAD_KEY_SEQUENCE_NUMBER)
+            {
+                LOG_WRN("Received BAD_KEY_SEQUENCE_NUMBER status");
+                bad_key_seq_counter++;
+                if (bad_key_seq_counter >= BAD_KEY_SEQ_THRESHOLD)
+                {
+                    LOG_WRN("Threshold reached. Checking network connection...");
+                    // Allocate buffer to send Simple Descriptor Request
+                    zb_bufid_t req_buf = zb_buf_get_out();
+                    if (req_buf)
+                    {
+                        LOG_WRN("Sending Simple Desc Req to coordinator");
+                        // Example: Send to coordinator (short addr = 0x0000, endpoint 0x00)
+                        zb_bufid_t req_buf = zb_buf_get_out();
+                        zb_zdo_simple_desc_req_t *req = ZB_BUF_GET_PARAM(req_buf, zb_zdo_simple_desc_req_t);
+                        req->nwk_addr = ZIGBEE_COORDINATOR_SHORT_ADDR;       // address of coordinator
+                        req->endpoint = APP_TEMPLATE_ENDPOINT;
+                        zb_zdo_simple_desc_req(req_buf, simple_desc_response_cb);
+                    }
+                    else
+                    {
+                        LOG_ERR("Unable to allocate buffer for simple desc request");
+                    }
+                }
+            }
+        }
+    }
+
+    if(sig == ZB_BDB_SIGNAL_STEERING || sig == ZB_NWK_SIGNAL_NO_ACTIVE_LINKS_LEFT || sig == ZB_ZDO_SIGNAL_LEAVE || sig == ZB_BDB_SIGNAL_TC_REJOIN_DONE )
     {
         soft_reset_counter++;
         LOG_WRN("Device is encountering issues during steering. %d; counter %d", sig, soft_reset_counter);
@@ -606,8 +713,8 @@ static int8_t watchdog_init(void)
     // Register this thread
     k_tid_t my_tid = k_current_get();
 
-    LOG_INF("Registering task watchdog for thread: %p", my_tid);
-    LOG_INF("Thread name: %s", k_thread_name_get(my_tid));
+    LOG_WRN("Registering task watchdog for thread: %p", my_tid);
+    LOG_WRN("Thread name: %s", k_thread_name_get(my_tid));
 
     /*
 	 * Add a new task watchdog channel with custom callback function and
@@ -617,13 +724,15 @@ static int8_t watchdog_init(void)
     // task_wdt_callback - callback function to be called when the watchdog expires
     // my_tid - thread ID of the current thread
     
-	task_wdt_id = task_wdt_add(60000U, task_wdt_callback , my_tid);
+	task_wdt_id = task_wdt_add(20000U, task_wdt_callback , my_tid);
     if (task_wdt_id < 0) {
 		LOG_ERR("task_wdt_add failed: %d", task_wdt_id);
 		return task_wdt_id;
 	}
-
-	LOG_INF("Task WDT initialized with channel %d", task_wdt_id);
+    else
+    {
+        LOG_WRN("task_wdt_add success: %d", task_wdt_id);
+    }
 
     return 0;
 }
@@ -688,7 +797,7 @@ void zigbee_configuration()
  */
 void diagnostic_toogle_pin()
 {
-    if(debug_led_ms_x10 >= 10000)
+    if(debug_led_ms_x10 >= 1000)
     {
         debug_led_ms_x10 = 0;
         gpio_pin_toggle_dt(&led);
@@ -855,16 +964,20 @@ void display_counters(void)
         zigbee_thread_manager();               // Manage the Zigbee thread
         time_last_ms_thread_manager = time_now_ms;
     }
-/*
-    if ( (uint64_t)( time_now_ms - time_last_ms_wdt ) > 10000 )
+
+    if ( (uint64_t)( time_now_ms - time_last_ms_wdt ) > 1000 )
     {
         int err = task_wdt_feed(task_wdt_id); // Feed the watchdog
         if (err != 0) {
             LOG_ERR("task_wdt_feed failed: %d", err);
         }
+        else 
+        {
+            //LOG_WRN("task_wdt_feed success");
+        }
         time_last_ms_wdt = time_now_ms;
     }
- */
+ 
 
     if (zb_buf_is_oom_state()) {
         // Handle Out Of Memory state
@@ -941,31 +1054,20 @@ void check_boot_status(void)
  */
 static void confirm_image(void)
 {
-    int swap_type = mcuboot_swap_type();
-    LOG_INF("MCUboot swap type: %d", swap_type);
-
-    if (swap_type == BOOT_SWAP_TYPE_REVERT || swap_type == BOOT_SWAP_TYPE_TEST) 
+    if (!boot_is_img_confirmed()) 
     {
-        LOG_INF("Image in test/revert mode. Confirming image...\n");
-
-        int ret = boot_request_upgrade(BOOT_UPGRADE_PERMANENT); // Request upgrade if needed
-        if (ret < 0) {
-            LOG_ERR("Failed to request upgrade: %d\n", ret);
-        } else {
-            LOG_INF("Upgrade requested successfully.\n");
+        int ret = boot_write_img_confirmed();
+        if (ret != 0) {
+            LOG_ERR("Failed to confirm image: %d", ret);
+        } 
+        else 
+        {
+            LOG_INF("Marked image as OK");
         }
-
-    } 
+    }
     else 
     {
-        LOG_INF("Image already confirmed or not in test/revert mode.");
-    }
-
-    int rc = boot_write_img_confirmed();
-    if (rc == 0) {
-        LOG_INF("Image confirmed successfully.");
-    } else {
-        LOG_ERR("Image confirmation failed: %d", rc);
+        LOG_INF("Image already confirmed");
     }
 }
 
@@ -1028,13 +1130,13 @@ int main(void)
     digi_node_discovery_init();
     digi_wireless_at_init();
     digi_fota_init();
-/*
+
     ret = watchdog_init();
     if( ret < 0)
     {
         LOG_ERR("watchdog_init error %d", ret);
     }
-*/
+
     ret = tcu_uart_init();
     if( ret < 0)
     {
