@@ -10,7 +10,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
-
+#include <zephyr/sys/reboot.h>
 #include <zboss_api.h>
 
 #include <zigbee/zigbee_app_utils.h>
@@ -19,67 +19,28 @@
 //#include <zb_osif_platform.h>
 //#include <zboss_api_buf.h>
 #include "zigbee_bdb.h"
+#include "global_defines.h"
+#include "zigbee_device_profile.h"
+#include "zigbee_aps.h"
 
 /* Local variables                                                            */
+static bool b_not_detected_coordinator_activity_since_boot;
+static bool b_coordinator_is_active;
+static uint64_t time_last_frame_received_from_coordinator_ms;
+
 
 LOG_MODULE_REGISTER(BDB, LOG_LEVEL_DBG);
 
-#define BAD_KEY_SEQ_THRESHOLD 5
-
-#define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
-
-/* Device endpoint, used to receive ZCL commands. */
-#define APP_TEMPLATE_ENDPOINT               232
-
-static uint8_t bad_key_seq_counter = 0;
-
-
-void simple_desc_response_cb(zb_bufid_t bufid)
+/**@brief Initializes local variables of the zigbee_bdb module.
+ *
+ */
+void zigbee_bdb_init(void)
 {
-    if (!bufid)
-    {
-        if (zb_buf_is_oom_state()) {
-        // Handle Out Of Memory state
-        LOG_ERR("Buffer pool is out of memory!\n");
-        }
-        if (zb_buf_memory_low()) 
-        {
-            // Handle low memory state
-            LOG_WRN("Warning: Buffer pool memory is running low!\n");
-        }
-    
-        // Trace the buffer statistics for debugging purposes
-        zb_buf_oom_trace();
-        LOG_ERR("Error: bufid is NULL simple_desc_response_cb beggining: bufid status %d", zb_buf_get_status(bufid));
-        return ;
-    }
-    else
-    {
-        zb_zdo_simple_desc_resp_t *resp = (zb_zdo_simple_desc_resp_t *)zb_buf_begin(bufid);
-
-        if (resp->hdr.status != ZB_ZDP_STATUS_SUCCESS)
-        {
-            LOG_WRN("Device seems disconnected. Initiating TC rejoin...");
-            zb_bdb_initiate_tc_rejoin(bufid);
-        }
-        else
-        {
-            LOG_INF("Device is still connected. Resetting bad key counter");
-            bad_key_seq_counter = 0;
-        }
-
-        if (bufid)
-        {
-        	// safe way to free buffer
-            zb_osif_disable_all_inter();
-            zb_buf_free(bufid);
-            zb_osif_enable_all_inter();
-        	return ;
-	    }
-
-    }
-
+    b_not_detected_coordinator_activity_since_boot = true;
+    b_coordinator_is_active = false;
+    time_last_frame_received_from_coordinator_ms = 0;
 }
+
 
 /**@brief Zigbee stack event handler.
  *
@@ -96,64 +57,18 @@ void zboss_signal_handler(zb_bufid_t bufid)
         signal_type         = zb_get_app_signal(bufid, &sg_p);
         signal_status_code  = ZB_GET_APP_SIGNAL_STATUS(bufid);
 
-        if(signal_type != ZB_COMMON_SIGNAL_CAN_SLEEP ) // Do not log this annoying signal. It is sent every second approx.
+        if (signal_type != ZB_COMMON_SIGNAL_CAN_SLEEP ) // Do not log this annoying signal. It is sent every second approx.
         {
             LOG_WRN("Event signal. Type %u, status code %" PRId32, signal_type, signal_status_code);
         }
 
-           // https://docs.nordicsemi.com/bundle/ncs-latest/page/nrf/releases_and_maturity/known_issues.html#zigbee
-        // NCSIDB-1411: Clearing configuration data is not fully performed when processing the Leave Network command
-
-
-        if(signal_type == ZB_ZDO_SIGNAL_LEAVE)
-        // Device leaves the network.
-        if (signal_status_code == RET_OK) 
+        if (signal_type == ZB_ZDO_SIGNAL_LEAVE)
         {
-            LOG_WRN("Device leaves the network");
-            zb_zdo_signal_leave_params_t *leave_params =
-                ZB_ZDO_SIGNAL_GET_PARAMS(signal_type, zb_zdo_signal_leave_params_t);
-
-            if (leave_params->leave_type == ZB_NWK_LEAVE_TYPE_RESET) {
-               // Workaround for NCSIDB-1411 - clearing ZCL Reporting parameters. 
-               LOG_WRN("Clearing ZCL Reporting parameters");
-               zb_zcl_init_reporting_info();
-            }
-        }
-    
-
-        if(signal_type == ZB_NLME_STATUS_INDICATION)
-        {
-            zb_zdo_signal_nlme_status_indication_params_t *nlme_status_ind =
-                ZB_ZDO_SIGNAL_GET_PARAMS(signal_type, zb_zdo_signal_nlme_status_indication_params_t);
-            /* Device leaves the network. */
-            if (signal_status_code == RET_OK) 
+            if (signal_status_code == RET_OK)
             {
-
-
-                if (nlme_status_ind->nlme_status.status == ZB_NWK_COMMAND_STATUS_BAD_KEY_SEQUENCE_NUMBER)
+                if (g_b_reset_mcu_after_leaving_network)
                 {
-                    LOG_WRN("Received BAD_KEY_SEQUENCE_NUMBER status");
-                    bad_key_seq_counter++;
-                    if (bad_key_seq_counter >= BAD_KEY_SEQ_THRESHOLD)
-                    {
-                        LOG_WRN("Threshold reached. Checking network connection...");
-                        // Allocate buffer to send Simple Descriptor Request
-                        zb_bufid_t req_buf = zb_buf_get_out();
-                        if (req_buf)
-                        {
-                            LOG_WRN("Sending Simple Desc Req to coordinator");
-                            // Example: Send to coordinator (short addr = 0x0000, endpoint 0x00)
-                            zb_bufid_t req_buf = zb_buf_get_out();
-                            zb_zdo_simple_desc_req_t *req = ZB_BUF_GET_PARAM(req_buf, zb_zdo_simple_desc_req_t);
-                            req->nwk_addr = ZIGBEE_COORDINATOR_SHORT_ADDR;       // address of coordinator
-                            req->endpoint = APP_TEMPLATE_ENDPOINT;
-                            zb_zdo_simple_desc_req(req_buf, simple_desc_response_cb);
-                        }
-                        else
-                        {
-                            LOG_ERR("Unable to allocate buffer for simple desc request");
-                        }
-                    }
+                    sys_reboot(SYS_REBOOT_COLD);
                 }
             }
         }
@@ -163,4 +78,99 @@ void zboss_signal_handler(zb_bufid_t bufid)
         zb_buf_free(bufid);
         zb_osif_enable_all_inter();
     }
+}
+
+/** @brief Resets the variables used for detecting coordinator activity.
+ *
+ */
+void zigbee_bdb_coordinator_activity_detected(void)
+{
+    if (b_not_detected_coordinator_activity_since_boot) b_not_detected_coordinator_activity_since_boot = false;
+    b_coordinator_is_active = true;
+    time_last_frame_received_from_coordinator_ms = k_uptime_get();
+}
+
+/** @brief Evaluates the presence of the coordinator and resets the module if no coordinator activity is detected.
+ *
+ */
+void zigbee_bdb_network_watchdog(void)
+{
+    static uint64_t time_last_ieee_address_request_sent_to_coordinator_ms = 0;
+    static uint8_t num_attempts_detect_coordinator = 0;
+    uint64_t time_now_ms = k_uptime_get();
+
+    if (zb_zdo_joined())
+    {
+        if (b_coordinator_is_active)
+        {
+            if ((time_now_ms - time_last_frame_received_from_coordinator_ms) > MAX_TIME_NO_FRAMES_FROM_COORDINATOR)
+            {
+                b_coordinator_is_active = false;
+                time_last_ieee_address_request_sent_to_coordinator_ms = 0;
+                num_attempts_detect_coordinator = 0;
+            }
+        }
+        else
+        {
+            if (num_attempts_detect_coordinator < MAX_ATTEMPS_DETECT_COORDINATOR)
+            {
+                if ((time_now_ms - time_last_ieee_address_request_sent_to_coordinator_ms) > TIME_INTERVAL_BETWEEN_IEEE_ADD_REQ_TO_ZC)
+                {
+                   if (request_coordinator_ieee_address())
+                    {
+                        time_last_ieee_address_request_sent_to_coordinator_ms = time_now_ms;
+                        num_attempts_detect_coordinator++;
+                    }
+                }
+            }
+            else
+            {
+                g_b_reset_zigbee_cmd = true;  // Leave the network and start steering process
+                //zb_set_nvram_erase_at_start(ZB_TRUE);
+                //sys_reboot(SYS_REBOOT_COLD);
+            }
+        }
+    }
+    else
+    {
+        b_coordinator_is_active = false;
+        time_last_ieee_address_request_sent_to_coordinator_ms = time_now_ms;
+        num_attempts_detect_coordinator = 0;
+    }
+}
+
+/**@brief This function adds to the APS output frame queue a coordinator IEEE request address.
+*
+* @return The function returns a bool. TRUE if frame could be added to the queue.
+*/
+bool request_coordinator_ieee_address(void)
+{
+    static uint8_t sequence_number = 0;
+    bool b_return = false;
+
+    if( zigbee_aps_get_output_frame_buffer_free_space() )
+    {
+        uint8_t i;
+        aps_output_frame_t element;
+
+        element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.profile_id = ZIGBEE_DEVICE_PROFILE_ID;
+        element.cluster_id = IEEE_ADDRESS_REQUEST_CLUSTER;
+        element.src_endpoint = ZIGBEE_DEVICE_OBJECT_SOURCE_ENDPOINT;
+        element.dst_endpoint = ZIGBEE_DEVICE_OBJECT_DESTINATION_ENDPOINT;
+        i = 0;
+        sequence_number++;
+        element.payload[i++] = sequence_number;
+        element.payload[i++] = COORDINATOR_SHORT_ADDRESS_LOWER_BYTE;
+        element.payload[i++] = COORDINATOR_SHORT_ADDRESS_HIGHER_BYTE;
+        element.payload[i++] = IEEE_ADDRESS_REQUEST_TYPE;
+        element.payload[i++] = SINGLE_REPLY_START_INDEX;
+        element.payload_size = (zb_uint8_t)i;
+        LOG_WRN("Request coordinator IEEE address");
+        if( enqueue_aps_frame(&element) ) b_return = true;
+    }
+
+    if( !b_return ) LOG_ERR("Not free space of aps output frame queue");
+
+    return b_return;
 }

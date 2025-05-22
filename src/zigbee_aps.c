@@ -140,6 +140,7 @@ bool enqueue_aps_frame(aps_output_frame_t *element)
         if( element->payload_size <= APS_UNENCRYPTED_PAYLOAD_MAX )
         {
             aps_output_frame_buffer.data[aps_output_frame_buffer.head].dst_addr = element->dst_addr;
+            aps_output_frame_buffer.data[aps_output_frame_buffer.head].profile_id = element->profile_id;
             aps_output_frame_buffer.data[aps_output_frame_buffer.head].cluster_id = element->cluster_id;
             aps_output_frame_buffer.data[aps_output_frame_buffer.head].dst_endpoint = element->dst_endpoint;
             aps_output_frame_buffer.data[aps_output_frame_buffer.head].src_endpoint = element->src_endpoint;
@@ -180,6 +181,7 @@ bool dequeue_aps_frame(aps_output_frame_t *element)
     if( aps_output_frame_buffer.used_space > 0 )
     {
         element->dst_addr = aps_output_frame_buffer.data[aps_output_frame_buffer.tail].dst_addr;
+        element->profile_id = aps_output_frame_buffer.data[aps_output_frame_buffer.tail].profile_id;
         element->cluster_id = aps_output_frame_buffer.data[aps_output_frame_buffer.tail].cluster_id;
         element->dst_endpoint = aps_output_frame_buffer.data[aps_output_frame_buffer.tail].dst_endpoint;
         element->src_endpoint = aps_output_frame_buffer.data[aps_output_frame_buffer.tail].src_endpoint;
@@ -230,7 +232,7 @@ uint16_t zigbee_aps_get_output_frame_buffer_free_space(void)
         {
             zb_ret_t ret = zb_aps_send_user_payload(bufid,
                                                     aps_frame.dst_addr,
-                                                    DIGI_PROFILE_ID,
+                                                    aps_frame.profile_id,
                                                     aps_frame.cluster_id,
                                                     aps_frame.src_endpoint,
                                                     aps_frame.dst_endpoint,
@@ -278,7 +280,7 @@ void zigbee_aps_frame_scheduling_cb2(zb_uint8_t bufid)
         {
             zb_ret_t ret = zb_aps_send_user_payload(bufid,
                                                     aps_frame.dst_addr,
-                                                    DIGI_PROFILE_ID,
+                                                    aps_frame.profile_id,
                                                     aps_frame.cluster_id,
                                                     aps_frame.src_endpoint,
                                                     aps_frame.dst_endpoint,

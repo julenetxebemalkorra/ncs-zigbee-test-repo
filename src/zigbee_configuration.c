@@ -25,6 +25,7 @@ enum nvram_status_t status = NVRAM_WRONG_DATA;
 
 bool g_b_flash_write_cmd = false; //   Flag to indicate that a write command has been received
 bool g_b_reset_zigbee_cmd = false; // Flag to indicate that a reset command has been received
+bool g_b_reset_mcu_after_leaving_network = false; // Flag to indicate that the MCU should reset after leaving the network
 bool g_b_reset_cmd = false; // Flag to indicate that a reset command has been received
 bool g_b_nvram_write_done = true; // Flag to indicate that the NVRAM write operation has been completed
 
@@ -396,13 +397,17 @@ void zigbee_thread_manager(void)
     // and the g_b_reset_cmd realices the reset of the whole system
     if(g_b_reset_zigbee_cmd)
     {
-        g_b_reset_zigbee_cmd = false;
         int ret = ZB_SCHEDULE_APP_CALLBACK(zb_bdb_reset_via_local_action, 0);
+        if(ret == RET_OK)
+        {
+            g_b_reset_zigbee_cmd = false;
+            g_b_reset_mcu_after_leaving_network = true;
+            LOG_WRN("Zigbee reset");
+        }
         if(ret != RET_OK)
         {
             LOG_ERR("zb_bdb_reset_via_local_action failed, ret %d", ret);
         }
-        LOG_WRN("Zigbee reset");
     }
 
     if (g_b_reset_cmd)

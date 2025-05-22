@@ -543,6 +543,7 @@ bool tcu_uart_send_received_frame_through_zigbee(void)
         aps_output_frame_t element;
 
         element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.profile_id = DIGI_PROFILE_ID;
         element.cluster_id = DIGI_BINARY_VALUE_CLUSTER;
         element.src_endpoint = DIGI_BINARY_VALUE_SOURCE_ENDPOINT;
         element.dst_endpoint = DIGI_BINARY_VALUE_DESTINATION_ENDPOINT;

@@ -35,6 +35,7 @@
 #include "zigbee_configuration.h"
 #include "tcu_Uart.h"
 #include "Digi_profile.h"
+#include "zigbee_device_profile.h"
 #include "zigbee_bdb.h"
 #include "zigbee_aps.h"
 #include "Digi_At_commands.h"
@@ -232,11 +233,17 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
     } 
     else
 	{
-        zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
-
         zb_uint8_t *pointerToBeginOfBuffer;
         zb_uint8_t *pointerToEndOfBuffer;
         zb_int32_t sizeOfPayload;
+
+        zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
+
+        if (ind->src_addr == COORDINATOR_SHORT_ADDRESS)
+        {
+            zigbee_bdb_coordinator_activity_detected();
+        }
+
         pointerToBeginOfBuffer = zb_buf_begin(bufid);
         pointerToEndOfBuffer = zb_buf_end(bufid);
         sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
@@ -322,6 +329,12 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             {
                 if(PRINT_ZIGBEE_INFO) LOG_DBG("PING");
             }
+        }
+        else if( ( ind->clusterid == IEEE_ADDRESS_RESPONSE_CLUSTER ) &&
+            ( ind->src_endpoint == ZIGBEE_DEVICE_OBJECT_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == ZIGBEE_DEVICE_OBJECT_DESTINATION_ENDPOINT ) )
+        {
+            LOG_WRN("IEEE address response received");
         }
         else
         {
@@ -778,6 +791,7 @@ int main(void)
     digi_node_discovery_init();
     digi_wireless_at_init();
     digi_fota_init();
+    zigbee_bdb_init();
 
     ret = watchdog_init();
     if( ret < 0)
@@ -828,6 +842,7 @@ int main(void)
         digi_wireless_read_at_command_manager(); // Manage the read AT commands received through Zigbee
         digi_fota_manager();                     // FUOTA state machine
         zigbee_aps_manager();                    // Manage the aps output frame queue
+        zigbee_bdb_network_watchdog();           // Network watchdog
         nvram_manager();                         // Manage the NVRAM
         tcu_uart_manager();                     // Manage the TCU UART
 

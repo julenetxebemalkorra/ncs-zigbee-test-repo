@@ -741,6 +741,7 @@ bool digi_wireless_read_at_cmd_reply(void)
         aps_output_frame_t element;
 
         element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.profile_id = DIGI_PROFILE_ID;
         element.cluster_id = DIGI_AT_COMMAND_REPLY_CLUSTER;
         element.src_endpoint = DIGI_AT_COMMAND_SOURCE_ENDPOINT;
         element.dst_endpoint = DIGI_AT_COMMAND_DESTINATION_ENDPOINT;
@@ -776,6 +777,7 @@ bool digi_wireless_ping_reply(void)
         aps_output_frame_t element;
 
         element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.profile_id = DIGI_PROFILE_ID;
         element.cluster_id = DIGI_AT_PONG_CLUSTER;
         element.src_endpoint = DIGI_AT_PONG_SOURCE_ENDPOINT;
         element.dst_endpoint = DIGI_AT_PONG_DESTINATION_ENDPOINT;

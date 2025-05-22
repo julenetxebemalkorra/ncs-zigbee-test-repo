@@ -160,6 +160,7 @@ bool digi_fota_send_query_next_image_request_cmd(void)
         aps_output_frame_t element;
 
         element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.profile_id = DIGI_PROFILE_ID;
         element.cluster_id = DIGI_FOTA_CLUSTER;
         element.src_endpoint = DIGI_BINARY_VALUE_SOURCE_ENDPOINT;
         element.dst_endpoint = DIGI_BINARY_VALUE_DESTINATION_ENDPOINT;
@@ -199,6 +200,7 @@ bool digi_fota_send_image_block_request_cmd(void)
         aps_output_frame_t element;
 
         element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.profile_id = DIGI_PROFILE_ID;
         element.cluster_id = DIGI_FOTA_CLUSTER;
         element.src_endpoint = DIGI_BINARY_VALUE_SOURCE_ENDPOINT;
         element.dst_endpoint = DIGI_BINARY_VALUE_DESTINATION_ENDPOINT;
@@ -242,6 +244,7 @@ bool digi_fota_send_upgrade_end_request_cmd(void)
         aps_output_frame_t element;
 
         element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.profile_id = DIGI_PROFILE_ID;
         element.cluster_id = DIGI_FOTA_CLUSTER;
         element.src_endpoint = DIGI_BINARY_VALUE_SOURCE_ENDPOINT;
         element.dst_endpoint = DIGI_BINARY_VALUE_DESTINATION_ENDPOINT;

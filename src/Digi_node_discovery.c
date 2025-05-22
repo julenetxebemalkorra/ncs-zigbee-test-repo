@@ -84,6 +84,7 @@ bool digi_node_discovery_reply(void)
         zb_ieee_addr_t zb_long_address; // MAC address of this node
 
         element.dst_addr.addr_short = COORDINATOR_SHORT_ADDRESS;
+        element.profile_id = DIGI_PROFILE_ID;
         element.cluster_id = DIGI_COMMISSIONING_REPLY_CLUSTER;
         element.src_endpoint = DIGI_COMMISSIONING_SOURCE_ENDPOINT;
         element.dst_endpoint = DIGI_COMMISSIONING_DESTINATION_ENDPOINT;

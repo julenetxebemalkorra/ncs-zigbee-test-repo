@@ -12,6 +12,7 @@
 
 typedef struct {
     zb_addr_u dst_addr;
+    zb_uint16_t profile_id;
     zb_uint16_t cluster_id;
     zb_uint8_t dst_endpoint;
     zb_uint8_t src_endpoint;
