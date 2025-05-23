@@ -14,6 +14,7 @@
 #include <zigbee/zigbee_error_handler.h>
 #include "zigbee_aps.h"
 #include "Digi_profile.h"
+#include "global_defines.h"
 
 #define SCHEDULING_CB_TIMEOUT_MS 50000 // Tiempo límite en milisegundos para enviar un frame APS
 #define SYSTEM_TICK_MS 1              // Tiempo de tick del sistema en milisegundos
