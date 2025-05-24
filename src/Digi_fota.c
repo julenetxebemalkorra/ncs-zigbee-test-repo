@@ -42,6 +42,8 @@ void digi_fota_init(void)
     time_last_attempt_ms = 0;
     attempt_counter = 0;
     command_sequence_number = 0;
+    file_offset = 0;
+    requested_file_offset = 0;
 }
 
 /**@brief This function evaluates if the last received APS frame is a Digi's read AT command
@@ -72,30 +74,55 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         LOG_WRN("Received fota command QUERY NEXT IMAGE RESPONSE");
         if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST) // Ignore the command if we were not expecting its reception
         {
-            firmware_image.manufacturer_code = (input_data[5] << 8) | input_data[4];
-            firmware_image.image_type = (input_data[7] << 8) | input_data[6];
-            firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
-            firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
-            if (firmware_image.file_size > DIGI_FILE_HEADER_SIZE)
+            if (file_offset > 0) // We are in the middle of an upgrade
             {
-                firmware_image.file_size = firmware_image.file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
+                uint32_t new_firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
+                uint32_t new_file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
+                if (new_file_size > DIGI_FILE_HEADER_SIZE)
+                {
+                    new_file_size = new_file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
+                }
+                else
+                {
+                    new_file_size = 0;
+                }
+                if ((new_firmware_version == firmware_image.firmware_version) && (new_file_size == firmware_image.file_size)) // Check if it is the same file
+                {
+                    LOG_WRN("It is the same bin file. Continue with the upgrade");
+                    digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
+                }
+                else
+                {
+                    LOG_WRN("It is a different bin file. Cancel previous upgrade and start a new one");
+                    file_offset = 0;
+                }
             }
-            else
+            if (file_offset == 0)
             {
-                firmware_image.file_size = 0;
-            }
-            command_sequence_number = input_data[1];
-            if ((firmware_image.manufacturer_code == DIGI_MANUFACTURER_ID) && (firmware_image.file_size > 0))
-            {
-                LOG_WRN("It is a valid image for this device");
-                file_offset = 0;
-                digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
+                firmware_image.manufacturer_code = (input_data[5] << 8) | input_data[4];
+                firmware_image.image_type = (input_data[7] << 8) | input_data[6];
+                firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
+                firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
+                if (firmware_image.file_size > DIGI_FILE_HEADER_SIZE)
+                {
+                    firmware_image.file_size = firmware_image.file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
+                }
+                else
+                {
+                    firmware_image.file_size = 0;
+                }
+                command_sequence_number = input_data[1];
+                if ((firmware_image.manufacturer_code == DIGI_MANUFACTURER_ID) && (firmware_image.file_size > 0))
+                {
+                    LOG_WRN("It is a valid image for this device");
+                    digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
 
-            }
-            else
-            {
-                LOG_WRN("It is not a valid image for this device");
-                digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                }
+                else
+                {
+                    LOG_WRN("It is not a valid image for this device");
+                    digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                }
             }
         }
         b_return = true;
