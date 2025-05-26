@@ -11,8 +11,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/reboot.h>
-
-#include <zboss_api.h>
+#include "app_version.h"
+#include <zboss_api.h>>
 #include <dfu/dfu_target.h>
 #include <dfu/dfu_target_mcuboot.h>
 
@@ -115,6 +115,7 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
                 if ((firmware_image.manufacturer_code == DIGI_MANUFACTURER_ID) && (firmware_image.file_size > 0))
                 {
                     LOG_WRN("It is a valid image for this device");
+                    LOG_WRN("Tamaño del archivo: 0x%08X", firmware_image.file_size);
                     digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
 
                 }
@@ -124,6 +125,15 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
                     digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
                 }
             }
+        }
+        b_return = true;
+    }
+    else if ((input_data[2] == QUERY_NEXT_IMAGE_RESPONDE_CMD) &&
+             ((input_data[3] == FOTA_STATUS_NO_IMAGE_AVAILABLE) || (input_data[3] == FOTA_STATUS_NOT_AUTHORIZED)))
+    {
+        if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST) // Ignore the command if we were not expecting its reception
+        {
+            digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
         }
         b_return = true;
     }
@@ -200,10 +210,10 @@ bool digi_fota_send_query_next_image_request_cmd(void)
         element.payload[i++] = (uint8_t)(DIGI_MANUFACTURER_ID >> 8); // High byte of manufacturer code
         element.payload[i++] = 0x01; // Image type 0x0001
         element.payload[i++] = 0x00;
-        element.payload[i++] = (uint8_t)(CURRENT_FW_VERSION & 0xFF);
-        element.payload[i++] = (uint8_t)((CURRENT_FW_VERSION >> 8) & 0xFF);
-        element.payload[i++] = (uint8_t)((CURRENT_FW_VERSION >> 16) & 0xFF);
-        element.payload[i++] = (uint8_t)(CURRENT_FW_VERSION >> 24);
+        element.payload[i++] = APP_VERSION_MINOR;
+        element.payload[i++] = APP_VERSION_MAJOR;
+        element.payload[i++] = 0x00; // TODO: Hardcoded to 0x00. Can be changed?
+        element.payload[i++] = 0x01; // TODO: Hardcoded to 0x20. Software compatibility number Can be changed?
 
         element.payload_size = (zb_uint8_t)i;
         if( enqueue_aps_frame(&element) ) b_return = true;
