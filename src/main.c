@@ -316,10 +316,7 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
             ( ind->src_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) &&
             ( ind->dst_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) )
         {
-            if( is_a_digi_fota_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
-            {
-                if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee read FOTA related command received");
-            }
+            is_a_digi_fota_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload);
         }
         else if( ( ind->clusterid == DIGI_AT_PING_CLUSTER ) &&
             ( ind->src_endpoint == DIGI_AT_PING_SOURCE_ENDPOINT ) &&

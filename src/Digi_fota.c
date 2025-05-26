@@ -166,7 +166,7 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
     }
     else
     {
-        LOG_WRN("Received unkown fota command");
+        LOG_ERR("FOTA COMMAND %u, de longitud %u, y estado %u", input_data[2], size_of_input_data, input_data[3]);
         b_return = false;
     }
     return b_return;
