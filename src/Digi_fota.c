@@ -31,6 +31,7 @@ static struct firmware_image_t firmware_image;     // Structure describing firmw
 static uint8_t command_sequence_number;
 static uint32_t file_offset;
 static uint32_t requested_file_offset;
+static uint16_t current_firmware_version;          // Major(MSB) Minor(LSB)
 
 /**@brief This function initializes the Digi_fota firmware module
  *
@@ -44,6 +45,8 @@ void digi_fota_init(void)
     command_sequence_number = 0;
     file_offset = 0;
     requested_file_offset = 0;
+    current_firmware_version = APP_VERSION_MAJOR;
+    current_firmware_version = (current_firmware_version << 8) + APP_VERSION_MINOR;
 }
 
 /**@brief This function evaluates if the last received APS frame is a Digi's read AT command
@@ -103,14 +106,18 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
                 firmware_image.image_type = (input_data[7] << 8) | input_data[6];
                 firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
                 firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
-                if (firmware_image.file_size > DIGI_FILE_HEADER_SIZE)
+                if (current_firmware_version >= 0x100A) // From this firmware version onward, the gateway includes the header size in the file size
                 {
-                    firmware_image.file_size = firmware_image.file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
+                    if (firmware_image.file_size > DIGI_FILE_HEADER_SIZE)
+                    {
+                        firmware_image.file_size = firmware_image.file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
+                    }
+                    else
+                    {
+                        firmware_image.file_size = 0;
+                    }
                 }
-                else
-                {
-                    firmware_image.file_size = 0;
-                }
+
                 command_sequence_number = input_data[1];
                 if ((firmware_image.manufacturer_code == DIGI_MANUFACTURER_ID) && (firmware_image.file_size > 0))
                 {
@@ -229,7 +236,14 @@ bool digi_fota_send_query_next_image_request_cmd(void)
 bool digi_fota_send_image_block_request_cmd(void)
 {
     bool b_return = false;
-    requested_file_offset = file_offset + DIGI_FILE_HEADER_SIZE;  // Correct the offset. The first 62 bytes of the file are metadata.
+    if (current_firmware_version >= 0x100A) // From this firmware version onward, the gateway also sends the metadata of the OTA file (62 bytes)
+    {
+        requested_file_offset = file_offset + DIGI_FILE_HEADER_SIZE;  // Correct the offset. The first 62 bytes of the file are metadata.
+    }
+    else
+    {
+        requested_file_offset = file_offset;
+    }
 
     if (zigbee_aps_get_output_frame_buffer_free_space())
     {
