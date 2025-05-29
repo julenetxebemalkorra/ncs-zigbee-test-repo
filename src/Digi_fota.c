@@ -343,10 +343,21 @@ void digi_fota_manager(void)
         case FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST:
             if ((time_now_ms - time_last_state_transition_ms) > MAX_NEXT_IMAGE_CMD_RESPONSE_TIME_MS)
             {
-                digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
+                if (attempt_counter < MAX_ATTEMPTS_NEXT_IMAGE_REQUEST)
+                {
+                    attempt_counter++;
+                    digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
+                }
+                else
+                {
+                    attempt_counter = 0;
+                    digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                    LOG_ERR("The maximum number of attempts to request the next image has been exceeded");
+                }
             }
             break;
         case FUOTA_NEXT_IMAGE_RESPONDED_ST:
+            attempt_counter = 0;
             digi_fota_switch_state(FUOTA_INIT_DFU_TARGET);
             break;
         case FUOTA_INIT_DFU_TARGET:
@@ -356,15 +367,18 @@ void digi_fota_manager(void)
                 ret = OTA_dfu_target_init(firmware_image.file_size);
                 if (ret == 0)
                 {
+                    attempt_counter = 0;
                     LOG_WRN("OTA_dfu_target_init() succeeded");
                     digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
                 }
                 else
                 {
                     attempt_counter++;
-                    if (attempt_counter >= 3) // Maximum 3 attempts
+                    if (attempt_counter >= MAX_ATTEMPTS_DFU_INIT)
                     {
+                        attempt_counter = 0;
                         digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                        LOG_ERR("The maximum number of attempts to init the dfu has been exceeded");
                     }
                 }
             }
@@ -381,10 +395,21 @@ void digi_fota_manager(void)
         case FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST:
             if ((time_now_ms - time_last_state_transition_ms) > MAX_IMAGE_BLOCK_CMD_RESPONSE_TIME_MS)
             {
-                digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
+                if (attempt_counter < MAX_ATTEMPTS_IMAGE_BLOCK_REQUEST)
+                {
+                    attempt_counter++;
+                    digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
+                }
+                else
+                {
+                    attempt_counter = 0;
+                    digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                    LOG_ERR("The maximum number of attempts to request an image block has been exceeded");
+                }
             }
             break;
         case FUOTA_IMAGE_BLOCK_RESPONDED_ST:
+            attempt_counter = 0;
             if (file_offset < firmware_image.file_size)
             {
                 digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
@@ -403,11 +428,22 @@ void digi_fota_manager(void)
         case FUOTA_WAITING_FOR_UPGRADE_END_RESPONSE_ST:
             if ((time_now_ms - time_last_state_transition_ms) > MAX_UPGRADE_CMD_RESPONSE_TIME_MS)
             {
-                digi_fota_switch_state(FUOTA_MAKE_AN_UPGRADE_END_REQUEST_ST);
+                if (attempt_counter < MAX_ATTEMPTS_UPGRADE_END_REQUEST)
+                {
+                    attempt_counter++;
+                    digi_fota_switch_state(FUOTA_MAKE_AN_UPGRADE_END_REQUEST_ST);
+                }
+                else
+                {
+                    attempt_counter = 0;
+                    digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                    LOG_ERR("The maximum number of attempts to request an upgrade has been exceeded");
+                }
             }
             break;
         case FUOTA_UPGRADE_END_RESPONDED_ST:
             int ret = dfu_target_mcuboot_done(true);
+            attempt_counter = 0;
             if (ret)
             {
                 LOG_ERR("dfu done failed: 0x%x\n", ret);
@@ -437,5 +473,4 @@ void digi_fota_switch_state(enum fuota_state_machine_e new_state)
     fuota_state = new_state;
     time_last_state_transition_ms = k_uptime_get();
     time_last_attempt_ms = 0;
-    attempt_counter = 0;
 }
