@@ -25,8 +25,6 @@
 // NVRAM file system instance for persisting application data
 static struct nvs_fs fs;
 
-static struct zb_user_conf_t zb_user_conf; // zigbee user configuration
-
 LOG_MODULE_REGISTER(nvram_app, LOG_LEVEL_DBG);
 
 /**
@@ -34,7 +32,7 @@ LOG_MODULE_REGISTER(nvram_app, LOG_LEVEL_DBG);
  * 
  * @return The function returns a uint8_t value. (You should describe what this return value represents)
  */
-uint8_t init_nvram(void)
+int8_t init_nvram(void)
 {
     int rc = 0;
     struct flash_pages_info info;
@@ -130,27 +128,5 @@ void write_nvram(uint16_t id, uint8_t *data, size_t len)
     (void)nvs_write(&fs, id, data, len);
 }
 
-/**
- * @brief This function Retrieve the hsitorically saved data entry in the NVRAM
- * 
- * @param id The ID of the data to be read.
- * @param data A pointer to a buffer where the data will be stored.
- * @param len The size of the data to be read.
- * 
- * @return The function returns a uint8_t value. (You should describe what this return value represents)
- */
-void read_nvram_hist(uint16_t id, uint8_t *data, size_t len)
-{
-    ssize_t result = nvs_read_hist(&fs, id, data, len, 0);
-    
-    if (result < 0) {
-        // Handle error
-        LOG_ERR("Error reading data: %zd\n", result);
-    } else {
-        // Successfully read data
-        LOG_DBG("Read %zd bytes of data\n", result);
-        // Process the data as needed
-    }
-}
 
 

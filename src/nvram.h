@@ -13,11 +13,12 @@
 
 enum nvram_id_t {
     ZB_NVRAM_CHECK_ID,
-    RBT_CNT_ID,
-    RBT_CNT_REASON,
     ZB_EXT_PANID,
     ZB_NODE_IDENTIFIER,
     ZB_NETWORK_ENCRYPTION_KEY,
+    DUFOTA_STATUS,
+    DUFOTA_FW_VERSION,
+    DUFOTA_FW_SIZE,
     ZB_CHECKSUM,
 };
 /**
@@ -49,7 +50,7 @@ enum nvram_id_t {
  */
 #define NVS_SECTOR_COUNT          2U
 
-uint8_t init_nvram(void);
+int8_t init_nvram(void);
 uint8_t read_nvram(uint16_t id, uint8_t *data, size_t len);
 void write_nvram(uint16_t id, uint8_t *data, size_t len);
 

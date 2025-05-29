@@ -19,7 +19,7 @@ enum nvram_status_t {
 struct zb_user_conf_t {
     uint64_t extended_pan_id; // Extended pan id
     uint8_t at_ni[MAXIMUM_SIZE_NODE_IDENTIFIER + 1];   // Node identifier string parameter (plus one to include the '\0')
-    uint8_t network_link_key[16];      	// Define a network key (assuming key size of 16 bytes, you might need to adjust based on documentation);
+    uint8_t network_link_key[SIZE_LINK_KEY];      	 // Define a network key (assuming key size of 16 bytes, you might need to adjust based on documentation);
 };
 
 /* Function prototypes (used only internally)                                 */

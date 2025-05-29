@@ -143,7 +143,6 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 void get_reset_reason(void)
 {
     int8_t rc = 0;
-    uint8_t restart_number[1] = {0};
     uint8_t reset_cause_flags[1] = {0};
 
     const zb_char_t *zb_version;
@@ -190,28 +189,6 @@ void get_reset_reason(void)
     else 
 	{
 		LOG_ERR("\n\n negative value on driver specific errors\n\n");
-    }
-    rc = read_nvram(RBT_CNT_ID, restart_number, sizeof(restart_number));
-    if (rc <= 0)     
-    {
-        LOG_ERR("read_nvram error %d", rc);
-    }
-    else
-    {
-        restart_number[0]++;
-        write_nvram(RBT_CNT_ID, restart_number, sizeof(restart_number));
-        LOG_WRN("restart_number, %d\n", restart_number[0]);
-    }
-
-    rc = read_nvram(RBT_CNT_REASON, reset_cause_flags, sizeof(reset_cause_flags));
-    if (rc <= 0)     
-    {
-        LOG_ERR("read_nvram error %d", rc);
-    }
-    else
-    {
-        write_nvram(RBT_CNT_REASON, (uint8_t *)&reset_cause, sizeof(reset_cause));
-        LOG_WRN("reset_cause_flags, %d\n", reset_cause_flags[0]);
     }
 
     hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset

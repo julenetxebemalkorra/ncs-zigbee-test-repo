@@ -21,6 +21,5 @@ extern bool g_b_reset_cmd;
 extern bool g_b_reset_zigbee_cmd;
 extern bool g_b_reset_mcu_after_leaving_network;
 extern bool tcu_transmission_running;
-extern bool g_b_nvram_write_done;
 
 #endif /* GLOBAL_DEFINES_H_ */
