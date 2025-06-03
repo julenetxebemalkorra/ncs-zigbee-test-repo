@@ -105,7 +105,7 @@ int8_t init_nvram(void)
  * @return The function returns a uint8_t value. (You should describe what this return value represents)
  */
 
-uint8_t read_nvram(uint16_t id, uint8_t *data, size_t len)
+int8_t read_nvram(uint16_t id, void *data, size_t len)
 {
     int rc =0;
     rc = nvs_read(&fs, id, data, len);
@@ -120,12 +120,13 @@ uint8_t read_nvram(uint16_t id, uint8_t *data, size_t len)
  * @param panid_size The size of the PAN_ID to be written.
  * 
  * 
- * @return The function returns a uint8_t value. (You should describe what this return value represents)
+ * @return The function returns a int value.
  */
-void write_nvram(uint16_t id, uint8_t *data, size_t len)
+int8_t write_nvram(uint16_t id, void *data, size_t len)
 {
-    // Write the PAN_ID to NVRAM
-    (void)nvs_write(&fs, id, data, len);
+    int rc =0;
+    rc = nvs_write(&fs, id, data, len);
+    return rc;
 }
 
 

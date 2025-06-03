@@ -55,6 +55,7 @@ struct firmware_image_t {
     uint16_t image_type;
     uint32_t firmware_version;
     uint32_t file_size;
+    uint8_t  upgrade_status;
 };
 
 /* Enumerative with the FUOTA state machine states */
@@ -80,6 +81,9 @@ bool digi_fota_send_query_next_image_request_cmd(void);
 bool digi_fota_send_image_block_request_cmd(void);
 bool digi_fota_send_upgrade_end_request_cmd(void);
 void digi_fota_switch_state(enum fuota_state_machine_e new_state);
+void set_in_nvram_fota_is_active(void);
+void set_in_nvram_fota_is_not_active(void);
+bool read_from_nvram_if_fota_is_active(void);
 
 /* Function prototypes used externally                                        */
 void digi_fota_init(void);

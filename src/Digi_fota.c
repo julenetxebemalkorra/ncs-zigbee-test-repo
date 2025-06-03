@@ -12,7 +12,7 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/reboot.h>
 #include "app_version.h"
-#include <zboss_api.h>>
+#include <zboss_api.h>
 #include <dfu/dfu_target.h>
 #include <dfu/dfu_target_mcuboot.h>
 
@@ -20,6 +20,7 @@
 #include "zigbee_aps.h"
 #include "Digi_fota.h"
 #include "OTA_dfu_target.h"
+#include "nvram.h"
 
 LOG_MODULE_REGISTER(Digi_fota, LOG_LEVEL_INF);
 
@@ -327,6 +328,7 @@ void digi_fota_manager(void)
     switch(fuota_state)
     {
         case FUOTA_INIT_STATE_ST:
+            read_from_nvram_if_fota_is_active();
             digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
             break;
         case FUOTA_NO_UPGRADE_IN_PROCESS_ST:
@@ -359,6 +361,7 @@ void digi_fota_manager(void)
         case FUOTA_NEXT_IMAGE_RESPONDED_ST:
             attempt_counter = 0;
             digi_fota_switch_state(FUOTA_INIT_DFU_TARGET);
+            set_in_nvram_fota_is_active();
             break;
         case FUOTA_INIT_DFU_TARGET:
             if ((time_now_ms - time_last_attempt_ms) > 2000) // Leave 2 seconds between attempts
@@ -444,6 +447,7 @@ void digi_fota_manager(void)
         case FUOTA_UPGRADE_END_RESPONDED_ST:
             int ret = dfu_target_mcuboot_done(true);
             attempt_counter = 0;
+            set_in_nvram_fota_is_not_active();
             if (ret)
             {
                 LOG_ERR("dfu done failed: 0x%x\n", ret);
@@ -473,4 +477,86 @@ void digi_fota_switch_state(enum fuota_state_machine_e new_state)
     fuota_state = new_state;
     time_last_state_transition_ms = k_uptime_get();
     time_last_attempt_ms = 0;
+}
+
+/**@brief This function stores in NVRAM a flag indicating that there is a FUOTA process running.
+ * It also stores the fw version and the size of the bin file.
+ *
+ */
+void set_in_nvram_fota_is_active(void)
+{
+    int8_t rc;         // Return code from the write operation
+    firmware_image.upgrade_status = 'A'; //Active
+    rc = write_nvram(DUFOTA_STATUS, (void*)&firmware_image.upgrade_status, sizeof(firmware_image.upgrade_status));
+    rc = rc + write_nvram(DUFOTA_FW_SIZE,(void*)&firmware_image.file_size, sizeof(firmware_image.file_size));
+    rc = rc + write_nvram(DUFOTA_FW_VERSION, (void*)&firmware_image.firmware_version, sizeof(firmware_image.firmware_version));
+}
+
+/**@brief This function stores in NVRAM a flag indicating that there is not a FUOTA process running
+ *
+ */
+void set_in_nvram_fota_is_not_active(void)
+{
+    firmware_image.upgrade_status = 0;
+    firmware_image.file_size = 0;
+    firmware_image.firmware_version = 0;
+    write_nvram(DUFOTA_STATUS, (void*)&firmware_image.upgrade_status, sizeof(firmware_image.upgrade_status));
+    write_nvram(DUFOTA_FW_SIZE,(void*)&firmware_image.file_size, sizeof(firmware_image.file_size));
+    write_nvram(DUFOTA_FW_VERSION, (void*)&firmware_image.firmware_version, sizeof(firmware_image.firmware_version));
+}
+
+/**@brief This function checks if there was FUOTA process running before the last reset
+ *
+ * This function reads from NVRAM the flag indicating if there was a FUOTA process running before the last reset.In that case, it reads the FW version and FW file size.
+ *
+ *
+ * @return Boolean indicating if there was a running FUOTA process before the last reset.
+ */
+bool read_from_nvram_if_fota_is_active(void)
+{
+    bool b_return = false;
+    int8_t rc;
+    uint8_t copy_fuota_status;
+    uint32_t copy_firmware_size;
+    uint32_t copy_firmware_version;
+
+    rc = read_nvram(DUFOTA_STATUS, (void*)&copy_fuota_status, sizeof(copy_fuota_status));
+    if (rc == 1)
+    {
+        rc = read_nvram(DUFOTA_FW_SIZE, (void*)&copy_firmware_size, sizeof(copy_firmware_size));
+        if (rc == 4)
+        {
+            rc = read_nvram(DUFOTA_FW_VERSION, (void*)&copy_firmware_version, sizeof(copy_firmware_version));
+            if (rc == 4)
+            {
+                LOG_ERR("Se han leido los cuatro valores");
+                LOG_ERR("Status %d", copy_fuota_status);
+                LOG_ERR("Tamaño 0x%08X bytes", copy_firmware_size);
+                LOG_ERR("FW version: 0x%08X bytes", copy_firmware_version);
+                if ((copy_fuota_status == 'A') && (copy_firmware_size > 0) && (copy_firmware_version > 0))
+                {
+                    LOG_ERR("Hay proceso de actualizaciona activo");
+                    b_return = true;
+                }
+                else
+                {
+                    LOG_ERR("No hay proceso de actualizaciona activo");
+                }
+            }
+            else
+            {
+                LOG_ERR("No pude leer la version de FW");
+            }
+        }
+        else
+        {
+            LOG_ERR("No pude leer el tamaño de archivo");
+        }
+    }
+    else
+    {
+        LOG_ERR("No pude leer el status del FUOTA");
+    }
+
+    return b_return;
 }

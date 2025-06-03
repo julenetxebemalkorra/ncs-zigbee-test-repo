@@ -51,7 +51,7 @@ enum nvram_id_t {
 #define NVS_SECTOR_COUNT          2U
 
 int8_t init_nvram(void);
-uint8_t read_nvram(uint16_t id, uint8_t *data, size_t len);
-void write_nvram(uint16_t id, uint8_t *data, size_t len);
+int8_t read_nvram(uint16_t id, void *data, size_t len);
+int8_t write_nvram(uint16_t id, void *data, size_t len);
 
 #endif /* NVRAM_H_ */
