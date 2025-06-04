@@ -147,25 +147,27 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         if (fuota_state == FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST) // Ignore the command if we were not expecting its reception
         {
             uint8_t chunk_len = size_of_input_data - IMAGE_BLOCK_RESPONSE_HEADER_SIZE;
-            uint32_t received_file_offset = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
+            uint32_t block_file_offset = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
+            uint32_t block_firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
             command_sequence_number = input_data[1];
-
-            // Check if file offset has the expected value
-            if (received_file_offset == requested_file_offset)  // Ignore the command if the offset is not correct
+            if (block_file_offset == requested_file_offset)  // Ignore the command if the offset is not correct
             {
-                const uint8_t *chunk_data = &input_data[IMAGE_BLOCK_RESPONSE_HEADER_SIZE];  // Remove the header from the received payload
-                int ret = handle_fota_chunk(chunk_data, chunk_len, &file_offset); //Store the chuck in NVRAM and update file_offset
-                if (ret != 0)
+                if (block_firmware_version == firmware_image.firmware_version) // Ignore the command if FW version is not correct
                 {
-                    LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                    LOG_ERR("handle_fota_chunk error: %d", ret);
+                    const uint8_t *chunk_data = &input_data[IMAGE_BLOCK_RESPONSE_HEADER_SIZE];  // Remove the header from the received payload
+                    int ret = handle_fota_chunk(chunk_data, chunk_len, &file_offset); //Store the chuck in NVRAM and update file_offset
+                    if (ret != 0)
+                    {
+                        LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
+                        LOG_ERR("handle_fota_chunk error: %d", ret);
+                    }
+                    else
+                    {
+                        LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
+                        LOG_WRN("handle_fota_chunk ok");
+                    }
+                    digi_fota_switch_state(FUOTA_IMAGE_BLOCK_RESPONDED_ST);
                 }
-                else
-                {
-                    LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                    LOG_WRN("handle_fota_chunk ok");
-                }
-                digi_fota_switch_state(FUOTA_IMAGE_BLOCK_RESPONDED_ST);
             }
         }
         b_return = true;
