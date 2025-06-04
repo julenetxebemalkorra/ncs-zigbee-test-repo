@@ -22,6 +22,9 @@
 #define IMAGE_BLOCK_REQUEST_CMD        0x03
 #define UPGRADE_END_REQUEST_CMD        0x06
 
+// FUOTA SERVER AND CLIENT COMMANDS
+#define DEFAULT_RESPONSE_CMD           0x0B
+
 // FUOTA SERVER COMMAND STATUS CODES
 #define FOTA_STATUS_SUCCESS 0x00
 #define FOTA_STATUS_NO_IMAGE_AVAILABLE 0x98
@@ -34,6 +37,7 @@
 #define IMAGE_BLOCK_RESPONSE_CMD_SIZE_MIN   IMAGE_BLOCK_RESPONSE_HEADER_SIZE + 1
 #define IMAGE_BLOCK_RESPONSE_CMD_SIZE_MAX   IMAGE_BLOCK_RESPONSE_HEADER_SIZE + FILE_BLOCK_MAX_SIZE
 #define UPGRADE_END_RESPONSE_CMD_SIZE       19
+#define DEFAULT_RESPONSE_CMD_SIZE           5
 
 
 #define DIGI_MANUFACTURER_ID 0x101E   // DIGI manufacturer code
@@ -55,13 +59,13 @@ struct firmware_image_t {
     uint16_t image_type;
     uint32_t firmware_version;
     uint32_t file_size;
-    uint8_t  upgrade_status;
 };
 
 /* Enumerative with the FUOTA state machine states */
 enum fuota_state_machine_e{
     FUOTA_INIT_STATE_ST,
-    FUOTA_NO_UPGRADE_IN_PROCESS_ST,
+    FUOTA_UPGRADE_WAS_INTERRUPTED_ST,
+    FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST,
     FUOTA_IMAGE_NOTIFY_RECEIVED_ST,
     FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST,
     FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST,
@@ -83,7 +87,7 @@ bool digi_fota_send_upgrade_end_request_cmd(void);
 void digi_fota_switch_state(enum fuota_state_machine_e new_state);
 void set_in_nvram_fota_is_active(void);
 void set_in_nvram_fota_is_not_active(void);
-bool read_from_nvram_if_fota_is_active(void);
+bool read_from_nvram_if_fota_was_interrupted(void);
 
 /* Function prototypes used externally                                        */
 void digi_fota_init(void);

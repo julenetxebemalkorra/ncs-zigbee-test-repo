@@ -93,6 +93,51 @@ int OTA_dfu_target_init(size_t file_size)
     return 0;
 }
 
+/**@brief Initialization of dfu target when we think that there was fuota upgrade process already started
+ *
+ * @param[in] file_size of the file is getting downloaded.
+ *
+ * @retval Offset of the already started fuota upgrade process. 0 if the initialization process did not success.
+ */
+uint32_t OTA_dfu_target_init_resume_previous_upgrade(size_t file_size)
+{
+    int ret;
+    size_t initial_offset;
+
+    ret = check_flash_area();
+    if (ret != 0)
+    {
+        LOG_ERR("check_flash_area() failed: %d", ret);
+        return 0;
+    }
+    ret = dfu_target_mcuboot_set_buf(staging_buf, STAGING_BUF_SIZE);
+    if (ret != 0)
+    {
+        LOG_ERR("dfu_target_mcuboot_set_buf() failed: %d", ret);
+        return 0;
+    }
+    ret = dfu_target_mcuboot_init(file_size, 0, NULL);
+    if (ret != 0)
+    {
+        LOG_ERR("dfu_target_mcuboot_init() failed: %d", ret);
+        return 0;
+    }
+    ret = dfu_target_mcuboot_offset_get(&initial_offset);
+    if (ret != 0)
+    {
+        LOG_ERR("dfu_target_mcuboot_offset_get() failed: %d", ret);
+        dfu_target_mcuboot_done(false); // Cancel upgrade and release resources
+        return 0;
+    }
+    if (initial_offset > 0)
+    {
+        LOG_ERR("There was a previous FW upgrade in process");
+        return (uint32_t)initial_offset;
+    }
+    dfu_target_mcuboot_done(false); // Cancel upgrade and release resources
+    return 0;
+}
+
 /**@brief Store the last received file chunk
  *
  * @param[in] Pointer to buffer containing the chunk

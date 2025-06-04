@@ -33,6 +33,8 @@ static uint8_t command_sequence_number;            // Sequence number generated 
 static uint32_t file_offset;                       // Address of next fragment of bin file to be written on NVRAM
 static uint32_t requested_file_offset;             // Address of next fragment of ota file to be requested from the server
 static uint16_t current_firmware_version;          // Major(MSB) Minor(LSB)
+static uint32_t interrupted_fuota_firmware_version; // Firmware version of a fuota process that was interrupted by a mcu reset
+static uint32_t interrupted_fuota_file_size;        // File size of a fuota process that was interrupted by a mcu reset
 
 /**@brief This function initializes the Digi_fota firmware module
  *
@@ -48,6 +50,8 @@ void digi_fota_init(void)
     requested_file_offset = 0;
     current_firmware_version = APP_VERSION_MAJOR;
     current_firmware_version = (current_firmware_version << 8) + APP_VERSION_MINOR;
+    interrupted_fuota_firmware_version = 0;
+    interrupted_fuota_file_size = 0;
 }
 
 /**@brief This function evaluates if the last received APS frame is a FUOTA command
@@ -65,8 +69,11 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
     if ((size_of_input_data == IMAGE_NOTIFY_CMD_SIZE) && (input_data[2] == IMAGE_NOTIFY_CMD))
     {
         LOG_WRN("Received fota command READ_FOTA_IMAGE_NOTIFY");
-        command_sequence_number = 0;
-        digi_fota_switch_state(FUOTA_IMAGE_NOTIFY_RECEIVED_ST);
+        if (fuota_state == FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST)
+        {
+            command_sequence_number = 0;
+            digi_fota_switch_state(FUOTA_IMAGE_NOTIFY_RECEIVED_ST);
+        }
         b_return = true;
     }
     else if ((input_data[2] == QUERY_NEXT_IMAGE_RESPONDE_CMD) && (input_data[3] == FOTA_STATUS_SUCCESS) &&
@@ -75,10 +82,10 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         LOG_WRN("Received fota command QUERY NEXT IMAGE RESPONSE");
         if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST) // Ignore the command if we were not expecting its reception
         {
-            if (file_offset > 0) // We are in the middle of an upgrade
+            uint32_t new_firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
+            uint32_t new_file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
+            if (current_firmware_version >= 0x100A) // From this firmware version onward, the gateway includes the header size in the file size
             {
-                uint32_t new_firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
-                uint32_t new_file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
                 if (new_file_size > DIGI_FILE_HEADER_SIZE)
                 {
                     new_file_size = new_file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
@@ -87,9 +94,13 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
                 {
                     new_file_size = 0;
                 }
+            }
+            if (file_offset > 0) // We are in the middle of an upgrade
+            {
                 if ((new_firmware_version == firmware_image.firmware_version) && (new_file_size == firmware_image.file_size)) // Check if it is the same file
                 {
                     LOG_WRN("It is the same bin file. Continue with the upgrade");
+                    command_sequence_number = input_data[1];
                     digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
                 }
                 else
@@ -102,32 +113,19 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
             {
                 firmware_image.manufacturer_code = (input_data[5] << 8) | input_data[4];
                 firmware_image.image_type = (input_data[7] << 8) | input_data[6];
-                firmware_image.firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
-                firmware_image.file_size = (input_data[15] << 24) | (input_data[14] << 16) | (input_data[13] << 8) | input_data[12];
-                if (current_firmware_version >= 0x100A) // From this firmware version onward, the gateway includes the header size in the file size
-                {
-                    if (firmware_image.file_size > DIGI_FILE_HEADER_SIZE)
-                    {
-                        firmware_image.file_size = firmware_image.file_size - DIGI_FILE_HEADER_SIZE; // Do not consider the bytes of the header.
-                    }
-                    else
-                    {
-                        firmware_image.file_size = 0;
-                    }
-                }
-
+                firmware_image.firmware_version = new_firmware_version;
+                firmware_image.file_size = new_file_size;
                 command_sequence_number = input_data[1];
                 if ((firmware_image.manufacturer_code == DIGI_MANUFACTURER_ID) && (firmware_image.file_size > 0))
                 {
                     LOG_WRN("It is a valid image for this device");
                     LOG_WRN("Tamaño del archivo: 0x%08X", firmware_image.file_size);
                     digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
-
                 }
                 else
                 {
                     LOG_WRN("It is not a valid image for this device");
-                    digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                    digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
                 }
             }
         }
@@ -138,7 +136,7 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
     {
         if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST) // Ignore the command if we were not expecting its reception
         {
-            digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+            digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
         }
         b_return = true;
     }
@@ -177,6 +175,11 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
         LOG_WRN("Received fota command UPGRADE_AND_RESPONSE");
         LOG_WRN("OTA finished successfully, now we can reset the device");
         digi_fota_switch_state(FUOTA_UPGRADE_END_RESPONDED_ST);
+        b_return = true;
+    }
+    else if ((size_of_input_data == DEFAULT_RESPONSE_CMD_SIZE) && (input_data[2] == DEFAULT_RESPONSE_CMD))
+    {
+        LOG_ERR("Received fota command DEFAULT RESPONSE to command %u", input_data[3]);
         b_return = true;
     }
     else
@@ -328,10 +331,30 @@ void digi_fota_manager(void)
     switch(fuota_state)
     {
         case FUOTA_INIT_STATE_ST:
-            read_from_nvram_if_fota_is_active();
-            digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+            if (read_from_nvram_if_fota_was_interrupted())
+            {
+                digi_fota_switch_state(FUOTA_UPGRADE_WAS_INTERRUPTED_ST);
+            }
+            else
+            {
+                digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
+            }
             break;
-        case FUOTA_NO_UPGRADE_IN_PROCESS_ST:
+        case FUOTA_UPGRADE_WAS_INTERRUPTED_ST:
+            file_offset = OTA_dfu_target_init_resume_previous_upgrade(interrupted_fuota_file_size);
+            if (file_offset > 0)
+            {
+                firmware_image.firmware_version = interrupted_fuota_firmware_version;
+                firmware_image.file_size = interrupted_fuota_file_size;
+                digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
+            }
+            else
+            {
+                set_in_nvram_fota_is_not_active();
+                digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
+            }
+            break;
+        case FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST:
             break;
         case FUOTA_IMAGE_NOTIFY_RECEIVED_ST:
             digi_fota_switch_state(FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST);
@@ -353,8 +376,12 @@ void digi_fota_manager(void)
                 else
                 {
                     attempt_counter = 0;
-                    digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                    digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
                     LOG_ERR("The maximum number of attempts to request the next image has been exceeded");
+                    if (file_offset > 0)
+                    {
+                        dfu_target_mcuboot_done(false);
+                    }
                 }
             }
             break;
@@ -380,8 +407,9 @@ void digi_fota_manager(void)
                     if (attempt_counter >= MAX_ATTEMPTS_DFU_INIT)
                     {
                         attempt_counter = 0;
-                        digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                        digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
                         LOG_ERR("The maximum number of attempts to init the dfu has been exceeded");
+                        set_in_nvram_fota_is_not_active();
                     }
                 }
             }
@@ -406,7 +434,7 @@ void digi_fota_manager(void)
                 else
                 {
                     attempt_counter = 0;
-                    digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                    digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
                     LOG_ERR("The maximum number of attempts to request an image block has been exceeded");
                 }
             }
@@ -439,7 +467,7 @@ void digi_fota_manager(void)
                 else
                 {
                     attempt_counter = 0;
-                    digi_fota_switch_state(FUOTA_NO_UPGRADE_IN_PROCESS_ST);
+                    digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
                     LOG_ERR("The maximum number of attempts to request an upgrade has been exceeded");
                 }
             }
@@ -486,8 +514,8 @@ void digi_fota_switch_state(enum fuota_state_machine_e new_state)
 void set_in_nvram_fota_is_active(void)
 {
     int8_t rc;         // Return code from the write operation
-    firmware_image.upgrade_status = 'A'; //Active
-    rc = write_nvram(DUFOTA_STATUS, (void*)&firmware_image.upgrade_status, sizeof(firmware_image.upgrade_status));
+    uint8_t upgrade_status = 'A'; //Active
+    rc = write_nvram(DUFOTA_STATUS, (void*)&upgrade_status, sizeof(upgrade_status));
     rc = rc + write_nvram(DUFOTA_FW_SIZE,(void*)&firmware_image.file_size, sizeof(firmware_image.file_size));
     rc = rc + write_nvram(DUFOTA_FW_VERSION, (void*)&firmware_image.firmware_version, sizeof(firmware_image.firmware_version));
 }
@@ -497,10 +525,10 @@ void set_in_nvram_fota_is_active(void)
  */
 void set_in_nvram_fota_is_not_active(void)
 {
-    firmware_image.upgrade_status = 0;
+    uint8_t upgrade_status = 0; //No active
     firmware_image.file_size = 0;
     firmware_image.firmware_version = 0;
-    write_nvram(DUFOTA_STATUS, (void*)&firmware_image.upgrade_status, sizeof(firmware_image.upgrade_status));
+    write_nvram(DUFOTA_STATUS, (void*)&upgrade_status, sizeof(upgrade_status));
     write_nvram(DUFOTA_FW_SIZE,(void*)&firmware_image.file_size, sizeof(firmware_image.file_size));
     write_nvram(DUFOTA_FW_VERSION, (void*)&firmware_image.firmware_version, sizeof(firmware_image.firmware_version));
 }
@@ -512,28 +540,27 @@ void set_in_nvram_fota_is_not_active(void)
  *
  * @return Boolean indicating if there was a running FUOTA process before the last reset.
  */
-bool read_from_nvram_if_fota_is_active(void)
+bool read_from_nvram_if_fota_was_interrupted(void)
 {
     bool b_return = false;
+    uint8_t upgrade_status = 0;
     int8_t rc;
-    uint8_t copy_fuota_status;
-    uint32_t copy_firmware_size;
-    uint32_t copy_firmware_version;
 
-    rc = read_nvram(DUFOTA_STATUS, (void*)&copy_fuota_status, sizeof(copy_fuota_status));
+    rc = read_nvram(DUFOTA_STATUS, (void*)&upgrade_status, sizeof(upgrade_status));
     if (rc == 1)
     {
-        rc = read_nvram(DUFOTA_FW_SIZE, (void*)&copy_firmware_size, sizeof(copy_firmware_size));
+        rc = read_nvram(DUFOTA_FW_SIZE, (void*)&interrupted_fuota_file_size, sizeof(interrupted_fuota_file_size));
         if (rc == 4)
         {
-            rc = read_nvram(DUFOTA_FW_VERSION, (void*)&copy_firmware_version, sizeof(copy_firmware_version));
+            rc = read_nvram(DUFOTA_FW_VERSION, (void*)&interrupted_fuota_firmware_version, sizeof(interrupted_fuota_firmware_version));
             if (rc == 4)
             {
                 LOG_ERR("Se han leido los cuatro valores");
-                LOG_ERR("Status %d", copy_fuota_status);
-                LOG_ERR("Tamaño 0x%08X bytes", copy_firmware_size);
-                LOG_ERR("FW version: 0x%08X bytes", copy_firmware_version);
-                if ((copy_fuota_status == 'A') && (copy_firmware_size > 0) && (copy_firmware_version > 0))
+                LOG_ERR("Status %d", upgrade_status);
+                LOG_ERR("Tamaño 0x%08X bytes", interrupted_fuota_file_size);
+                LOG_ERR("FW version: 0x%08X bytes", interrupted_fuota_firmware_version);
+                if ((upgrade_status == 'A') &&
+                    (interrupted_fuota_file_size > 0) && (interrupted_fuota_firmware_version > 0))
                 {
                     LOG_ERR("Hay proceso de actualizaciona activo");
                     b_return = true;
@@ -556,6 +583,12 @@ bool read_from_nvram_if_fota_is_active(void)
     else
     {
         LOG_ERR("No pude leer el status del FUOTA");
+    }
+
+    if(!b_return)
+    {
+        interrupted_fuota_file_size = 0;
+        interrupted_fuota_firmware_version = 0;
     }
 
     return b_return;
