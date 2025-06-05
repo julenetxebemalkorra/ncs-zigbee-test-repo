@@ -59,27 +59,91 @@ void digi_fota_init(void)
  * @param[in]   input_data   Pointer to payload of received APS frame
  * @param[in]   size_of_input_data   Payload size
  *
- * @retval True It is a valid FUOTA command
+ * @retval True It is a valid FUOTA command and was processed
  * @retval False Otherwise
  */
 bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
 {
     bool b_return = false;
-
-    if ((size_of_input_data == IMAGE_NOTIFY_CMD_SIZE) && (input_data[2] == IMAGE_NOTIFY_CMD))
+    if (input_data[2] == IMAGE_NOTIFY_CMD)
     {
-        LOG_WRN("Received fota command READ_FOTA_IMAGE_NOTIFY");
+        LOG_INF("Received IMAGE NOTIFY command");
+        b_return = process_image_notify_cmd(input_data, size_of_input_data);
+    }
+    else if (input_data[2] == QUERY_NEXT_IMAGE_RESPONSE_CMD)
+    {
+        LOG_INF("Received NEXT IMAGE RESPONSE command");
+        b_return = process_next_image_response_cmd(input_data, size_of_input_data);
+    }
+    else if (input_data[2] == IMAGE_BLOCK_RESPONSE_CMD)
+    {
+        LOG_INF("Received IMAGE BLOCK RESPONSE command");
+        b_return = process_image_block_response_cmd(input_data, size_of_input_data);
+    }
+    else if (input_data[2] == UPGRADE_END_RESPONSE_CMD)
+    {
+        LOG_INF("Received UPGRADE_END_RESPONSE command");
+        b_return = process_upgrade_end_response_cmd(input_data, size_of_input_data);
+    }
+    else if (input_data[2] == DEFAULT_RESPONSE_CMD)
+    {
+        LOG_INF("Received DEFAULT_RESPONSE command");
+        b_return = process_default_response_cmd(input_data, size_of_input_data);
+    }
+    else
+    {
+        LOG_ERR("Received not supported command: %u", input_data[2]);
+    }
+    if (!b_return) LOG_WRN("Command not processed");
+    return b_return;
+}
+
+/**@brief This function processes the image notify command
+ *
+ * @param[in]   input_data   Pointer to buffer containing the command
+ * @param[in]   size_of_input_data   buffer size
+ *
+ * @retval True If the command is accepted and processed
+ * @retval False Otherwise
+ */
+bool process_image_notify_cmd(uint8_t* input_data, int16_t size_of_input_data)
+{
+    bool b_return = false;
+    if (size_of_input_data == IMAGE_NOTIFY_CMD_SIZE)
+    {
         if (fuota_state == FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST)
         {
             command_sequence_number = 0;
             digi_fota_switch_state(FUOTA_IMAGE_NOTIFY_RECEIVED_ST);
+            b_return = true;
         }
-        b_return = true;
     }
-    else if ((input_data[2] == QUERY_NEXT_IMAGE_RESPONDE_CMD) && (input_data[3] == FOTA_STATUS_SUCCESS) &&
-             (size_of_input_data == QUERY_NEXT_IMAGE_RESPONDE_CMD_SIZE))
+    return b_return;
+}
+
+/**@brief This function processes the query next image response  command
+ *
+ * @param[in]   input_data   Pointer to buffer containing the command
+ * @param[in]   size_of_input_data   buffer size
+ *
+ * @retval True If the command is accepted and processed
+ * @retval False Otherwise
+ */
+bool process_next_image_response_cmd(uint8_t* input_data, int16_t size_of_input_data)
+{
+    bool b_return = false;
+    if ((input_data[3] == FOTA_STATUS_NO_IMAGE_AVAILABLE) || (input_data[3] == FOTA_STATUS_NOT_AUTHORIZED))
     {
-        LOG_WRN("Received fota command QUERY NEXT IMAGE RESPONSE");
+        if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST) // Ignore the command if we were not expecting its reception
+        {
+            LOG_WRN("The server does not have a valid image for this node");
+            digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
+            b_return = true;
+        }
+    }
+
+    if ((input_data[3] == FOTA_STATUS_SUCCESS) && (size_of_input_data == QUERY_NEXT_IMAGE_RESPONSE_CMD_SIZE))
+    {
         if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST) // Ignore the command if we were not expecting its reception
         {
             uint32_t new_firmware_version = (input_data[11] << 24) | (input_data[10] << 16) | (input_data[9] << 8) | input_data[8];
@@ -95,11 +159,12 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
                     new_file_size = 0;
                 }
             }
-            if (file_offset > 0) // We are in the middle of an upgrade
+            if (file_offset > 0) // A firmware upgrade is already in process
             {
+                LOG_INF("A firmware upgrade is already in process");
                 if ((new_firmware_version == firmware_image.firmware_version) && (new_file_size == firmware_image.file_size)) // Check if it is the same file
                 {
-                    LOG_WRN("It is the same bin file. Continue with the upgrade");
+                    LOG_INF("It is the same bin file. Continue with the upgrade");
                     command_sequence_number = input_data[1];
                     digi_fota_switch_state(FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST);
                 }
@@ -118,8 +183,8 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
                 command_sequence_number = input_data[1];
                 if ((firmware_image.manufacturer_code == DIGI_MANUFACTURER_ID) && (firmware_image.file_size > 0))
                 {
-                    LOG_WRN("It is a valid image for this device");
-                    LOG_WRN("Tamaño del archivo: 0x%08X", firmware_image.file_size);
+                    LOG_INF("It is a valid image for this device");
+                    LOG_INF("File size: 0x%08X", firmware_image.file_size);
                     digi_fota_switch_state(FUOTA_NEXT_IMAGE_RESPONDED_ST);
                 }
                 else
@@ -128,22 +193,26 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
                     digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
                 }
             }
+            b_return = true;
         }
-        b_return = true;
     }
-    else if ((input_data[2] == QUERY_NEXT_IMAGE_RESPONDE_CMD) &&
-             ((input_data[3] == FOTA_STATUS_NO_IMAGE_AVAILABLE) || (input_data[3] == FOTA_STATUS_NOT_AUTHORIZED)))
+    return b_return;
+}
+
+/**@brief This function processes the image block response command
+ *
+ * @param[in]   input_data   Pointer to buffer containing the command
+ * @param[in]   size_of_input_data   buffer size
+ *
+ * @retval True If the command is accepted and processed
+ * @retval False Otherwise
+ */
+bool process_image_block_response_cmd(uint8_t* input_data, int16_t size_of_input_data)
+{
+    bool b_return = false;
+    if ((input_data[3] == FOTA_STATUS_SUCCESS) &&
+        (size_of_input_data <= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MAX) && (size_of_input_data >= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MIN))
     {
-        if (fuota_state == FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST) // Ignore the command if we were not expecting its reception
-        {
-            digi_fota_switch_state(FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST);
-        }
-        b_return = true;
-    }
-    else if ((input_data[2] == IMAGE_BLOCK_RESPONSE_CMD) && (input_data[3] == FOTA_STATUS_SUCCESS) &&
-             (size_of_input_data <= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MAX) && (size_of_input_data >= IMAGE_BLOCK_RESPONSE_CMD_SIZE_MIN))
-    {
-        LOG_WRN("Received fota command IMAGE BLOCK RESPONSE");
         if (fuota_state == FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST) // Ignore the command if we were not expecting its reception
         {
             uint8_t chunk_len = size_of_input_data - IMAGE_BLOCK_RESPONSE_HEADER_SIZE;
@@ -158,36 +227,53 @@ bool is_a_digi_fota_command(uint8_t* input_data, int16_t size_of_input_data)
                     int ret = handle_fota_chunk(chunk_data, chunk_len, &file_offset); //Store the chuck in NVRAM and update file_offset
                     if (ret != 0)
                     {
-                        LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                        LOG_ERR("handle_fota_chunk error: %d", ret);
+                        LOG_ERR("Received block couldn't be stored in NVRAM: %d", ret);
                     }
-                    else
-                    {
-                        LOG_WRN("File offset + NEXT_IMAGE_SIZE: 0x%08X", file_offset);
-                        LOG_WRN("handle_fota_chunk ok");
-                    }
+                    LOG_INF("Next binary file offset: 0x%08X", file_offset);
+                    b_return = true;
                     digi_fota_switch_state(FUOTA_IMAGE_BLOCK_RESPONDED_ST);
                 }
             }
         }
-        b_return = true;
     }
-    else if ((size_of_input_data == UPGRADE_END_RESPONSE_CMD_SIZE) && (input_data[2] == UPGRADE_END_RESPONSE_CMD))
+    return b_return;
+}
+
+/**@brief This function processes the upgrade end response command
+ *
+ * @param[in]   input_data   Pointer to buffer containing the command
+ * @param[in]   size_of_input_data   buffer size
+ *
+ * @retval True If the command is accepted and processed
+ * @retval False Otherwise
+ */
+bool process_upgrade_end_response_cmd(uint8_t* input_data, int16_t size_of_input_data)
+{
+    bool b_return = false;
+    if (size_of_input_data == UPGRADE_END_RESPONSE_CMD_SIZE)
     {
-        LOG_WRN("Received fota command UPGRADE_AND_RESPONSE");
-        LOG_WRN("OTA finished successfully, now we can reset the device");
+        LOG_INF("OTA finished successfully, now we can reset the device");
         digi_fota_switch_state(FUOTA_UPGRADE_END_RESPONDED_ST);
         b_return = true;
     }
-    else if ((size_of_input_data == DEFAULT_RESPONSE_CMD_SIZE) && (input_data[2] == DEFAULT_RESPONSE_CMD))
+    return b_return;
+}
+
+/**@brief This function processes the fuota default response command
+ *
+ * @param[in]   input_data   Pointer to buffer containing the command
+ * @param[in]   size_of_input_data   buffer size
+ *
+ * @retval True If the command is accepted and processed
+ * @retval False Otherwise
+ */
+bool process_default_response_cmd(uint8_t* input_data, int16_t size_of_input_data)
+{
+    bool b_return = false;
+    if (size_of_input_data == DEFAULT_RESPONSE_CMD_SIZE)
     {
-        LOG_ERR("Received fota command DEFAULT RESPONSE to command %u", input_data[3]);
+        LOG_WRN("Received fota command DEFAULT RESPONSE to command %u", input_data[3]);
         b_return = true;
-    }
-    else
-    {
-        LOG_ERR("FOTA COMMAND %u, de longitud %u, y estado %u", input_data[2], size_of_input_data, input_data[3]);
-        b_return = false;
     }
     return b_return;
 }
@@ -417,7 +503,7 @@ void digi_fota_manager(void)
             }
             break;
         case FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST:
-            if ((time_now_ms - time_last_state_transition_ms) > 200) // Artificial delay of 200 ms to avoid network congestion
+            if ((time_now_ms - time_last_state_transition_ms) > 10) // Artificial delay of 200 ms to avoid network congestion
             {
                 if (digi_fota_send_image_block_request_cmd())
                 {
@@ -557,19 +643,17 @@ bool read_from_nvram_if_fota_was_interrupted(void)
             rc = read_nvram(DUFOTA_FW_VERSION, (void*)&interrupted_fuota_firmware_version, sizeof(interrupted_fuota_firmware_version));
             if (rc == 4)
             {
-                LOG_ERR("Se han leido los cuatro valores");
-                LOG_ERR("Status %d", upgrade_status);
-                LOG_ERR("Tamaño 0x%08X bytes", interrupted_fuota_file_size);
-                LOG_ERR("FW version: 0x%08X bytes", interrupted_fuota_firmware_version);
                 if ((upgrade_status == 'A') &&
                     (interrupted_fuota_file_size > 0) && (interrupted_fuota_firmware_version > 0))
                 {
-                    LOG_ERR("Hay proceso de actualizaciona activo");
+                    LOG_WRN("There was an interrupted fw upgrade process");
+                    LOG_WRN("Bin file size 0x%08X bytes", interrupted_fuota_file_size);
+                    LOG_WRN("FW version: 0x%08X bytes", interrupted_fuota_firmware_version);
                     b_return = true;
                 }
                 else
                 {
-                    LOG_ERR("No hay proceso de actualizaciona activo");
+                    LOG_INF("There was not an interrupted fw upgrade process");
                 }
             }
             else

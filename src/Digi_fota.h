@@ -13,7 +13,7 @@
 
 // FUOTA SERVER COMMANDS
 #define IMAGE_NOTIFY_CMD               0x00
-#define QUERY_NEXT_IMAGE_RESPONDE_CMD  0x02
+#define QUERY_NEXT_IMAGE_RESPONSE_CMD  0x02
 #define IMAGE_BLOCK_RESPONSE_CMD       0x05
 #define UPGRADE_END_RESPONSE_CMD       0x07
 
@@ -32,7 +32,7 @@
 
 // SIZE OF FUOTA SERVER COMMANDS
 #define IMAGE_NOTIFY_CMD_SIZE               13
-#define QUERY_NEXT_IMAGE_RESPONDE_CMD_SIZE  16
+#define QUERY_NEXT_IMAGE_RESPONSE_CMD_SIZE  16
 #define IMAGE_BLOCK_RESPONSE_HEADER_SIZE    17
 #define IMAGE_BLOCK_RESPONSE_CMD_SIZE_MIN   IMAGE_BLOCK_RESPONSE_HEADER_SIZE + 1
 #define IMAGE_BLOCK_RESPONSE_CMD_SIZE_MAX   IMAGE_BLOCK_RESPONSE_HEADER_SIZE + FILE_BLOCK_MAX_SIZE
@@ -81,6 +81,11 @@ enum fuota_state_machine_e{
 };
 
 /* Function prototypes used only internally                                   */
+bool process_image_notify_cmd(uint8_t* input_data, int16_t size_of_input_data);
+bool process_next_image_response_cmd(uint8_t* input_data, int16_t size_of_input_data);
+bool process_image_block_response_cmd(uint8_t* input_data, int16_t size_of_input_data);
+bool process_upgrade_end_response_cmd(uint8_t* input_data, int16_t size_of_input_data);
+bool process_default_response_cmd(uint8_t* input_data, int16_t size_of_input_data);
 bool digi_fota_send_query_next_image_request_cmd(void);
 bool digi_fota_send_image_block_request_cmd(void);
 bool digi_fota_send_upgrade_end_request_cmd(void);
