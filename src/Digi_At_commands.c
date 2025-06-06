@@ -140,21 +140,29 @@ void digi_at_reply_error(void)
  */
 int8_t digi_at_read_ni(uint8_t* buffer)
 {
-    uint8_t i = 0;
-    for(i=0; i<=MAXIMUM_SIZE_NODE_IDENTIFIER; i++)
+    uint8_t i;
+    for (i = 0; i < MAXIMUM_SIZE_NODE_IDENTIFIER; i++)
     {
-        if( xbee_parameters.at_ni[i] == 0 )
+        buffer[i] = xbee_parameters.at_ni[i];
+        if (buffer[i] == 0) // End of string
         {
             break;
         }
-        else
-        {
-            buffer[i] = xbee_parameters.at_ni[i];
-        }
     }
- 
-    buffer[i] = '\r';
-    return(i+1);
+    if (i == 0) // If empty string, send a space
+    {
+        buffer[0] = ' ';
+        buffer[1] = 0;
+        buffer[2] = '\r';
+        return 3;
+    }
+    else
+    {
+        if (buffer[i] != 0) buffer[i] = 0; //String should end with the \0 characterº
+        i++;
+        buffer[i] = '\r';
+        return(i+1);
+    }
 }
 
 /**@brief This function places the link key into a buffer
