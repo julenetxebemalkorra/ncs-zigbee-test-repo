@@ -737,19 +737,13 @@ int main(void)
             if(ret < 0)
             {
                 LOG_ERR("zb_conf_read_from_nvram error %d", ret);
-                g_b_flash_error = ZB_TRUE;
+                //g_b_flash_error = ZB_TRUE;
             }
             else if(ret == 0)
             {
                 LOG_INF("NVRAM data read successfully");
-                g_b_flash_error = ZB_FALSE;
+                //g_b_flash_error = ZB_FALSE;
             }
-            else
-            {
-                LOG_ERR("zb_conf_read_from_nvram error %d", ret);
-                g_b_flash_error = ZB_TRUE;
-            }
-            
         }
         else
         {
