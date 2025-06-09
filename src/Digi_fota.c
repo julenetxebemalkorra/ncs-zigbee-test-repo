@@ -171,6 +171,8 @@ bool process_next_image_response_cmd(uint8_t* input_data, int16_t size_of_input_
                 else
                 {
                     LOG_WRN("It is a different bin file. Cancel previous upgrade and start a new one");
+                    abort_dfu();
+                    set_in_nvram_fota_is_not_active();
                     file_offset = 0;
                 }
             }

@@ -27,6 +27,10 @@ LOG_MODULE_REGISTER(OTA_dfu_target, LOG_LEVEL_INF);
 static uint8_t staging_buf[STAGING_BUF_SIZE] __aligned(32); // The array should be aligned to 32 bits,
 static uint8_t dfu_target_initialized = false;
 
+/**@brief Check that there is a partition available in flash for storing the new image.
+ *
+ * @retval 0 If successful, negative error code otherwise.
+ */
 int_fast8_t check_flash_area(void)
 {
     const struct flash_area *fa;
@@ -150,6 +154,18 @@ uint32_t OTA_dfu_target_init_resume_previous_upgrade(size_t file_size)
     dfu_target_mcuboot_done(false); // Cancel upgrade and release resources
     dfu_target_initialized = false;
     return 0;
+}
+
+/**@brief Abort current dfu and release resources
+ *
+ */
+void abort_dfu(void)
+{
+    if (dfu_target_initialized)
+    {
+        dfu_target_initialized = false;
+        dfu_target_mcuboot_done(false);
+    }
 }
 
 /**@brief Store the last received file chunk
