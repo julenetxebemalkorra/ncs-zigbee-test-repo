@@ -28,7 +28,6 @@
 #include <string.h>
 
 #include <nrfx_timer.h>
-#include <zephyr/drivers/hwinfo.h>
 #include <zephyr/sys/reboot.h>
 
 #include "global_defines.h"
@@ -95,8 +94,6 @@
 /*UART Modbus and zigbee buffer size definitions*/
 #define MODBUS_MIN_RX_LENGTH                8   // if the messagge has 8 bytes we consider it a modbus frame
 
-uint32_t reset_cause; // Bit register containg the last reset cause.
-
 uint16_t aps_frames_received_total_counter = 0;
 uint16_t aps_frames_received_binary_cluster_counter = 0;
 uint16_t aps_frames_received_commissioning_cluster_counter = 0;
@@ -134,58 +131,6 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 /*                           FUNCTION DEFINITIONS                             */
 /*----------------------------------------------------------------------------*/
 
-/**@brief Function to read the reason for the last reset. The reason is printed in the console. */
-void get_reset_reason(void)
-{
-    const zb_char_t *zb_version;
-    // Call the zb_get_version function to get the ZBOSS version string
-    zb_version = zb_get_version();
-
-    // Print the version string
-    LOG_DBG("ZBOSS Version: %s\n", zb_version);
-
-    zb_uint8_t max_children_allowed = zb_get_max_children();
-
-    LOG_DBG("Max children allowed: %d\n", max_children_allowed);
-
-	int result = hwinfo_get_reset_cause(&reset_cause);
-
-    if (result == 0) // Success, reset_cause now contains the reset cause flags
-	{
-        LOG_ERR("RESET:");    
-        if (reset_cause & RESET_PIN)              LOG_WRN("Reset cause: RESET_PIN");
-        if (reset_cause & RESET_SOFTWARE)         LOG_WRN("Reset cause: RESET_SOFTWARE");
-        if (reset_cause & RESET_BROWNOUT)         LOG_WRN("Reset cause: RESET_BROWNOUT");
-        if (reset_cause & RESET_POR)              LOG_WRN("Reset cause: RESET_POR");
-        if (reset_cause & RESET_WATCHDOG)         LOG_WRN("Reset cause: RESET_WATCHDOG");
-        if (reset_cause & RESET_DEBUG)            LOG_WRN("Reset cause: RESET_DEBUG");
-        if (reset_cause & RESET_SECURITY)         LOG_WRN("Reset cause: RESET_SECURITY");
-        if (reset_cause & RESET_LOW_POWER_WAKE)   LOG_WRN("Reset cause: RESET_LOW_POWER_WAKE");
-        if (reset_cause & RESET_CPU_LOCKUP)       LOG_WRN("Reset cause: RESET_CPU_LOCKUP");
-        if (reset_cause & RESET_PARITY)           LOG_WRN("Reset cause: RESET_PARITY");
-        if (reset_cause & RESET_PLL)              LOG_WRN("Reset cause: RESET_PLL");
-        if (reset_cause & RESET_CLOCK)            LOG_WRN("Reset cause: RESET_CLOCK");
-        if (reset_cause & RESET_HARDWARE)         LOG_WRN("Reset cause: RESET_HARDWARE");
-        if (reset_cause & RESET_USER)             LOG_WRN("Reset cause: RESET_USER");
-        if (reset_cause & RESET_TEMPERATURE)      LOG_WRN("Reset cause: RESET_TEMPERATURE");
-    
-        if (reset_cause == 0) {
-            LOG_WRN("No known reset causes detected");
-        }
-
-    } 
-    else if (result == -ENOSYS) 
-	{
-		LOG_ERR("\n\n there is no implementation for the particular device.\n\n");
-    } 
-    else 
-	{
-		LOG_ERR("\n\n negative value on driver specific errors\n\n");
-    }
-
-    hwinfo_clear_reset_cause(); // Clear the hardware flags. In that way we see only the cause of last reset
-
-}
 
 //------------------------------------------------------------------------------
 /**@brief Callback function excuted when AF gets APS packet.
@@ -626,7 +571,7 @@ int main(void)
 {
     int8_t ret = 0;
 
-    LOG_WRN("Starting Zigbee Router");
+    display_system_information();
 
     ret = init_nvram();              // Initialize NVRAM
     if( ret != 0)
@@ -663,8 +608,6 @@ int main(void)
             g_b_flash_error = ZB_TRUE;
         }	
     }
-
-    get_reset_reason();        // Read last reset reason
 
     zigbee_aps_init();
     digi_at_init();

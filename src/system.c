@@ -11,8 +11,11 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/reboot.h>
+#include <zephyr/drivers/hwinfo.h>
 //#include <zephyr/drivers/watchdog.h>
 #include <zephyr/task_wdt/task_wdt.h>
+#include "app_version.h"
+#include <zboss_api.h>
 #include "system.h"
 
 LOG_MODULE_REGISTER(system, LOG_LEVEL_DBG);
@@ -87,4 +90,55 @@ void periodic_feed_of_main_loop_watchdog(void)
         }
         time_last_ms_wdt = time_now_ms;
     }
+}
+
+/// @brief Display system information.
+///
+/// This function will be called after a start up. It displays system information (firmware version,
+/// ZBOSS version, reason of last reset...)
+///
+/// @param None
+void display_system_information(void)
+{
+    const zb_char_t ZB_IAR_CODE *zb_version;
+    uint32_t reset_cause;
+    int result;
+
+    // Display the last reset cause
+    result = hwinfo_get_reset_cause(&reset_cause);
+    if (result == 0)
+	{
+        LOG_ERR("RESET:");
+        if (reset_cause & RESET_PIN)              LOG_WRN("Reset cause: RESET_PIN");
+        if (reset_cause & RESET_SOFTWARE)         LOG_WRN("Reset cause: RESET_SOFTWARE");
+        if (reset_cause & RESET_BROWNOUT)         LOG_WRN("Reset cause: RESET_BROWNOUT");
+        if (reset_cause & RESET_POR)              LOG_WRN("Reset cause: RESET_POR");
+        if (reset_cause & RESET_WATCHDOG)         LOG_WRN("Reset cause: RESET_WATCHDOG");
+        if (reset_cause & RESET_DEBUG)            LOG_WRN("Reset cause: RESET_DEBUG");
+        if (reset_cause & RESET_SECURITY)         LOG_WRN("Reset cause: RESET_SECURITY");
+        if (reset_cause & RESET_LOW_POWER_WAKE)   LOG_WRN("Reset cause: RESET_LOW_POWER_WAKE");
+        if (reset_cause & RESET_CPU_LOCKUP)       LOG_WRN("Reset cause: RESET_CPU_LOCKUP");
+        if (reset_cause & RESET_PARITY)           LOG_WRN("Reset cause: RESET_PARITY");
+        if (reset_cause & RESET_PLL)              LOG_WRN("Reset cause: RESET_PLL");
+        if (reset_cause & RESET_CLOCK)            LOG_WRN("Reset cause: RESET_CLOCK");
+        if (reset_cause & RESET_HARDWARE)         LOG_WRN("Reset cause: RESET_HARDWARE");
+        if (reset_cause & RESET_USER)             LOG_WRN("Reset cause: RESET_USER");
+        if (reset_cause & RESET_TEMPERATURE)      LOG_WRN("Reset cause: RESET_TEMPERATURE");
+
+        if (reset_cause == 0) {
+            LOG_WRN("No known reset causes detected");
+        }
+    }
+    else
+	{
+		LOG_ERR("\n\n It was not possible to read the last reset causes \n\n");
+    }
+
+    hwinfo_clear_reset_cause(); // Clear the reset cause flags. In that way we will see only the cause of last reset
+
+    // Display the APP firmware version
+    LOG_INF("APP firmware version is %u.%u,with patch level %u", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_PATCHLEVEL);
+    // Display the ZBOSS version
+    zb_version = zb_get_version();
+    LOG_INF("ZBOSS Version: %s\n", zb_version);
 }
