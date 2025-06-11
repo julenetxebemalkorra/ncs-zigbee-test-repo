@@ -26,6 +26,7 @@ target_sources(app PRIVATE
   src/nvram.c
   src/Digi_fota.c
   src/OTA_dfu_target.c
+  src/system.c
 )
 
 target_include_directories(app PRIVATE include)

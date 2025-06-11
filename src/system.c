@@ -1,0 +1,90 @@
+/*
+ * Copyright (c) 2024 IED
+ *
+ */
+
+/** @file
+ *
+ * @brief Configuration and management of watchdog.
+ */
+
+#include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
+#include <zephyr/sys/reboot.h>
+//#include <zephyr/drivers/watchdog.h>
+#include <zephyr/task_wdt/task_wdt.h>
+#include "system.h"
+
+LOG_MODULE_REGISTER(system, LOG_LEVEL_DBG);
+
+static const struct device *const hw_wdt_dev = DEVICE_DT_GET_OR_NULL(WDT_NODE);
+static int task_wdt_id = -1;
+
+/// @brief Function for initializing the task watchdog
+/// 
+/// The task watchdog task is initialized and a channel is created for the main loop thread.
+/// HW watchdog set as fallback.
+/// 
+///  @retval -1 Error
+///  @retval 0 OK
+int8_t watchdog_init(void)
+{
+	int ret;
+
+    if (!device_is_ready(hw_wdt_dev)) {
+		LOG_ERR("HW WDT not available.\n");
+        return -1;
+	}
+
+    ret = task_wdt_init(hw_wdt_dev);
+	if (ret != 0) {
+		LOG_ERR("Task watchdog init failure: %d\n", ret);
+        return -2;
+	}
+
+    // Register this thread
+    k_tid_t my_tid = k_current_get();
+
+    LOG_INF("Registering task watchdog for thread: %p", my_tid);
+    LOG_INF("Thread name: %s", k_thread_name_get(my_tid));
+ 
+	task_wdt_id = task_wdt_add(2000U, task_wdt_callback , my_tid); //2 seconds timeout
+    if (task_wdt_id < 0) {
+		LOG_ERR("task_wdt_add failed: %d", task_wdt_id);
+		return -3;
+	}
+
+	LOG_INF("Task WDT initialized with channel %d", task_wdt_id);
+
+    return 0;
+}
+
+/// @brief Callback function to be executed when the watchdog of the main thread times out.
+///
+/// It just resets the device. There is not attempt to resolve the issue and continue operation.
+///
+/// @param channel_id :Id of the whatdog channel 
+/// @param user_data ; Pointer to strucure with thread information
+void task_wdt_callback(int channel_id, void *user_data)
+{
+    LOG_WRN("Task watchdog channel %d callback, thread: %s\n", channel_id, k_thread_name_get((k_tid_t)user_data));
+    LOG_WRN("Resetting device...\n");
+    sys_reboot(SYS_REBOOT_COLD);
+}
+
+/// @brief Feed the main loop thread watchdog every 1000 ms
+/// @param None
+void periodic_feed_of_main_loop_watchdog(void)
+{
+    static uint64_t time_last_ms_wdt = 0;
+    uint64_t time_now_ms = k_uptime_get();
+    
+    if ((uint64_t)( time_now_ms - time_last_ms_wdt ) > 1000)
+    {
+        int err = task_wdt_feed(task_wdt_id); // Feed the watchdog
+        if (err != 0) {
+            LOG_ERR("task_wdt_feed failed: %d", err);
+        }
+        time_last_ms_wdt = time_now_ms;
+    }
+}

@@ -44,9 +44,8 @@
 #include "nvram.h"
 #include "Digi_fota.h"
 #include "OTA_dfu_target.h"
+#include "system.h"
 
-#include <zephyr/drivers/watchdog.h>
-#include <zephyr/task_wdt/task_wdt.h>
 #include <stdbool.h>
 
 #include <zboss_api_addons.h>
@@ -119,10 +118,6 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 // Get a reference to the TIMER1 instance
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
 
-// Get reference to watchdog device
-static const struct device *const hw_wdt_dev = DEVICE_DT_GET_OR_NULL(WDT_NODE);
-static int task_wdt_id = -1; // Task watchdog ID
-
 /* Zigbee messagge info*/
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
 
@@ -142,9 +137,6 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 /**@brief Function to read the reason for the last reset. The reason is printed in the console. */
 void get_reset_reason(void)
 {
-    int8_t rc = 0;
-    uint8_t reset_cause_flags[1] = {0};
-
     const zb_char_t *zb_version;
     // Call the zb_get_version function to get the ZBOSS version string
     zb_version = zb_get_version();
@@ -329,23 +321,6 @@ zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 	}
 }
 
-static void task_wdt_callback(int channel_id, void *user_data)
-{
-    LOG_WRN("Task watchdog channel %d callback, thread: %s\n",
-        channel_id, k_thread_name_get((k_tid_t)user_data));
-
-    /*
-     * If the issue could be resolved, call task_wdt_feed(channel_id) here
-     * to continue operation.
-     *
-     * Otherwise we can perform some cleanup and reset the device.
-     */
-
-    LOG_WRN("Resetting device...\n");
-
-    sys_reboot(SYS_REBOOT_COLD);
-}
-
 // Interrupt handler for the timer
 // NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
 //		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
@@ -410,57 +385,6 @@ static int8_t gpio_init(void)
 	if (ret < 0) {
 		return -1;
 	}
-
-    return 0;
-}
-
-//------------------------------------------------------------------------------
-/**@brief Function for initializing the watchdog task.
- *      The watchdog task is used to monitor the main loop and reset the device if it gets stuck.
- * @retval -1 Error
- * @retval 0 OK
- */
-static int8_t watchdog_init(void)
-{
-	int ret;
-
-    if (!device_is_ready(hw_wdt_dev)) {
-		LOG_ERR("Hardware watchdog not ready; ignoring it.\n");
-        return -1;
-	}
-    /* This function sets up necessary kernel timers and the hardware watchdog 
-    * (if desired as fallback). It has to be called before task_wdt_add() and task_wdt_feed().
-    * 0 – If successful.
-    * -ENOTSUP – If assigning a hardware watchdog is not supported.
-    * -Errno – Negative errno if the fallback hw_wdt is used and the install timeout API
-    * fails. See wdt_install_timeout() API for possible return values.
-    * */
-    ret = task_wdt_init(hw_wdt_dev);
-	if (ret != 0) {
-		LOG_ERR("task wdt init failure: %d\n", ret);
-	}
-
-    // Register this thread
-    k_tid_t my_tid = k_current_get();
-
-    LOG_INF("Registering task watchdog for thread: %p", my_tid);
-    LOG_INF("Thread name: %s", k_thread_name_get(my_tid));
-
-    /*
-	 * Add a new task watchdog channel with custom callback function and
-	 * the current thread ID as user data.
-	*/
-    // 60000U - 60 seconds timeout
-    // task_wdt_callback - callback function to be called when the watchdog expires
-    // my_tid - thread ID of the current thread
-    
-	task_wdt_id = task_wdt_add(2000U, task_wdt_callback , my_tid);
-    if (task_wdt_id < 0) {
-		LOG_ERR("task_wdt_add failed: %d", task_wdt_id);
-		return task_wdt_id;
-	}
-
-	LOG_INF("Task WDT initialized with channel %d", task_wdt_id);
 
     return 0;
 }
@@ -598,8 +522,6 @@ void display_counters(void)
 {
     static uint64_t time_last_ms_counter = 0;
     static uint64_t time_last_ms_thread_manager = 0;
-    static uint64_t time_last_ms_wdt = 0;
-
 
     uint64_t time_now_ms = k_uptime_get();
     if( (uint64_t)( time_now_ms - time_last_ms_counter ) > 60000 )
@@ -620,16 +542,6 @@ void display_counters(void)
         zigbee_thread_manager();               // Manage the Zigbee thread
         time_last_ms_thread_manager = time_now_ms;
     }
-
-    if ( (uint64_t)( time_now_ms - time_last_ms_wdt ) > 1000 )
-    {
-        int err = task_wdt_feed(task_wdt_id); // Feed the watchdog
-        if (err != 0) {
-            LOG_ERR("task_wdt_feed failed: %d", err);
-        }
-        time_last_ms_wdt = time_now_ms;
-    }
-
 
 }
 
@@ -797,6 +709,7 @@ int main(void)
 
     while(1)
     {
+        periodic_feed_of_main_loop_watchdog();
         // run diagnostic functions
         if(PRINT_ZIGBEE_INFO)
         {
@@ -813,7 +726,6 @@ int main(void)
         zigbee_bdb_network_watchdog();           // Network watchdog
         nvram_manager();                         // Manage the NVRAM
         tcu_uart_manager();                     // Manage the TCU UART
-
         k_sleep(K_MSEC(5));                    // Required to see log messages on console
     }
 
