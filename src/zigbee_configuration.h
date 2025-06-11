@@ -33,7 +33,7 @@ uint64_t zb_conf_get_extended_pan_id (void);
 uint8_t zb_conf_get_extended_node_identifier (uint8_t *ni);
 uint32_t calculate_checksum(char* data, int size);
 void nvram_manager(void);
-void zigbee_thread_manager(void);
+void zigbee_reset_manager(void);
 uint32_t zb_get_mac_addr_high (void);
 uint32_t zb_get_mac_addr_low (void);
 void zb_conf_get_network_link_key(uint8_t *network_key);

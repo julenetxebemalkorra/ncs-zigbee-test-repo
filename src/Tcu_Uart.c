@@ -37,8 +37,6 @@ typedef struct{
 
 K_MSGQ_DEFINE(tcu_uart_tx_message_queue, sizeof(tcu_message), MAX_QUEUE_SIZE, 4);  // Align buffer to 4 bytes
 
-extern uint16_t tcu_uart_frames_received_counter;
-
 LOG_MODULE_REGISTER(uart_app, LOG_LEVEL_DBG);
 
 /* Local variables used to manage the command mode of the zigbee module */
@@ -605,11 +603,9 @@ void tcu_uart_transparent_mode_manager(void)
 {
     if( b_tcu_uart_rx_complete_frame_received )
     {
-        tcu_uart_frames_received_counter++;
         tcu_uart_send_received_frame_through_zigbee();
         b_tcu_uart_rx_complete_frame_received = false;
         b_tcu_uart_rx_buffer_busy = false;
-        //LOG_WRN("Frame received from TCU UART");
     }   
 }
 

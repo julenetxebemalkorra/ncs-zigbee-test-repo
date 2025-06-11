@@ -384,7 +384,7 @@ void nvram_manager(void)
     }     
 }
 
-void zigbee_thread_manager(void)
+void zigbee_reset_manager(void)
 {
     // The flag g_b_reset_zigbee_cmd realices the reset of the zigbee stack
     // and the g_b_reset_cmd realices the reset of the whole system

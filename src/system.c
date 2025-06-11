@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2024 IED
+ * Copyright (c) 2025 IED
  *
  */
 
 /** @file
  *
- * @brief Configuration and management of watchdog.
+ * @brief Definition of auxiliar functions used to configure and manage peripherals, and to display system information at start up.
  */
 
 #include <zephyr/kernel.h>

@@ -75,10 +75,6 @@
  */
 #define TEMPLATE_INIT_BASIC_POWER_SOURCE    ZB_ZCL_BASIC_POWER_SOURCE_DC_SOURCE
 
-/* Flag  used to print zigbee info once the device joins a network. */
-#define PRINT_ZIGBEE_INFO                ZB_TRUE
-#define PRINT_UART_INFO                  ZB_TRUE
-
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
 
@@ -87,16 +83,6 @@
 #else
 #define WDT_NODE DT_INVALID_NODE
 #endif
-
-/*UART Modbus and zigbee buffer size definitions*/
-#define MODBUS_MIN_RX_LENGTH                8   // if the messagge has 8 bytes we consider it a modbus frame
-
-uint16_t aps_frames_received_total_counter = 0;
-uint16_t aps_frames_received_binary_cluster_counter = 0;
-uint16_t aps_frames_received_commissioning_cluster_counter = 0;
-
-uint16_t tcu_uart_frames_transmitted_counter = 0;
-uint16_t tcu_uart_frames_received_counter = 0;
 
 
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
@@ -127,141 +113,6 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 /*----------------------------------------------------------------------------*/
 /*                           FUNCTION DEFINITIONS                             */
 /*----------------------------------------------------------------------------*/
-
-
-//------------------------------------------------------------------------------
-/**@brief Callback function excuted when AF gets APS packet.
- *
- * @param[in]   bufid   Reference to the Zigbee stack buffer used to pass signal.
- *
- */
-zb_uint8_t data_indication_cb(zb_bufid_t bufid)
-{
-    if(!bufid)
-    {    
-        LOG_ERR("Error: bufid is NULL data_indication_cb beggining");
-        return ZB_TRUE;
-    } 
-    else
-	{
-        zb_uint8_t *pointerToBeginOfBuffer;
-        zb_uint8_t *pointerToEndOfBuffer;
-        zb_int32_t sizeOfPayload;
-
-        zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
-
-        if (ind->src_addr == COORDINATOR_SHORT_ADDRESS)
-        {
-            zigbee_bdb_coordinator_activity_detected();
-        }
-
-        pointerToBeginOfBuffer = zb_buf_begin(bufid);
-        pointerToEndOfBuffer = zb_buf_end(bufid);
-        sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
-
-        if(PRINT_ZIGBEE_INFO) {
-            LOG_DBG("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes, status %d",
-                                                    (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,
-                                                    (uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload, zb_buf_get_status(bufid));
-        }
-
-        aps_frames_received_total_counter++;
-        if( ind->clusterid == DIGI_BINARY_VALUE_CLUSTER )aps_frames_received_binary_cluster_counter++;
-        if( ind->clusterid == DIGI_COMMISSIONING_CLUSTER )aps_frames_received_commissioning_cluster_counter++;
-
-        if( (ind->clusterid == DIGI_BINARY_VALUE_CLUSTER) &&
-            ( ind->src_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) &&
-            ( ind->dst_endpoint == DIGI_BINARY_VALUE_DESTINATION_ENDPOINT ) )
-        {
-            if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
-            {
-                if(PRINT_ZIGBEE_INFO)
-                {
-                    LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
-                    LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
-                }
-                
-
-                if( !is_tcu_uart_in_command_mode() && (sizeOfPayload >= MODBUS_MIN_RX_LENGTH) )
-                {
-                    if (queue_zigbee_Message(pointerToBeginOfBuffer, sizeOfPayload) == SUCCESS) // Assuming queueMessage returns SUCCESS or error
-                    {
-                        tcu_uart_frames_transmitted_counter++;
-                        //if (PRINT_ZIGBEE_INFO) LOG_DBG("Payload of input RF packet sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
-                    }
-                    else
-                    {
-                        LOG_ERR("Failed to send payload to TCU UART");
-                    }                    
-                }
-                else
-                {
-                    if(PRINT_ZIGBEE_INFO) LOG_ERR("Payload of input RF packet NOT sent to TCU UART: counter %d", tcu_uart_frames_transmitted_counter);
-                }
-            }
-            else
-            {
-                if(PRINT_ZIGBEE_INFO) LOG_ERR("Payload of input RF packet is too big or too small: %d bytes", sizeOfPayload);
-            }
-        }
-
-        else if( ( ind->clusterid == DIGI_COMMISSIONING_CLUSTER ) &&
-            ( ind->src_endpoint == DIGI_COMMISSIONING_SOURCE_ENDPOINT ) &&
-            ( ind->dst_endpoint == DIGI_COMMISSIONING_DESTINATION_ENDPOINT ) )
-        {
-            if( is_a_digi_node_discovery_request((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
-            {
-                if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee Node Discovery Device Request");
-            }
-        }
-        else if( ( ind->clusterid == DIGI_AT_COMMAND_CLUSTER ) &&
-            ( ind->src_endpoint == DIGI_AT_COMMAND_SOURCE_ENDPOINT ) &&
-            ( ind->dst_endpoint == DIGI_AT_COMMAND_DESTINATION_ENDPOINT ) )
-        {
-            if( is_a_digi_read_at_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
-            {
-                if(PRINT_ZIGBEE_INFO) LOG_DBG("Xbee read AT command received");
-            }
-        }
-        else if( ( ind->clusterid == DIGI_FOTA_CLUSTER ) &&
-            ( ind->src_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) &&
-            ( ind->dst_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) )
-        {
-            is_a_digi_fota_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload);
-        }
-        else if( ( ind->clusterid == DIGI_AT_PING_CLUSTER ) &&
-            ( ind->src_endpoint == DIGI_AT_PING_SOURCE_ENDPOINT ) &&
-            ( ind->dst_endpoint == DIGI_AT_PING_DESTINATION_ENDPOINT ) )
-        {
-            if( is_a_ping_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
-            {
-                if(PRINT_ZIGBEE_INFO) LOG_DBG("PING");
-            }
-        }
-        else if( ( ind->clusterid == IEEE_ADDRESS_RESPONSE_CLUSTER ) &&
-            ( ind->src_endpoint == ZIGBEE_DEVICE_OBJECT_SOURCE_ENDPOINT ) &&
-            ( ind->dst_endpoint == ZIGBEE_DEVICE_OBJECT_DESTINATION_ENDPOINT ) )
-        {
-            LOG_WRN("IEEE address response received");
-        }
-        else
-        {
-            if(PRINT_ZIGBEE_INFO) LOG_ERR("Cluster ID not found");
-            if(PRINT_ZIGBEE_INFO) LOG_WRN("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes",
-                          (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,(uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload);
-            if(PRINT_ZIGBEE_INFO)
-                {
-                    LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
-                    LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
-                }
-        }
-        // safe way to free buffer
-        zb_osif_disable_all_inter();
-        zb_buf_free(bufid);
-        zb_osif_enable_all_inter();
-    	return ZB_TRUE;
-	}
-}
 
 // Interrupt handler for the timer
 // NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
@@ -451,43 +302,6 @@ void log_ext_address(zb_uint8_t *addr)
 }
 
 //------------------------------------------------------------------------------
-/**@brief This function prints the contents of multiple counters to the console.
- *
- *
- * @details Information is printed once per minute. Those counters contain information about
- *        the number of RF packets received, RF packets schedule for transmission,...
- *
- * @note Executed in the main loop
- *
- */
-void display_counters(void)
-{
-    static uint64_t time_last_ms_counter = 0;
-    static uint64_t time_last_ms_thread_manager = 0;
-
-    uint64_t time_now_ms = k_uptime_get();
-    if( (uint64_t)( time_now_ms - time_last_ms_counter ) > 60000 )
-    {
-        time_last_ms_counter = time_now_ms;
-        LOG_DBG("APS RX COUNTERS: Total %d, Binary %d, Commis %d",
-                               aps_frames_received_total_counter,
-                               aps_frames_received_binary_cluster_counter,
-                               aps_frames_received_commissioning_cluster_counter);
-        LOG_DBG("Uart frames: Tx %d, Rx %d",
-                               tcu_uart_frames_transmitted_counter,
-                               tcu_uart_frames_received_counter);
-
-    }
-
-    if( (uint64_t)( time_now_ms - time_last_ms_thread_manager ) > 1000 )
-    {
-        zigbee_thread_manager();               // Manage the Zigbee thread
-        time_last_ms_thread_manager = time_now_ms;
-    }
-
-}
-
-//------------------------------------------------------------------------------
 /**@brief Main function
  *
  */
@@ -576,23 +390,18 @@ int main(void)
     while(1)
     {
         periodic_feed_of_main_loop_watchdog();
-        // run diagnostic functions
-        if(PRINT_ZIGBEE_INFO)
-        {
-            diagnostic_toogle_pin();
-            diagnostic_zigbee_info();
-            display_counters();
-        }    
-
+        diagnostic_toogle_pin();
+        diagnostic_zigbee_info();   
         tcu_uart_transparent_mode_manager();     // Manage the frames received from the TCU uart when module is in transparent mode
-        digi_node_discovery_request_manager();  // Manage the device discovery requests
+        digi_node_discovery_request_manager();   // Manage the device discovery requests
         digi_wireless_read_at_command_manager(); // Manage the read AT commands received through Zigbee
         digi_fota_manager();                     // FUOTA state machine
         zigbee_aps_manager();                    // Manage the aps output frame queue
         zigbee_bdb_network_watchdog();           // Network watchdog
+        zigbee_reset_manager();                  // Manage reset requests of ZBOSS stack or MCU
         nvram_manager();                         // Manage the NVRAM
-        tcu_uart_manager();                     // Manage the TCU UART
-        k_sleep(K_MSEC(5));                    // Required to see log messages on console
+        tcu_uart_manager();                      // Manage the TCU UART
+        k_sleep(K_MSEC(5));                      // Required to see log messages on console
     }
 
     return 0;

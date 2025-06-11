@@ -9,9 +9,6 @@
 /* Default tick to consider a modbus frame completed*/
 #define TICKS_TO_CONSIDER_FRAME_COMPLETED 10 // 10ms = approximately time for transmitting 20 chars at 19200
 
-/*UART Modbus and zigbee buffer size definitions*/
-#define UART_RX_BUFFER_SIZE              255 //253 bytes + CRC (2 bytes) = 255
-
 
 #define MAXIMUM_SIZE_MODBUS_RTU_FRAME 256
 #define SIZE_TRANSMISSION_BUFFER MAXIMUM_SIZE_MODBUS_RTU_FRAME

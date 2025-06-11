@@ -14,7 +14,13 @@
 #include <zigbee/zigbee_error_handler.h>
 #include "zigbee_aps.h"
 #include "Digi_profile.h"
+#include "zigbee_device_profile.h"
 #include "global_defines.h"
+#include "Digi_fota.h"
+#include "Digi_node_discovery.h"
+#include "Digi_wireless_at_commands.h"
+#include "zigbee_bdb.h"
+#include "Tcu_Uart.h"
 
 #define SCHEDULING_CB_TIMEOUT_MS 50000 // Tiempo límite en milisegundos para enviar un frame APS
 #define SYSTEM_TICK_MS 1              // Tiempo de tick del sistema en milisegundos
@@ -24,7 +30,7 @@ static aps_output_frame_circular_buffer_t aps_output_frame_buffer;
 static bool b_scheduling_cb_pending = false;
 static uint32_t scheduling_cb_timer = 0;
 
-LOG_MODULE_REGISTER(zigbee_aps, LOG_LEVEL_DBG);
+LOG_MODULE_REGISTER(zigbee_aps, LOG_LEVEL_INF);
 
 /* Function definition                                                        */
 
@@ -219,61 +225,8 @@ uint16_t zigbee_aps_get_output_frame_buffer_free_space(void)
  *
  *
  */
-/*void zigbee_aps_frame_scheduling_cb(zb_uint8_t param)
+void zigbee_aps_frame_scheduling_cb(zb_uint8_t bufid)
 {
-    ZVUNUSED(param);
-    zb_ret_t zb_err_code;
-
-    zb_bufid_t bufid = zb_buf_get_out();
-
-    if( bufid ) // If buffer could be allocated, generate frame and schedule the transmission
-    {
-        aps_output_frame_t aps_frame;
-        if( dequeue_aps_frame(&aps_frame) ) // First pending frame from the queue
-        {
-            zb_ret_t ret = zb_aps_send_user_payload(bufid,
-                                                    aps_frame.dst_addr,
-                                                    aps_frame.profile_id,
-                                                    aps_frame.cluster_id,
-                                                    aps_frame.src_endpoint,
-                                                    aps_frame.dst_endpoint,
-                                                    ZB_APS_ADDR_MODE_16_ENDP_PRESENT,
-                                                    #ifdef APS_ACK_REQUIRED
-                                                    ZB_TRUE,
-                                                    #else
-                                                    ZB_FALSE,
-                                                    #endif
-                                                    aps_frame.payload,
-                                                    aps_frame.payload_size);
-            if(ret == RET_OK) LOG_WRN("Scheduled APS Frame with cluster 0x%x and payload %d bytes", aps_frame.cluster_id, (uint16_t)aps_frame.payload_size);
-            else if(ret == RET_INVALID_PARAMETER_1) LOG_ERR("Transmission could not be scheduled: The buffer is invalid");
-            else if(ret == RET_INVALID_PARAMETER_2) LOG_ERR("Transmission could not be scheduled: The payload_ptr parameter is invalid");
-            else if(ret == RET_INVALID_PARAMETER_3) LOG_ERR("Transmission could not be scheduled: The payload_size parameter is too large");
-            else LOG_ERR("Transmission could not be scheduled: Unkown error");                                                    
-        }
-        else
-        {
-            zb_osif_disable_all_inter();
-            zb_buf_free(bufid); // No need to use the buffer is there was not a pending frame in the queue.
-            zb_osif_enable_all_inter();
-            LOG_ERR("Transmission could not be scheduled: No pending output frame in queue");
-        }                
-    }
-    else
-    {
-        //TODO: Implement a mechanism to try to allocate the buffer again after a while
-        zb_err_code = zb_buf_get_out_delayed(zigbee_aps_frame_scheduling_cb);
-        ZB_ERROR_CHECK(zb_err_code);
-        LOG_ERR("Transmission could not be scheduled: Zigbee Out buffer not allocated");
-    }
-
-    b_scheduling_cb_pending = false;
-}*/
-
-void zigbee_aps_frame_scheduling_cb2(zb_uint8_t bufid)
-{
-    zb_ret_t zb_err_code;
-
     if( bufid ) // If buffer could be allocated, generate frame and schedule the transmission
     {
         aps_output_frame_t aps_frame;
@@ -332,14 +285,134 @@ void zigbee_aps_manager(void)
             b_scheduling_cb_pending = true;
             scheduling_cb_timer = SCHEDULING_CB_TIMEOUT_MS;
             //ret = ZB_SCHEDULE_APP_CALLBACK(zigbee_aps_frame_scheduling_cb,0);
-            ret = zb_buf_get_out_delayed(zigbee_aps_frame_scheduling_cb2);
+            ret = zb_buf_get_out_delayed(zigbee_aps_frame_scheduling_cb);
             if(ret == RET_OK) LOG_DBG("Transmission scheduled");
             else if(ret == RET_OVERFLOW) LOG_ERR("Transmission could not be scheduled: Scheduling failed RET_OVERFLOW");
-            else LOG_ERR("Transmission could not be scheduled: Unkown error");
+            else LOG_ERR("Transmission could not be scheduled: Unknown error");
         } 
         else
         {
             LOG_WRN("Transmission could not be scheduled: Scheduling callback already pending");
         }       
     }
+}
+
+
+///@brief Callback function excuted when AF gets APS packet.
+///
+/// @param[in]   bufid   Reference to the Zigbee stack buffer containing the packet.
+///
+
+zb_uint8_t data_indication_cb(zb_bufid_t bufid)
+{
+    if(!bufid)
+    {
+        LOG_ERR("NULL buffer ID passed to data_indication_cb() function");
+        return ZB_TRUE;
+    }
+    else
+	{
+        zb_uint8_t *pointerToBeginOfBuffer;
+        zb_uint8_t *pointerToEndOfBuffer;
+        zb_int32_t sizeOfPayload;
+
+        zb_apsde_data_indication_t *ind = ZB_BUF_GET_PARAM(bufid, zb_apsde_data_indication_t);  // Get APS header
+
+        if (ind->src_addr == COORDINATOR_SHORT_ADDRESS)
+        {
+            zigbee_bdb_coordinator_activity_detected();
+        }
+
+        pointerToBeginOfBuffer = zb_buf_begin(bufid);
+        pointerToEndOfBuffer = zb_buf_end(bufid);
+        sizeOfPayload = pointerToEndOfBuffer - pointerToBeginOfBuffer;
+
+        if(PRINT_ZIGBEE_INFO) {
+            LOG_DBG("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes, status %d",
+                                                    (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,
+                                                    (uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload, zb_buf_get_status(bufid));
+        }
+
+        if( (ind->clusterid == DIGI_BINARY_VALUE_CLUSTER) &&
+            ( ind->src_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_BINARY_VALUE_DESTINATION_ENDPOINT ) )
+        {
+            LOG_INF("RF packet from binary cluster received");
+            if ((sizeOfPayload > 0) && (sizeOfPayload < UART_RX_BUFFER_SIZE))
+            {
+                LOG_DBG("Received binary RF packet of %d bytes \n", sizeOfPayload);
+                LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input binary RF packet");
+
+                if( !is_tcu_uart_in_command_mode() && (sizeOfPayload >= MODBUS_MIN_RX_LENGTH) )
+                {
+                    if (queue_zigbee_Message(pointerToBeginOfBuffer, sizeOfPayload) != 0) // If message could not be queued
+                    {
+                        LOG_WRN("Payload of input binary RF packet could NOT been sent to TCU UART");
+                    }
+                }
+                else
+                {
+                    LOG_WRN("Payload of input binary RF packet NOT sent to TCU UART");
+                }
+            }
+            else
+            {
+                LOG_WRN("Size of payload of input binary RF packet out of range: %d bytes", sizeOfPayload);
+            }
+        }
+
+        else if( ( ind->clusterid == DIGI_COMMISSIONING_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_COMMISSIONING_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_COMMISSIONING_DESTINATION_ENDPOINT ) )
+        {
+            if( is_a_digi_node_discovery_request((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            {
+                LOG_INF("RF packet with Node Discovery Device Request received");
+            }
+        }
+        else if( ( ind->clusterid == DIGI_AT_COMMAND_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_AT_COMMAND_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_AT_COMMAND_DESTINATION_ENDPOINT ) )
+        {
+            if( is_a_digi_read_at_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            {
+                LOG_INF("RF packet with read AT command received");
+            }
+        }
+        else if( ( ind->clusterid == DIGI_FOTA_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_BINARY_VALUE_SOURCE_ENDPOINT ) )
+        {
+            is_a_digi_fota_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload);
+        }
+        else if( ( ind->clusterid == DIGI_AT_PING_CLUSTER ) &&
+            ( ind->src_endpoint == DIGI_AT_PING_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == DIGI_AT_PING_DESTINATION_ENDPOINT ) )
+        {
+            if( is_a_ping_command((uint8_t *)pointerToBeginOfBuffer, (uint16_t)sizeOfPayload) )
+            {
+                LOG_INF("RF packet with PING from GW received");
+            }
+        }
+        else if( ( ind->clusterid == IEEE_ADDRESS_RESPONSE_CLUSTER ) &&
+            ( ind->src_endpoint == ZIGBEE_DEVICE_OBJECT_SOURCE_ENDPOINT ) &&
+            ( ind->dst_endpoint == ZIGBEE_DEVICE_OBJECT_DESTINATION_ENDPOINT ) )
+        {
+            LOG_INF("RF packet with IEEE address response received");
+        }
+        else
+        {
+            LOG_ERR("Cluster ID not found");
+            LOG_WRN("Rx APS Frame with profile 0x%x, cluster 0x%x, src_ep %d, dest_ep %d, payload %d bytes",
+                          (uint16_t)ind->profileid, (uint16_t)ind->clusterid, (uint8_t)ind->src_endpoint,(uint8_t)ind->dst_endpoint, (uint16_t)sizeOfPayload);
+
+            LOG_DBG("Size of received payload is %d bytes \n", sizeOfPayload);
+            LOG_HEXDUMP_DBG(pointerToBeginOfBuffer,sizeOfPayload,"Payload of input RF packet");
+        }
+        // safe way to free buffer
+        zb_osif_disable_all_inter();
+        zb_buf_free(bufid);
+        zb_osif_enable_all_inter();
+        return ZB_TRUE;
+	}
 }

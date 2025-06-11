@@ -6,6 +6,9 @@
 #ifndef GLOBAL_DEFINES_H_
 #define GLOBAL_DEFINES_H_
 
+#define MODBUS_MIN_RX_LENGTH          8
+#define UART_RX_BUFFER_SIZE         255 //253 bytes + CRC (2 bytes) = 255
+
 #define MAXIMUM_SIZE_NODE_IDENTIFIER 20
 #define SIZE_LINK_KEY 16
 #define APS_ACK_REQUIRED 1
@@ -13,6 +16,10 @@
 #define COORDINATOR_SHORT_ADDRESS 0x0000
 #define COORDINATOR_SHORT_ADDRESS_LOWER_BYTE 0x00
 #define COORDINATOR_SHORT_ADDRESS_HIGHER_BYTE 0x00
+
+/* Flag  used to print zigbee info once the device joins a network. */
+#define PRINT_ZIGBEE_INFO                ZB_TRUE
+#define PRINT_UART_INFO                  ZB_TRUE
 
 //Indicadores de alarma     
 extern bool g_b_flash_error;
