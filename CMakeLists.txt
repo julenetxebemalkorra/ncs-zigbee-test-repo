@@ -6,6 +6,9 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
+# Partition Manager file
+set(PM_STATIC_YML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/configuration/${BOARD}/pm_static.yml)
+message(STATUS "PM_STATIC_YML_FILE: ${PM_STATIC_YML_FILE}")
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(dual_wireless_test_uart)
