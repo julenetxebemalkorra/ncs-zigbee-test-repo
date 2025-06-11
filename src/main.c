@@ -56,16 +56,13 @@
 
 #include <zephyr/debug/coredump.h>
 
-#include <zephyr/dfu/mcuboot.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <dfu/dfu_target.h>
 #include <dfu/dfu_target_mcuboot.h>
 #include <zephyr/sys/reboot.h>
 
-#include <zephyr/storage/flash_map.h>
-
-#define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000  // Update with actual coordinator address
+#define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000
 
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
@@ -490,79 +487,6 @@ void display_counters(void)
 
 }
 
-void check_boot_status(void)
-{
-    int swap_type = mcuboot_swap_type();
-    switch (swap_type) {
-        case BOOT_SWAP_TYPE_NONE:
-            LOG_WRN("No swap pending.\n");
-            break;
-        case BOOT_SWAP_TYPE_TEST:
-            LOG_WRN("New image in slot1 is scheduled for test.\n");
-            break;
-        case BOOT_SWAP_TYPE_PERM:
-            LOG_WRN("New image will be made permanent.\n");
-            break;
-        case BOOT_SWAP_TYPE_REVERT:
-            LOG_WRN("Reverting to previous image.\n");
-            break;
-        default:
-            LOG_WRN("Unknown swap type: %d\n", swap_type);
-            break;
-    }
-
-    struct mcuboot_img_header header;
-    size_t header_size = sizeof(header);
-
-    int ret = boot_read_bank_header(FIXED_PARTITION_ID(slot0_partition), &header, header_size);
-    if (ret == 0) {
-        if (header.mcuboot_version == 1) {
-            LOG_INF("MCUBoot image header (v1):");
-            LOG_INF("  Version: %d.%d.%d+%d",
-                    header.h.v1.sem_ver.major,
-                    header.h.v1.sem_ver.minor,
-                    header.h.v1.sem_ver.revision,
-                    header.h.v1.sem_ver.build_num);
-            LOG_INF("  Image size:  %u bytes", header.h.v1.image_size);
-        } else {
-            LOG_WRN("Unsupported mcuboot_version: %u", header.mcuboot_version);
-        }
-    } else {
-        LOG_ERR("Failed to read MCUBoot header, error: %d", ret);
-    }
-
-    // Optionally log trailer offset
-    ssize_t trailer_offset = boot_get_area_trailer_status_offset(0);
-    if (trailer_offset >= 0) {
-        LOG_INF("Trailer status offset: 0x%08zx", trailer_offset);
-    } else {
-        LOG_ERR("Failed to get trailer offset");
-    }
-}
-
-/**
- * @brief Confirms the current firmware image.
-    int swap_type = mcuboot_swap_type();
-    if (swap_type < 0) {
-        LOG_ERR("Failed to get swap type: %d\n", swap_type);
-    } else if (swap_type == BOOT_SWAP_TYPE_REVERT) {
-        int rc = boot_write_img_confirmed();
-        LOG_WRN("Confirmed image: %d\n", rc);
-    }
- */
-static void confirm_image(void)
-{
-	if (!boot_is_img_confirmed()) {
-		int ret = boot_write_img_confirmed();
-
-		if (ret) {
-			LOG_ERR("Couldn't confirm image: %d", ret);
-		} else {
-			LOG_INF("Marked image as OK");
-		}
-	}
-}
-
 //------------------------------------------------------------------------------
 /**@brief Main function
  *
@@ -572,6 +496,7 @@ int main(void)
     int8_t ret = 0;
 
     display_system_information();
+    display_boot_status();
 
     ret = init_nvram();              // Initialize NVRAM
     if( ret != 0)
@@ -638,17 +563,15 @@ int main(void)
         LOG_ERR("gpio_init error %d", ret);
     }
 
-    confirm_image(); // Confirm the image if it is not already confirmed
-
-    check_boot_status(); // Check the boot status
-
     LOG_WRN("Starting Zigbee Router");
     zigbee_configuration(); //Zigbee configuration
     zigbee_enable(); // Start Zigbee default thread
     zb_af_set_data_indication(data_indication_cb); // Set call back function for APS frame received
     zb_aps_set_user_data_tx_cb(zigbee_aps_user_data_tx_cb); // Set call back function for APS frame transmitted
-            
+
     LOG_INF("Router started successfully");
+
+    confirm_image(); // Confirm the image if it is not already confirmed
 
     while(1)
     {

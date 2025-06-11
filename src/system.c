@@ -14,6 +14,8 @@
 #include <zephyr/drivers/hwinfo.h>
 //#include <zephyr/drivers/watchdog.h>
 #include <zephyr/task_wdt/task_wdt.h>
+        #include <zephyr/dfu/mcuboot.h>
+        #include <zephyr/storage/flash_map.h>
 #include "app_version.h"
 #include <zboss_api.h>
 #include "system.h"
@@ -94,7 +96,7 @@ void periodic_feed_of_main_loop_watchdog(void)
 
 /// @brief Display system information.
 ///
-/// This function will be called after a start up. It displays system information (firmware version,
+/// This function is called at startup. It displays system information (firmware version,
 /// ZBOSS version, reason of last reset...)
 ///
 /// @param None
@@ -141,4 +143,80 @@ void display_system_information(void)
     // Display the ZBOSS version
     zb_version = zb_get_version();
     LOG_INF("ZBOSS Version: %s\n", zb_version);
+}
+
+
+/// @brief Display boot status information
+///
+/// This function is called at startup. It displays the boot status (if there is a swap pending,
+/// or if the image running is only for test and needs confirmation...)
+///
+/// @param  None
+void display_boot_status(void)
+{
+    int swap_type = mcuboot_swap_type();
+    switch (swap_type) {
+        case BOOT_SWAP_TYPE_NONE:
+            LOG_INF("No swap pending.\n");
+            break;
+        case BOOT_SWAP_TYPE_TEST:
+            LOG_INF("New image in slot1 is scheduled for test.\n");
+            break;
+        case BOOT_SWAP_TYPE_PERM:
+            LOG_INF("New image will be made permanent.\n");
+            break;
+        case BOOT_SWAP_TYPE_REVERT:
+            LOG_INF("Reverting to previous image.\n");
+            break;
+        default:
+            LOG_INF("Unknown swap type: %d\n", swap_type);
+            break;
+    }
+
+    struct mcuboot_img_header header;
+    size_t header_size = sizeof(header);
+
+    int ret = boot_read_bank_header(FIXED_PARTITION_ID(slot0_partition), &header, header_size);
+    if (ret == 0) {
+        if (header.mcuboot_version == 1) {
+            LOG_INF("MCUBoot image header (v1):");
+            LOG_INF("  Version: %d.%d.%d+%d",
+                    header.h.v1.sem_ver.major,
+                    header.h.v1.sem_ver.minor,
+                    header.h.v1.sem_ver.revision,
+                    header.h.v1.sem_ver.build_num);
+            LOG_INF("  Image size:  %u bytes", header.h.v1.image_size);
+        } else {
+            LOG_WRN("Unsupported mcuboot_version: %u", header.mcuboot_version);
+        }
+    } else {
+        LOG_ERR("Failed to read MCUBoot header, error: %d", ret);
+    }
+
+    // Optionally log trailer offset
+    ssize_t trailer_offset = boot_get_area_trailer_status_offset(0);
+    if (trailer_offset >= 0) {
+        LOG_INF("Trailer status offset: 0x%08zx", trailer_offset);
+    } else {
+        LOG_ERR("Failed to get trailer offset");
+    }
+}
+
+/// @brief Confirms the current firmware image.
+///
+/// This function is called at startup. It checks whether the current image is already confirmed or is in test mode.
+/// If the images in slot 0 and slot 1 were recently swapped, it confirms the new image.
+/// @param  None
+void confirm_image(void)
+{
+	if (!boot_is_img_confirmed()) {
+        LOG_WRN("Image is in test mode");
+		int ret = boot_write_img_confirmed();
+
+		if (ret) {
+			LOG_ERR("Couldn't confirm image. Error code: %d", ret);
+		} else {
+			LOG_WRN("Image confirmed");
+		}
+	}
 }

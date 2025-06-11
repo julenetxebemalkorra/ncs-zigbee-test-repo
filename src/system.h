@@ -10,5 +10,7 @@ int8_t watchdog_init(void);
 void task_wdt_callback(int channel_id, void *user_data);
 void periodic_feed_of_main_loop_watchdog(void);
 void display_system_information(void);
+void display_boot_status(void);
+void confirm_image(void);
 
 #endif /* SYSTEM_H_ */
