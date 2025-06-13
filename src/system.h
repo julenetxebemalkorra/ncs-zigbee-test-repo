@@ -12,9 +12,18 @@
 #define WDT_NODE DT_INVALID_NODE
 #endif
 
+
+#define LED0_NODE DT_ALIAS(led0) //The devicetree node identifier for the "led0" alias.
+
+
+int8_t gpio_init(void);
+void timer1_init(void);
 int8_t watchdog_init(void);
+void diagnostic_toogle_pin(void);
 void task_wdt_callback(int channel_id, void *user_data);
 void periodic_feed_of_main_loop_watchdog(void);
+void timer1_event_handler(nrf_timer_event_t event_type, void * p_context);
+void timer1_repeated_timer_start(uint32_t timeout_us);
 void display_system_information(void);
 void display_boot_status(void);
 void confirm_image(void);

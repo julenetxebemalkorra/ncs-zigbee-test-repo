@@ -12,18 +12,68 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/reboot.h>
 #include <zephyr/drivers/hwinfo.h>
+#include <zephyr/drivers/gpio.h>
+#include <nrfx_timer.h>
 //#include <zephyr/drivers/watchdog.h>
 #include <zephyr/task_wdt/task_wdt.h>
-        #include <zephyr/dfu/mcuboot.h>
-        #include <zephyr/storage/flash_map.h>
+#include <zephyr/dfu/mcuboot.h>
+#include <zephyr/storage/flash_map.h>
 #include "app_version.h"
 #include <zboss_api.h>
 #include "system.h"
+#include "Tcu_Uart.h"
+#include "zigbee_aps.h"
 
 LOG_MODULE_REGISTER(system, LOG_LEVEL_DBG);
 
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
+static volatile uint16_t debug_led_ms_x10 = 0;
 static const struct device *const hw_wdt_dev = DEVICE_DT_GET_OR_NULL(WDT_NODE);
 static int task_wdt_id = -1;
+static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1); // Reference to the TIMER1 instance
+
+//------------------------------------------------------------------------------
+/**@brief Initialization of the GPIO pins.
+ *        Currently, only one pin is initialized. Configured as output to drive a led.
+ * @retval -1 Error
+ * @retval 0 OK
+ */
+int8_t gpio_init(void)
+{
+	int ret;
+
+	if (!device_is_ready(led.port)) {
+		return -1;
+	}
+
+	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+	if (ret < 0) {
+		return -1;
+	}
+
+    return 0;
+}
+
+
+/// @brief Initialization of the TIMER1 peripheral using the nrfx driver
+/// 
+/// @param None
+
+void timer1_init(void)
+{
+	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(1000000); //1MHz
+	timer_config.bit_width = NRF_TIMER_BIT_WIDTH_32;
+
+	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
+	if (err != NRFX_SUCCESS) {
+		LOG_WRN("Error initializing timer: %x\n", err);
+	}
+
+	IRQ_DIRECT_CONNECT(TIMER1_IRQn, 0, nrfx_timer_1_irq_handler, 0);
+	irq_enable(TIMER1_IRQn);
+
+	timer1_repeated_timer_start(100); //100 us
+}
 
 /// @brief Function for initializing the task watchdog
 /// 
@@ -64,6 +114,21 @@ int8_t watchdog_init(void)
     return 0;
 }
 
+//------------------------------------------------------------------------------
+/**@brief This function toggles and output pin at 1Hz. That output pin is connected to a LED
+ *
+ * @note Executed the in main loop
+ *
+ */
+void diagnostic_toogle_pin(void)
+{
+    if(debug_led_ms_x10 >= 10000)
+    {
+        debug_led_ms_x10 = 0;
+        gpio_pin_toggle_dt(&led);
+    }
+}
+
 /// @brief Callback function to be executed when the watchdog of the main thread times out.
 ///
 /// It just resets the device. There is not attempt to resolve the issue and continue operation.
@@ -92,6 +157,39 @@ void periodic_feed_of_main_loop_watchdog(void)
         }
         time_last_ms_wdt = time_now_ms;
     }
+}
+
+/**
+ * @brief Interrupt handler for TIMER1
+ * NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
+ * and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt
+ * context.
+ */
+void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
+{
+	switch(event_type) {
+		case NRF_TIMER_EVENT_COMPARE0:
+            if(debug_led_ms_x10 < 10000) debug_led_ms_x10++;
+            tcu_uart_timers_10kHz();
+            check_scheduling_cb_timeout();
+			break;
+		default:
+			break;
+	}
+}
+
+/**
+ * @brief Schedule repeated callbacks from TIMER1.
+ * @param timeout_us Period in microseconds.
+ */
+int miFuncion(int param1, float param2);
+
+void timer1_repeated_timer_start(uint32_t timeout_us)
+{
+	nrfx_timer_enable(&my_timer);
+
+	nrfx_timer_extended_compare(&my_timer, NRF_TIMER_CC_CHANNEL0, timeout_us, 
+                                NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
 }
 
 /// @brief Display system information.

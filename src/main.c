@@ -23,12 +23,11 @@
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <zephyr/sys/ring_buffer.h>
-#include <zephyr/drivers/gpio.h>
+
 #include <zephyr/drivers/uart.h>
 #include <string.h>
 
 #include <nrfx_timer.h>
-#include <zephyr/sys/reboot.h>
 
 #include "global_defines.h"
 #include "zigbee_configuration.h"
@@ -54,47 +53,20 @@
 #include "zb_types.h"
 #include "zboss_api_zgp.h"
 
-#include <zephyr/debug/coredump.h>
-
-#include <zephyr/kernel.h>
-#include <zephyr/logging/log.h>
-#include <dfu/dfu_target.h>
-#include <dfu/dfu_target_mcuboot.h>
-#include <zephyr/sys/reboot.h>
-
-#define ZIGBEE_COORDINATOR_SHORT_ADDR 0x0000
-
 /* Device endpoint, used to receive ZCL commands. */
 #define APP_TEMPLATE_ENDPOINT               232
-
-//#define ZB_APS_MAX_IN_FRAGMENT_TRANSMISSIONS 5U  // Example: Increase to handle 5 fragments in parallel
-//#define ZB_APS_ACK_WAIT_TIMEOUT             1000U // Example: Increase to 1000 ms
 
 /* Type of power sources available for the device.
  * For possible values see section 3.2.2.2.8 of ZCL specification.
  */
 #define TEMPLATE_INIT_BASIC_POWER_SOURCE    ZB_ZCL_BASIC_POWER_SOURCE_DC_SOURCE
 
-/* The devicetree node identifier for the "led0" alias. */
-#define LED0_NODE DT_ALIAS(led0)
-
-static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
+LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 bool g_b_flash_error = false; //   Flag to indicate if there was an error when reading the NVRAM
 
-/*
- * A build error on this line means your board is unsupported.
- * See the sample documentation for information on how to fix this.
- */
-static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
-
-// Get a reference to the TIMER1 instance
-static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1);
-
 /* Zigbee messagge info*/
 static bool b_infit_info_flag = PRINT_ZIGBEE_INFO;
-
-LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 // boolean flags for detecting modbus request handling
 bool b_Zigbe_Connected = false;
@@ -106,74 +78,6 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 /*----------------------------------------------------------------------------*/
 /*                           FUNCTION DEFINITIONS                             */
 /*----------------------------------------------------------------------------*/
-
-// Interrupt handler for the timer
-// NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
-//		 and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context. 
-void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
-{
-	switch(event_type) {
-		case NRF_TIMER_EVENT_COMPARE0:
-            if(debug_led_ms_x10 < 10000) debug_led_ms_x10++;
-            tcu_uart_timers_10kHz();
-            check_scheduling_cb_timeout();
-			break;
-		default:
-			break;
-	}
-}
-
-// Function for scheduling repeated callbacks from TIMER1
-static void timer1_repeated_timer_start(uint32_t timeout_us)
-{
-	nrfx_timer_enable(&my_timer);
-
-	nrfx_timer_extended_compare(&my_timer, NRF_TIMER_CC_CHANNEL0, timeout_us, 
-                                NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
-}
-
-// Function for initializing the TIMER1 peripheral using the nrfx driver
-static void timer1_init(void)
-{
-	//nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(NRF_TIMER_FREQ_1MHz);
-	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(1000000);
-	timer_config.bit_width = NRF_TIMER_BIT_WIDTH_32;
-
-	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
-	if (err != NRFX_SUCCESS) {
-		LOG_WRN("Error initializing timer: %x\n", err);
-	}
-
-	IRQ_DIRECT_CONNECT(TIMER1_IRQn, 0, nrfx_timer_1_irq_handler, 0);
-	irq_enable(TIMER1_IRQn);
-
-	// Setup TIMER1 to generate callbacks every second 1000000
-	// Setup TIMER1 to generate callbacks every 100ms 100000
-	timer1_repeated_timer_start(100); //100 us
-	//timer1_repeated_timer_start(200000); // 200 ms
-}
-
-//------------------------------------------------------------------------------
-/**@brief Function for initializing the GPIO pins.
- *        Currently, only one pin is initialized. Configured as output to drive a led.
- * @retval -1 Error
- * @retval 0 OK
- */
-static int8_t gpio_init(void)
-{
-	int ret;
-
-	if (!device_is_ready(led.port)) {
-		return -1;
-	}
-
-	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
-	if (ret < 0) {
-		return -1;
-	}
-
-    return 0;
-}
 
 void set_extended_pan_id_in_stack(void)
 {
@@ -216,21 +120,6 @@ void zigbee_configuration()
     // Set the device link key. This action can help us choose between different link keys it has to be distributed TC to all devices
     if(zb_is_network_distributed()) LOG_WRN("Network key is distributed");
     else LOG_WRN("Network key is NOT distributed");
-}
-
-//------------------------------------------------------------------------------
-/**@brief This function toggles and output pin at 1Hz. That output pin is connected to a LED
- *
- * @note Executed the in main loop
- *
- */
-void diagnostic_toogle_pin()
-{
-    if(debug_led_ms_x10 >= 10000)
-    {
-        debug_led_ms_x10 = 0;
-        gpio_pin_toggle_dt(&led);
-    }
 }
 
 //------------------------------------------------------------------------------
