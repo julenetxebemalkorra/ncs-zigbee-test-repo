@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2021 Nordic Semiconductor ASA
+ * Copyright (c) 2024 IED
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
 /** @file
  *
- * @brief Zigbee application template.
+ * @brief C main source file.
  */
 
 #include <zephyr/kernel.h>
@@ -79,48 +78,6 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 /*                           FUNCTION DEFINITIONS                             */
 /*----------------------------------------------------------------------------*/
 
-void set_extended_pan_id_in_stack(void)
-{
-    zb_uint8_t extended_pan_id[8] = {0};
-    uint64_t ui_temp = zb_conf_get_extended_pan_id();
-
-    for(uint8_t i=0; i<8; i++)
-    {
-        extended_pan_id[i] = (zb_uint8_t)(ui_temp & 0x00000000000000FF);
-        ui_temp = ui_temp>>8;
-    }
-
-	zb_set_extended_pan_id(extended_pan_id);
-}
-
-// Function for initializing the Zigbee configuration
-void zigbee_configuration()
-{
-    zb_uint8_t network_link_key[16];
-    /* disable NVRAM erasing on every application startup*/
-    zb_set_nvram_erase_at_start(ZB_FALSE);
-
-    //TRUE to disable trust center, FALSE to enable trust center
-    zb_bdb_set_legacy_device_support(ZB_FALSE);
-
-    zb_conf_get_network_link_key(network_link_key);
-
-    LOG_WRN("Link key: ");
-    LOG_HEXDUMP_DBG(network_link_key, 16, " ");
-
-    // Set the network link key. This action can help us choose between different link keys
-    zb_zdo_set_tc_standard_distributed_key(network_link_key);
-
-    // Enable distributed Trust Center
-    zb_enable_distributed();
-    zb_zdo_setup_network_as_distributed();
-
-    set_extended_pan_id_in_stack();
-
-    // Set the device link key. This action can help us choose between different link keys it has to be distributed TC to all devices
-    if(zb_is_network_distributed()) LOG_WRN("Network key is distributed");
-    else LOG_WRN("Network key is NOT distributed");
-}
 
 //------------------------------------------------------------------------------
 /**@brief This function prints the value of several Zigbee parameters to the console.

@@ -29,8 +29,58 @@ bool g_b_reset_mcu_after_leaving_network = false; // Flag to indicate that the M
 bool g_b_reset_cmd = false; // Flag to indicate that a reset command has been received
 
 
-/* Function definition                                                        */
-//------------------------------------------------------------------------------
+/**@brief Configuration of some parameters of the ZBOSS stack before stating its thread
+ *
+ */
+void zigbee_configuration(void)
+{
+    zb_uint8_t network_link_key[16];
+    /* disable NVRAM erasing on every application startup*/
+    zb_set_nvram_erase_at_start(ZB_FALSE);
+
+    //TRUE to disable trust center, FALSE to enable trust center
+    zb_bdb_set_legacy_device_support(ZB_FALSE);
+
+    zb_conf_get_network_link_key(network_link_key);
+
+    LOG_INF("Link key: ");
+    LOG_HEXDUMP_INF(network_link_key, 16, " ");
+
+    // Set the network link key. This action can help us choose between different link keys
+    zb_zdo_set_tc_standard_distributed_key(network_link_key);
+
+    // Enable distributed Trust Center
+    zb_enable_distributed();
+    zb_zdo_setup_network_as_distributed();
+
+    set_extended_pan_id_in_stack();
+
+    // Set the device link key. This action can help us choose between different link keys it has to be distributed TC to all devices
+    if(zb_is_network_distributed()) LOG_INF("Network key is distributed");
+    else LOG_INF("Network key is NOT distributed");
+}
+
+
+/**@brief Set the extended PAN ID address in the ZBOSS stack
+ *
+ * This function gets the PAN ID address stored in the NVS and sets that value as the extended PAN ID
+ * in the ZBOSS stack.
+ *
+ */
+void set_extended_pan_id_in_stack(void)
+{
+    zb_uint8_t extended_pan_id[8] = {0};
+    uint64_t ui_temp = zb_conf_get_extended_pan_id();
+
+    for(uint8_t i=0; i<8; i++)
+    {
+        extended_pan_id[i] = (zb_uint8_t)(ui_temp & 0x00000000000000FF);
+        ui_temp = ui_temp>>8;
+    }
+
+	zb_set_extended_pan_id(extended_pan_id);
+}
+
 /**@brief Check if the NVRAM is being used for the first time
  *
  * This function checks if the NVRAM is being used for the first time.
@@ -364,7 +414,6 @@ uint8_t zb_conf_get_extended_node_identifier (uint8_t *ni)
  * @param data A pointer to the data to calculate the checksum.
  * @param size The size of the data to calculate the checksum.
 */
-// Calculate checksum for given data
 uint32_t calculate_checksum(char* data, int size) {
     uint32_t checksum = 0;
     for (int i = 0; i < size; i++) {
@@ -373,6 +422,10 @@ uint32_t calculate_checksum(char* data, int size) {
     return checksum;
 }
 
+/** @brief Manages the configuration parameters stored in the NVS
+ * 
+ * @param None
+*/
 void nvram_manager(void)
 {
     if((!g_b_flash_error) && (g_b_flash_write_cmd))
@@ -384,6 +437,10 @@ void nvram_manager(void)
     }     
 }
 
+/** @brief Manages requested resets (of only the ZBOSS stack or the MCU)
+ * 
+ * @param None
+*/
 void zigbee_reset_manager(void)
 {
     // The flag g_b_reset_zigbee_cmd realices the reset of the zigbee stack
