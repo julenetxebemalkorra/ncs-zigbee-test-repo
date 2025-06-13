@@ -603,11 +603,13 @@ void digi_fota_switch_state(enum fuota_state_machine_e new_state)
  */
 void set_in_nvram_fota_is_active(void)
 {
+    #ifdef RESUMING_INTERRUPTED_FUOTA_IMPLEMENTED
     int8_t rc;         // Return code from the write operation
     uint8_t upgrade_status = 'A'; //Active
     rc = write_nvram(DUFOTA_STATUS, (void*)&upgrade_status, sizeof(upgrade_status));
     rc = rc + write_nvram(DUFOTA_FW_SIZE,(void*)&firmware_image.file_size, sizeof(firmware_image.file_size));
     rc = rc + write_nvram(DUFOTA_FW_VERSION, (void*)&firmware_image.firmware_version, sizeof(firmware_image.firmware_version));
+    #endif
 }
 
 /**@brief This function stores in NVRAM a flag indicating that there is not a FUOTA process running
@@ -615,12 +617,14 @@ void set_in_nvram_fota_is_active(void)
  */
 void set_in_nvram_fota_is_not_active(void)
 {
+    #ifdef RESUMING_INTERRUPTED_FUOTA_IMPLEMENTED
     uint8_t upgrade_status = 0; //No active
     firmware_image.file_size = 0;
     firmware_image.firmware_version = 0;
     write_nvram(DUFOTA_STATUS, (void*)&upgrade_status, sizeof(upgrade_status));
     write_nvram(DUFOTA_FW_SIZE,(void*)&firmware_image.file_size, sizeof(firmware_image.file_size));
     write_nvram(DUFOTA_FW_VERSION, (void*)&firmware_image.firmware_version, sizeof(firmware_image.firmware_version));
+    #endif
 }
 
 /**@brief This function checks if there was FUOTA process running before the last reset
@@ -632,6 +636,7 @@ void set_in_nvram_fota_is_not_active(void)
  */
 bool read_from_nvram_if_fota_was_interrupted(void)
 {
+    #ifdef RESUMING_INTERRUPTED_FUOTA_IMPLEMENTED
     bool b_return = false;
     uint8_t upgrade_status = 0;
     int8_t rc;
@@ -680,4 +685,9 @@ bool read_from_nvram_if_fota_was_interrupted(void)
     }
 
     return b_return;
+    #else
+    interrupted_fuota_file_size = 0;
+    interrupted_fuota_firmware_version = 0;
+    return 0;
+    #endif
 }

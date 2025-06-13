@@ -21,6 +21,9 @@
 #define PRINT_ZIGBEE_INFO                ZB_TRUE
 #define PRINT_UART_INFO                  ZB_TRUE
 
+
+//#define RESUMING_INTERRUPTED_FUOTA_IMPLEMENTED 1
+
 //Indicadores de alarma     
 extern bool g_b_flash_error;
 extern bool g_b_flash_write_cmd;
