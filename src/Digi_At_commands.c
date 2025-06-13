@@ -231,6 +231,8 @@ void digi_at_reply_read_command(uint8_t at_command)
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_ce);
         break;
      case AT_AI:
+        if (zb_zdo_joined()) xbee_parameters.at_ai = 0;
+        else xbee_parameters.at_ai = 0xFF;
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_ai);
         break;
      case AT_CH:
