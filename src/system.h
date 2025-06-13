@@ -6,6 +6,12 @@
 #ifndef SYSTEM_H_
 #define SYSTEM_H_
 
+#if DT_NODE_HAS_STATUS(DT_ALIAS(watchdog0), okay)
+#define WDT_NODE DT_ALIAS(watchdog0)
+#else
+#define WDT_NODE DT_INVALID_NODE
+#endif
+
 int8_t watchdog_init(void);
 void task_wdt_callback(int channel_id, void *user_data);
 void periodic_feed_of_main_loop_watchdog(void);

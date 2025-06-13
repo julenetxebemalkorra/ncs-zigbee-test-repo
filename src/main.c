@@ -78,13 +78,6 @@
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
 
-#if DT_NODE_HAS_STATUS(DT_ALIAS(watchdog0), okay)
-#define WDT_NODE DT_ALIAS(watchdog0)
-#else
-#define WDT_NODE DT_INVALID_NODE
-#endif
-
-
 static volatile uint16_t debug_led_ms_x10 = 0; // 10000 ms timer to control the debug led
 
 bool g_b_flash_error = false; //   Flag to indicate if there was an error when reading the NVRAM
