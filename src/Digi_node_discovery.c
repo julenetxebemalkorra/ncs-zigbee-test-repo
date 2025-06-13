@@ -17,6 +17,7 @@
 #include "zigbee_aps.h"
 #include "Digi_At_commands.h"
 #include "Digi_node_discovery.h"
+#include "zigbee_configuration.h"
 
 /* Local variables                                                            */
 static struct node_discovery_reply_t node_discovery_reply;

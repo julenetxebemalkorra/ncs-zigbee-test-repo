@@ -20,8 +20,10 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <ctype.h>
 #include <zephyr/kernel.h>
+#include <zboss_api.h>
 #include "app_version.h"
 #include "zigbee_configuration.h"
 #include "Digi_At_commands.h"
@@ -250,7 +252,7 @@ void digi_at_reply_read_command(uint8_t at_command)
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_eo);
         break;
      case AT_KY:
-        reply_size = sprintf(reply, "%x\r", xbee_parameters.at_ky);
+        reply_size = sprintf(reply, "%x\r", 0);
         break;
      case AT_ZS:
         reply_size = sprintf(reply, "%x\r", xbee_parameters.at_zs);

@@ -15,6 +15,8 @@
 
 #include "Digi_profile.h"
 #include "zigbee_aps.h"
+#include "Digi_At_commands.h"
+#include "zigbee_configuration.h"
 #include "Digi_wireless_at_commands.h"
 
 LOG_MODULE_REGISTER(Digi_wireless_at_commands, LOG_LEVEL_DBG);
@@ -73,7 +75,7 @@ bool is_a_digi_read_at_command(uint8_t* input_data, int16_t size_of_input_data)
 {
     bool b_return = false;
     enum wireless_at_read_cmd_e received_cmd = NO_SUPPORTED_EXT_READ_AT_CMD;
-    uint8_t i, j;
+    uint8_t i;
     uint16_t uitemp;
     uint64_t ultemp;
     if (size_of_input_data == 16) // We got this value with the sniffer and reverse engineering
