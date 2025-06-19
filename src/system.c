@@ -33,35 +33,43 @@ static int task_wdt_id = -1;
 static const nrfx_timer_t my_timer = NRFX_TIMER_INSTANCE(1); // Reference to the TIMER1 instance
 
 //------------------------------------------------------------------------------
-/**@brief Initialization of the GPIO pins.
- *        Currently, only one pin is initialized. Configured as output to drive a led.
+/**
+ * @brief Initialization of the GPIO pins.
+ *
+ * @details Currently, only one pin is initialized. Configured as output to drive a led.
+ *
  * @retval -1 Error
  * @retval 0 OK
  */
+//------------------------------------------------------------------------------
 int8_t gpio_init(void)
 {
 	int ret;
 
 	if (!device_is_ready(led.port)) {
-		return -1;
+		return SYSTEM_RET_ERR;
 	}
 
 	ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
-	if (ret < 0) {
-		return -1;
+	if (ret < SYSTEM_RET_OK) {
+		return SYSTEM_RET_ERR;
 	}
 
-    return 0;
+    return ret;
 }
 
-
-/// @brief Initialization of the TIMER1 peripheral using the nrfx driver
-/// 
-/// @param None
-
+//------------------------------------------------------------------------------
+/**
+ * @brief Initialization of the TIMER1 peripheral using the nrfx driver.
+ *
+ * @details This function initializes the TIMER1 peripheral to generate an interrupt every 100 microseconds.
+ *          It uses the nrfx_timer driver to configure the timer and set up an interrupt handler.
+ *
+ */
+//------------------------------------------------------------------------------
 void timer1_init(void)
 {
-	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(1000000); //1MHz
+    nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(TIMER1_FREQUENCY_HZ); // 1MHz
 	timer_config.bit_width = NRF_TIMER_BIT_WIDTH_32;
 
 	int err = nrfx_timer_init(&my_timer, &timer_config, timer1_event_handler);
@@ -72,29 +80,34 @@ void timer1_init(void)
 	IRQ_DIRECT_CONNECT(TIMER1_IRQn, 0, nrfx_timer_1_irq_handler, 0);
 	irq_enable(TIMER1_IRQn);
 
-	timer1_repeated_timer_start(100); //100 us
+    timer1_repeated_timer_start(TIMER1_PERIOD_US); // 100 us
 }
 
-/// @brief Function for initializing the task watchdog
-/// 
-/// The task watchdog task is initialized and a channel is created for the main loop thread.
-/// HW watchdog set as fallback.
-/// 
-///  @retval -1 Error
-///  @retval 0 OK
+//------------------------------------------------------------------------------
+/**
+ * @brief Function for initializing the task watchdog.
+ *
+ * @details The task watchdog task is initialized and a channel is created for the main loop thread.
+ *          HW watchdog set as fallback.
+ *
+ * @retval -1 Error
+ * @retval 0 OK
+ */
+//------------------------------------------------------------------------------
 int8_t watchdog_init(void)
 {
 	int ret;
 
     if (!device_is_ready(hw_wdt_dev)) {
 		LOG_ERR("HW WDT not available.\n");
-        return -1;
+        return SYSTEM_RET_ERR;
 	}
 
     ret = task_wdt_init(hw_wdt_dev);
-	if (ret != 0) {
+	if (ret != SYSTEM_RET_OK) {
+        // If the task watchdog initialization fails, log the error and return
 		LOG_ERR("Task watchdog init failure: %d\n", ret);
-        return -2;
+        return SYSTEM_WDT_RET_ERR;
 	}
 
     // Register this thread
@@ -103,38 +116,42 @@ int8_t watchdog_init(void)
     LOG_INF("Registering task watchdog for thread: %p", my_tid);
     LOG_INF("Thread name: %s", k_thread_name_get(my_tid));
  
-	task_wdt_id = task_wdt_add(2000U, task_wdt_callback , my_tid); //2 seconds timeout
-    if (task_wdt_id < 0) {
+    task_wdt_id = task_wdt_add(MAIN_LOOP_WDT_TIMEOUT_MS, task_wdt_callback , my_tid); //2 seconds timeout
+    if (task_wdt_id < SYSTEM_RET_OK) {
 		LOG_ERR("task_wdt_add failed: %d", task_wdt_id);
-		return -3;
+		return SYSTEM_TASK_WDT_ADD_RET_ERR;
 	}
 
 	LOG_INF("Task WDT initialized with channel %d", task_wdt_id);
 
-    return 0;
+    return SYSTEM_RET_OK;
 }
 
 //------------------------------------------------------------------------------
-/**@brief This function toggles and output pin at 1Hz. That output pin is connected to a LED
- *
- * @note Executed the in main loop
+/**
+ * @brief This function toggles an output pin at 1Hz. That output pin is connected to a LED.
  *
  */
+//------------------------------------------------------------------------------
 void diagnostic_toogle_pin(void)
 {
-    if(debug_led_ms_x10 >= 10000)
+    if(debug_led_ms_x10 >= DEBUG_LED_TOGGLE_INTERVAL)
     {
         debug_led_ms_x10 = 0;
         gpio_pin_toggle_dt(&led);
     }
 }
 
-/// @brief Callback function to be executed when the watchdog of the main thread times out.
-///
-/// It just resets the device. There is not attempt to resolve the issue and continue operation.
-///
-/// @param channel_id :Id of the whatdog channel 
-/// @param user_data ; Pointer to strucure with thread information
+//------------------------------------------------------------------------------
+/**
+ * @brief Callback function to be executed when the watchdog of the main thread times out.
+ *
+ * @details It just resets the device. There is no attempt to resolve the issue and continue operation.
+ *
+ * @param channel_id Id of the watchdog channel.
+ * @param user_data Pointer to structure with thread information.
+ */
+//------------------------------------------------------------------------------
 void task_wdt_callback(int channel_id, void *user_data)
 {
     LOG_WRN("Task watchdog channel %d callback, thread: %s\n", channel_id, k_thread_name_get((k_tid_t)user_data));
@@ -142,14 +159,21 @@ void task_wdt_callback(int channel_id, void *user_data)
     sys_reboot(SYS_REBOOT_COLD);
 }
 
-/// @brief Feed the main loop thread watchdog every 1000 ms
-/// @param None
+//------------------------------------------------------------------------------
+/**
+ * @brief Feed the main loop thread watchdog every 1000 ms.
+ *
+ * @details This function is called periodically to ensure that the main loop thread does not time out.
+ *          It feeds the task watchdog to prevent it from triggering a reset.
+ *
+ */
+//------------------------------------------------------------------------------
 void periodic_feed_of_main_loop_watchdog(void)
 {
     static uint64_t time_last_ms_wdt = 0;
     uint64_t time_now_ms = k_uptime_get();
     
-    if ((uint64_t)( time_now_ms - time_last_ms_wdt ) > 1000)
+    if ((uint64_t)( time_now_ms - time_last_ms_wdt ) > MAIN_LOOP_WDT_FEED_INTERVAL_MS)
     {
         int err = task_wdt_feed(task_wdt_id); // Feed the watchdog
         if (err != 0) {
@@ -158,13 +182,27 @@ void periodic_feed_of_main_loop_watchdog(void)
         time_last_ms_wdt = time_now_ms;
     }
 }
+ /**
+ * @brief Flow diagram for the timer interrupt handling
+ *
+ * \dot
+ * digraph TimerInterruptFlow {
+ *     rankdir=LR;
+ *     "Zephyr Timer Interrupt\n(every 100 μs)" -> "system_timers_10kHz()" [label="calls"];
+ *     "system_timers_10kHz()" -> "Increments counters\n(UART, timeouts)";
+ *     "system_timers_10kHz()" -> "Drives FSMs\n(e.g., UART idle detection)";
+ * }
+ * \enddot
 
+//------------------------------------------------------------------------------
 /**
- * @brief Interrupt handler for TIMER1
- * NOTE: This callback is triggered by an interrupt. Many drivers or modules in Zephyr can not be accessed directly from interrupts, 
- * and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt
- * context.
- */
+* @brief Interrupt handler for TIMER1.
+*
+* @details This callback is triggered by an interrupt. Many drivers or modules in Zephyr cannot be accessed directly from interrupts,
+*          and if you need to access one of these from the timer callback it is necessary to use something like a k_work item to move execution out of the interrupt context.
+*
+*/
+//------------------------------------------------------------------------------
 void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 {
 	switch(event_type) {
@@ -178,12 +216,15 @@ void timer1_event_handler(nrf_timer_event_t event_type, void * p_context)
 	}
 }
 
+//------------------------------------------------------------------------------
 /**
- * @brief Schedule repeated callbacks from TIMER1.
- * @param timeout_us Period in microseconds.
+ * @brief Start the TIMER1 in a repeated mode with a specified timeout.
+ *
+ * @details This function enables the TIMER1 and sets it to trigger an event every `timeout_us` microseconds.
+ *
+ * @param timeout_us Timeout in microseconds for the timer.
  */
-int miFuncion(int param1, float param2);
-
+//------------------------------------------------------------------------------
 void timer1_repeated_timer_start(uint32_t timeout_us)
 {
 	nrfx_timer_enable(&my_timer);
@@ -192,12 +233,15 @@ void timer1_repeated_timer_start(uint32_t timeout_us)
                                 NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK, true);
 }
 
-/// @brief Display system information.
-///
-/// This function is called at startup. It displays system information (firmware version,
-/// ZBOSS version, reason of last reset...)
-///
-/// @param None
+//------------------------------------------------------------------------------
+/**
+ * @brief Display system information.
+ *
+ * @details This function is called at startup. It displays system information (firmware version,
+ *          ZBOSS version, reason of last reset...).
+ *
+ */
+//------------------------------------------------------------------------------
 void display_system_information(void)
 {
     const zb_char_t ZB_IAR_CODE *zb_version;
@@ -206,7 +250,7 @@ void display_system_information(void)
 
     // Display the last reset cause
     result = hwinfo_get_reset_cause(&reset_cause);
-    if (result == 0)
+    if (result == SYSTEM_RET_OK)
 	{
         LOG_ERR("RESET:");
         if (reset_cause & RESET_PIN)              LOG_WRN("Reset cause: RESET_PIN");
@@ -244,12 +288,15 @@ void display_system_information(void)
 }
 
 
-/// @brief Display boot status information
-///
-/// This function is called at startup. It displays the boot status (if there is a swap pending,
-/// or if the image running is only for test and needs confirmation...)
-///
-/// @param  None
+//------------------------------------------------------------------------------
+/**
+ * @brief Display boot status information.
+ *
+ * @details This function is called at startup. It displays the boot status (if there is a swap pending,
+ *          or if the image running is only for test and needs confirmation...).
+ *
+ */
+//------------------------------------------------------------------------------
 void display_boot_status(void)
 {
     int swap_type = mcuboot_swap_type();
@@ -275,7 +322,7 @@ void display_boot_status(void)
     size_t header_size = sizeof(header);
 
     int ret = boot_read_bank_header(FIXED_PARTITION_ID(slot0_partition), &header, header_size);
-    if (ret == 0) {
+    if (ret == SYSTEM_RET_OK) {
         if (header.mcuboot_version == 1) {
             LOG_INF("MCUBoot image header (v1):");
             LOG_INF("  Version: %d.%d.%d+%d",
@@ -300,11 +347,16 @@ void display_boot_status(void)
     }
 }
 
-/// @brief Confirms the current firmware image.
-///
-/// This function is called at startup. It checks whether the current image is already confirmed or is in test mode.
-/// If the images in slot 0 and slot 1 were recently swapped, it confirms the new image.
-/// @param  None
+//------------------------------------------------------------------------------
+/**
+ * @brief Confirms the current firmware image.
+ *
+ * @details This function is called at startup. It checks whether the current image is already confirmed or is in test mode.
+ *          If the images in slot 0 and slot 1 were recently swapped, it confirms the new image.
+ *          If the image is in test mode, it writes the confirmation to the bootloader.
+ *
+ */
+//------------------------------------------------------------------------------
 void confirm_image(void)
 {
 	if (!boot_is_img_confirmed()) {

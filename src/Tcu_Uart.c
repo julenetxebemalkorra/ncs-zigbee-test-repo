@@ -8,6 +8,12 @@
  * @brief Managment of the UART0, which is connected to the TCU.
  */
 
+ 
+/*
+ * UART State Machine (Graphviz DOT)
+ */
+ 
+
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zboss_api.h>
@@ -82,12 +88,66 @@ static struct uart_config tcu_uart_config = {
     .flow_ctrl = UART_CFG_FLOW_CTRL_NONE
  };
 
-//extern struct k_msgq tcu_message_queue; // Ensure the message queue is declared
-
-/**@brief Initialization of the TCU UART FW module
+/**
+ * @brief UART State Machine Logic (for TCU UART Command/Transparent Modes)
  *
- * @retval -1 Error
- * @retval 0 OK
+ * This state machine manages the transition between Transparent Mode and Command Mode
+ * for the UART interface with the TCU (Zigbee module). It implements the "+++" escape
+ * sequence with required guard times (silence before and after) as per Digi/XBee protocol.
+ *
+ * States:
+ *   - Transparent Mode: Normal data transfer. Looking for "+++" escape sequence.
+ *   - Waiting for Initial Silence: Wait for 500ms silence before accepting "+++".
+ *   - Waiting for First '+': Accept first '+' of the sequence.
+ *   - Waiting for Second '+': Accept second '+'.
+ *   - Waiting for Third '+': Accept third '+'.
+ *   - Waiting for End Silence: Wait for 500ms silence after "+++".
+ *   - Command Mode: Accept AT commands. Exit after 10s of inactivity or explicit command.
+ *
+ * Transitions:
+ *   - Transparent Mode -> Waiting for Initial Silence:
+ *       On detection of '+' (potential start of escape sequence).
+ *   - Waiting for Initial Silence -> Waiting for First '+':
+ *       After 500ms of silence.
+ *   - Waiting for First '+', Second '+', Third '+':
+ *       Advance on receiving '+', reset to initial silence on any other character.
+ *   - Waiting for Third '+' -> Waiting for End Silence:
+ *       After third '+' received.
+ *   - Waiting for End Silence -> Command Mode:
+ *       After 500ms of silence.
+ *   - Command Mode -> Transparent Mode:
+ *       After 10s of inactivity or explicit AT command to exit.
+ *   - Any state (except Command Mode) -> Waiting for Initial Silence:
+ *       On unexpected character or timing violation.
+ *   - Command Mode -> Command Mode:
+ *       On any input, reset 10s inactivity timer.
+ *
+ * @dot
+ * digraph UART_RX_Flow {
+ *     rankdir=LR;
+ *     node [shape=box, style=filled, fillcolor=lightgray];
+
+ *     UART_RX [label="UART RX"];
+ *     DetectFrame [label="Detect Frame"];
+ *     PlusPlusPlus [label="Detect '+++' (Command Mode)"];
+ *     BinaryFrame [label="Binary Frame"];
+ *     CommandMode [label="Command Mode:\nParse AT, respond by UART"];
+ *     TransparentMode [label="Transparent Mode:\nForward frame via Zigbee APS"];
+
+ *     UART_RX -> DetectFrame;
+ *     DetectFrame -> PlusPlusPlus [label="If '+++'"];
+ *     DetectFrame -> BinaryFrame [label="Else"];
+ *     PlusPlusPlus -> CommandMode;
+ *     BinaryFrame -> TransparentMode;
+ * }
+ * @enddot
+ *
+ * Key Timings:
+ *   - 500ms silence before and after "+++" required to enter command mode.
+ *   - 10s silence (or explicit AT command) to exit command mode.
+ *   - Frame considered complete after 10ms silence in transparent mode.
+ *
+ * See Digi/XBee documentation for escape sequence details.
  */
 int8_t tcu_uart_init(void)
 {
@@ -97,7 +157,8 @@ int8_t tcu_uart_init(void)
     return ret;
 }
 
-/**@brief Initialization of the TCU UART RX buffer
+/**
+ * @brief Initialization of the TCU UART RX buffer
  *
  */
 void tcu_uart_rx_buffer_init(void)
@@ -112,7 +173,8 @@ void tcu_uart_rx_buffer_init(void)
     tcu_uart_rx_time_since_last_byte_ms = 0;
 }
 
-/**@brief Configuration and initialization of the UART used to communicate with the TCU
+/**
+ * @brief Configuration and initialization of the UART used to communicate with the TCU
  *
  * @retval -1 Error
  * @retval 0 OK
@@ -121,24 +183,24 @@ int8_t tcu_uart_configuration(void)
 {
 	if (!device_is_ready(dev_tcu_uart)) {
 		LOG_ERR("UART device not found!");
-		return -1;
+		return UART_RET_ERR;
 	}
 
 	// Call uart_configure to apply the configuration
     int result = uart_configure(dev_tcu_uart, &tcu_uart_config);
 
 	// Check the result
-    if (result == 0) {
+    if (result == UART_RET_OK) {
         LOG_DBG("TCU UART configuration successful!\n");
     } else {
         LOG_ERR("TCU UART configuration failed with error code: %d\n", result);
-        return -1;
+        return UART_RET_ERR;
     }
 
 	/* configure interrupt and callback to receive data */
 	int ret = uart_irq_callback_set(dev_tcu_uart, tcu_uart_isr);
 
-	if (ret < 0) {
+	if (ret < UART_RET_OK) {
 		if (ret == -ENOTSUP) {
 			LOG_ERR("Interrupt-driven UART API support not enabled\n");
 		} else if (ret == -ENOSYS) {
@@ -146,7 +208,7 @@ int8_t tcu_uart_configuration(void)
 		} else {
 			LOG_ERR("Error setting UART callback: %d\n", ret);
 		}
-		return -1;
+		return UART_RET_ERR;
 	}
 	else
 	{
@@ -154,10 +216,11 @@ int8_t tcu_uart_configuration(void)
 	}
 
 	uart_irq_rx_enable(dev_tcu_uart);
-    return 0;
+    return UART_RET_OK;
 }
 
-/**@brief This function updates the timers used in the Tcu UART FW module.
+/**
+ * @brief This function updates the timers used in the Tcu UART FW module.
  * @details The 10 ms silence to consider that a RX frame is complete [10ms]
  *        The 0.5 s silence before and after the sequence "+++", which make the Zigbee module
  *        to enter in command mode
@@ -170,7 +233,7 @@ void tcu_uart_timers_10kHz(void)
 {
     static uint8_t one_ms_counter = 0;
 
-    if( one_ms_counter < 10 ) one_ms_counter++;
+    if( one_ms_counter < TICKS_TO_CONSIDER_FRAME_COMPLETED ) one_ms_counter++;
     else
     {
         one_ms_counter = 0;
@@ -207,7 +270,7 @@ void tcu_uart_timers_10kHz(void)
 /*      Verify the 500 ms silences needed to accept the "+++" sequence        */
         if( enter_cmd_mode_sequence_st == ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_INITIAL_SILENCE_ST )
         {
-            if( pre_silence_timer_ms < 500 ) pre_silence_timer_ms++;
+            if( pre_silence_timer_ms < ENTER_CMD_MODE_SILENCE_MS ) pre_silence_timer_ms++;
             else
             {
                 pre_silence_timer_ms = 0;
@@ -216,7 +279,7 @@ void tcu_uart_timers_10kHz(void)
         }
         else if( enter_cmd_mode_sequence_st == ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_END_SILENCE_ST )
         {
-            if( post_silence_timer_ms < 500 ) post_silence_timer_ms++;
+            if( post_silence_timer_ms < ENTER_CMD_MODE_SILENCE_MS ) post_silence_timer_ms++;
             else
             {
                 post_silence_timer_ms = 0;
@@ -228,7 +291,7 @@ void tcu_uart_timers_10kHz(void)
 /*      Verify the 10 s silence which makes the zigbee module to leave automatically the command mode */
         if( b_zigbee_module_in_command_mode )
         {
-            if( leave_cmd_mode_silence_timer_ms < 10000 ) leave_cmd_mode_silence_timer_ms++;
+            if( leave_cmd_mode_silence_timer_ms < LEAVE_CMD_MODE_SILENCE_MS ) leave_cmd_mode_silence_timer_ms++;
             else
             {
                 switch_tcu_uart_out_of_command_mode();
@@ -237,7 +300,8 @@ void tcu_uart_timers_10kHz(void)
     }
 }
 
-/**@brief This function processes the last byte received throught the
+/**
+ * @brief This function processes the last byte received throught the
  *        TCU's UART when the Zigbee module is in command mode
  *
  */
@@ -298,7 +362,8 @@ void tcu_uart_process_byte_received_in_command_mode(uint8_t input_byte)
     }
 }
 
-/**@brief This function processes the last byte received throught the
+/**
+ * @brief This function processes the last byte received throught the
  *        TCU's UART when the Zigbee module is in transparent mode
  *
  */
@@ -346,6 +411,13 @@ void tcu_uart_process_byte_received_in_transparent_mode(uint8_t input_byte)
     }
 }
 
+/**
+ * 
+ * @brief This function handles the received data from the UART
+ *        It reads the data from the hardware FIFO and processes it
+ *        according to the current mode (command or transparent).
+ *
+ */
 void handle_uart_rx(void)
 {
     uint8_t uart_rx_hw_fifo[SIZE_OF_RX_FIFO_OF_NRF52840_UART];
@@ -365,6 +437,11 @@ void handle_uart_rx(void)
     }
 }
 
+/** 
+ * @brief This function handles the transmission of data through the UART
+ *        It sends data from the transmission buffer in chunks of up to 8 bytes.
+ *
+ */
 void handle_uart_tx(void)
 {
     if (tcu_transmission_running) {
@@ -383,7 +460,7 @@ void handle_uart_tx(void)
                                      bytes_to_send);
 
             //int ret = uart_fifo_fill(dev_tcu_uart, (uint8_t *)&tcu_transmission_buffer.buffer, tcu_transmission_buffer.size);
-            if (ret > 0) {
+            if (ret > UART_RET_OK) {
                 //LOG_WRN("Sent %d bytes", ret);
                 tcu_transmission_buffer_index += ret;
             } else 
@@ -402,7 +479,8 @@ void handle_uart_tx(void)
     }
 }
 
-/**@brief Interrupt Service Routine for the UART used to communicate with the TCU
+/**
+ * @brief Interrupt Service Routine for the UART used to communicate with the TCU
  *
  *
  */
@@ -425,7 +503,8 @@ void tcu_uart_isr(const struct device *dev, void *user_data)
     }
 }
 
-/**@brief Queue a message to be sent through the TCU UART
+/**
+ * @brief Queue a message to be sent through the TCU UART
  *
  * @param[in]   input_data          Pointer to the message to be sent
  * @param[in]   size_input_data     Size of the message to be sent
@@ -435,7 +514,7 @@ int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data)
 {
     if (size_input_data > MAX_MESSAGE_SIZE) {
         LOG_ERR("Message size exceeds queue capacity");
-        return -1;
+        return UART_RET_ERR;
     }
 
     LOG_DBG("Queueing message of size %d", size_input_data);
@@ -448,7 +527,7 @@ int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data)
 
     int ret = k_msgq_put(&tcu_uart_tx_message_queue, &message_buffer, K_NO_WAIT);
 
-    if (ret == 0) {
+    if (ret == UART_RET_OK) {
         //LOG_DBG("Message queued successfully");
     } else if (ret == -ENOMSG) {
         LOG_ERR("Message queue is full");
@@ -459,9 +538,10 @@ int8_t queue_zigbee_Message(uint8_t *input_data, uint16_t size_input_data)
     return ret;
 }
 
-/**@brief Switch the TCU uart to command mode
- *
- *
+/**
+ * @brief Switch the TCU uart to command mode
+ * 
+ * 
  */
 void switch_tcu_uart_to_command_mode(void)
 {
@@ -474,7 +554,8 @@ void switch_tcu_uart_to_command_mode(void)
     }
 }
 
-/**@brief Switch the TCU uart out of command mode
+/**
+ * @brief Switch the TCU uart out of command mode 
  *
  *
  */
@@ -485,7 +566,8 @@ void switch_tcu_uart_out_of_command_mode(void)
     LOG_DBG("Leave command mode");
 }
 
-/**@brief Indicate if the TCU UART is in command mode
+/**
+ * @brief Indicate if the TCU UART is in command mode
  *
  * @retval true In command mode
  * @retval false Not in command mode (i.e. transparent mode)
@@ -495,7 +577,8 @@ bool is_tcu_uart_in_command_mode(void)
     return b_zigbee_module_in_command_mode;
 }
 
-/**@brief Check if the TCU has sent the "+++" sequence
+/**
+ * @brief Check if the TCU has sent the "+++" sequence
  *
  * @param[in]   input_byte   Last byte received through the TCU UART
  *
@@ -529,7 +612,8 @@ void check_input_sequence_for_entering_in_command_mode(uint8_t input_byte)
     }
 }
 
-/**@brief This function places in the APS output frame queue a frame received through
+/**
+ * @brief This function places in the APS output frame queue a frame received through
 *         the TCU UART when the zigbee module is in transparent mode.
 */
 bool tcu_uart_send_received_frame_through_zigbee(void)
@@ -595,7 +679,8 @@ bool tcu_uart_send_received_frame_through_zigbee(void)
     return b_return;
 }
 
-/**@brief If a complete frame has been received from the TCU UART when the module is
+/**
+ * @brief If a complete frame has been received from the TCU UART when the module is
  *        i transparente mode, place it in the APS output frame queue.
  *
  */
@@ -610,7 +695,8 @@ void tcu_uart_transparent_mode_manager(void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Management of tcu uart layer. Generation of TCU UART frames and scheduling of their transmission
+/**
+ * @brief Management of tcu uart layer. Generation of TCU UART frames and scheduling of their transmission
  *
  *
  */
@@ -630,19 +716,19 @@ void tcu_uart_manager(void)
 
         // You can also log or take action after a certain number of increments if needed
         // For example, log a warning after 1000 iterations
-        if (uart_idle_duration  >= 80) {
+        if (uart_idle_duration  >= UART_TX_IDLE_THRESHOLD_MS) {
             int ret = k_msgq_get(&tcu_uart_tx_message_queue, &tcu_transmission_buffer, K_NO_WAIT);
             if (ret == 0) {
-                //LOG_WRN("Sending message from queue");
-                //LOG_HEXDUMP_DBG((uint8_t *)tcu_transmission_buffer.buffer, tcu_transmission_buffer.size, "Payload of message from queue");
-                tcu_transmission_running = true;
-                // Reset the idle time tracking since transmission starts
-                uart_idle_start_time = 0;
-                uart_idle_duration = 0;
-                uart_idle_start_time = current_time;
-                uart_poll_out(dev_tcu_uart, tcu_transmission_buffer.buffer[0]);  // Send the first byte
-                tcu_transmission_buffer_index = 1;
-                uart_irq_tx_enable(dev_tcu_uart);  // Enable TX interrupt
+            //LOG_WRN("Sending message from queue");
+            //LOG_HEXDUMP_DBG((uint8_t *)tcu_transmission_buffer.buffer, tcu_transmission_buffer.size, "Payload of message from queue");
+            tcu_transmission_running = true;
+            // Reset the idle time tracking since transmission starts
+            uart_idle_start_time = 0;
+            uart_idle_duration = 0;
+            uart_idle_start_time = current_time;
+            uart_poll_out(dev_tcu_uart, tcu_transmission_buffer.buffer[0]);  // Send the first byte
+            tcu_transmission_buffer_index = 1;
+            uart_irq_tx_enable(dev_tcu_uart);  // Enable TX interrupt
             }
         }
     }

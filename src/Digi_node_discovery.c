@@ -8,6 +8,8 @@
  * @brief Managment of replies to the Node Discovery command from Digi.
  */
 
+
+
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
@@ -24,8 +26,59 @@ static struct node_discovery_reply_t node_discovery_reply;
 
 LOG_MODULE_REGISTER(Digi_node_discovery, LOG_LEVEL_DBG);
 
-/**@brief This function initializes the Digi_node_discovery's firmware module
+/**
+ * @brief Digi Node Discovery Module
  *
+ * This module manages replies to Digi/XBee Node Discovery (ND) commands over Zigbee APS frames.
+ * It detects incoming ND requests, schedules randomized replies, and formats responses
+ * compatible with Digi/XBee expectations.
+ *
+ * @dot
+ * digraph DigiNodeDiscovery {
+ *     rankdir=LR;
+ *     node [shape=box];
+ *
+ *     APS_RX [label="APS RX: Receive Zigbee frame"];
+ *     CheckND [label="is_a_digi_node_discovery_request()"];
+ *     Pending [label="Set pending request\nand reply timing"];
+ *     MainLoop [label="digi_node_discovery_request_manager()"];
+ *     TimeCheck [label="Check if reply time reached"];
+ *     Reply [label="digi_node_discovery_reply()"];
+ *     Format [label="Format ND reply payload"];
+ *     Enqueue [label="enqueue_aps_frame()"];
+ *     Done [label="Reply sent"];
+ *
+ *     APS_RX -> CheckND;
+ *     CheckND -> Pending [label="ND request detected"];
+ *     Pending -> MainLoop;
+ *     MainLoop -> TimeCheck;
+ *     TimeCheck -> Reply [label="Time to reply"];
+ *     Reply -> Format;
+ *     Format -> Enqueue;
+ *     Enqueue -> Done;
+ * }
+ * @enddot
+ *
+ * Flow:
+ * 1. APS RX receives a Zigbee frame.
+ * 2. is_a_digi_node_discovery_request() checks if it's an ND command.
+ * 3. If ND, sets pending request and schedules a randomized reply time.
+ * 4. Periodically, digi_node_discovery_request_manager() checks if it's time to reply.
+ * 5. When due, digi_node_discovery_reply() formats the ND reply payload (including addresses, NI string, etc.).
+ * 6. The reply is enqueued for Zigbee transmission.
+ *
+ * Key Features:
+ * - Compatible with Digi/XBee ND command format.
+ * - Randomized reply timing to avoid reply collisions.
+ * - Includes device addressing, node identifier, and product/manufacturer info in reply.
+ * - Designed for integration with Zephyr and ZBOSS Zigbee stack.
+ */
+
+/**
+ * @brief This function initializes the Node Discovery module
+ *
+ * @details This function initializes the Node Discovery module by setting the initial values
+ *          for the node discovery reply structure.
  */
 void digi_node_discovery_init(void)
 {
@@ -39,7 +92,8 @@ void digi_node_discovery_init(void)
 
 }
 
-/**@brief This function evaluates if the last received APS frame is a Digi's Node Discover request
+/**
+ * @brief This function evaluates if the last received APS frame is a Digi's Node Discover request
  *
  * @param[in]   input_data   Pointer to payload of received APS frame
  * @param[in]   size_of_input_data   Payload size
@@ -71,8 +125,15 @@ bool is_a_digi_node_discovery_request(uint8_t* input_data, int16_t size_of_input
     return b_return;
 }
 
-/**@brief This function places in the APS output frame queue the reply to a node discovery request.
+/**
+ * @brief This function places in the APS output frame queue the reply to a node discovery request.
 *
+* @details It formats the reply according to Digi's Node Discovery request format.
+*          The reply includes the node's short address, long address, node identifier, parent address,
+*          node type, profile ID, manufacturer ID, product type, and a fixed RSSI value.
+*
+* @retval True if the reply was successfully enqueued
+* @retval False if there was no free space in the APS output frame queue
 */
 bool digi_node_discovery_reply(void)
 {
@@ -139,11 +200,11 @@ bool digi_node_discovery_reply(void)
     return b_return;
 }
 
-/**@brief This function checks if there is a node discovery request pending to be replied, and, in that case
- *        schedules the function that will reply to that request.
+/**
+ * @brief Checks if there is a pending node discovery request and schedules the reply if needed.
  *
- * @retval True If the transmission of a reply to a Node Discover request has been scheduled
- * @retval False Otherwise
+ * @details This function should be called periodically in the main loop.
+ *          It checks if there is a pending node discovery request and if the time to reply has passed.
  */
 void digi_node_discovery_request_manager(void)
 {

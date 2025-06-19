@@ -29,7 +29,8 @@ bool g_b_reset_mcu_after_leaving_network = false; // Flag to indicate that the M
 bool g_b_reset_cmd = false; // Flag to indicate that a reset command has been received
 
 
-/**@brief Configuration of some parameters of the ZBOSS stack before stating its thread
+/**
+ * @brief Configuration of some parameters of the ZBOSS stack before stating its thread
  *
  */
 void zigbee_configuration(void)
@@ -61,7 +62,8 @@ void zigbee_configuration(void)
 }
 
 
-/**@brief Set the extended PAN ID address in the ZBOSS stack
+/**
+ * @brief Set the extended PAN ID address in the ZBOSS stack
  *
  * This function gets the PAN ID address stored in the NVS and sets that value as the extended PAN ID
  * in the ZBOSS stack.
@@ -81,7 +83,8 @@ void set_extended_pan_id_in_stack(void)
 	zb_set_extended_pan_id(extended_pan_id);
 }
 
-/**@brief Check if the NVRAM is being used for the first time
+/**
+ * @brief Check if the NVRAM is being used for the first time
  *
  * This function checks if the NVRAM is being used for the first time.
  * It reads the first 6 bytes of the NVRAM and compares them with the expected values.
@@ -159,7 +162,8 @@ int8_t zb_nvram_check_usage(void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Load zigbee user configuration from NVRAM
+/**
+ * @brief Load zigbee user configuration from NVRAM
  *
  * This function reads the Zigbee user configuration from NVRAM.
  * It reads the PAN_ID and stores it in the zb_user_conf structure.
@@ -242,7 +246,8 @@ uint8_t zb_conf_read_from_nvram (void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Write zigbee user configuration to NVRAM
+/**
+ * @brief Write zigbee user configuration to NVRAM
  *
  * This function writes the current Zigbee user configuration to NVRAM.
  * It writes both the PAN_ID and the Node Identifier (NI).
@@ -271,7 +276,8 @@ void zb_conf_write_to_nvram (void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Update the zigbee user configuration structure with the last values 
+/**
+ * @brief Update the zigbee user configuration structure with the last values 
  *        introduced by the user.
  *
  * This function updates the Zigbee user configuration structure with the latest
@@ -290,7 +296,8 @@ void zb_conf_update (void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Get the used configurable parameter "extended pan id"
+/**
+ * @brief Get the used configurable parameter "extended pan id"
  *
  * @retval User configured extended pan id
  */
@@ -300,9 +307,11 @@ uint64_t zb_conf_get_extended_pan_id (void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Get the used configurable parameter network key
+/**
+ * @brief Get the used configurable parameter "network link key"
+ *        It gets stored in the buffer passed as argument
  *
- * @retval User configured network key
+ * @param  network_key  Pointer to buffer where the network link key will be stored.
  */
 void zb_conf_get_network_link_key (uint8_t *network_key)
 {
@@ -313,7 +322,8 @@ void zb_conf_get_network_link_key (uint8_t *network_key)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Invert the order of bytes in a 32-bit value 
+/**
+ * @brief Invert the order of bytes in a 32-bit value 
  *      (e.g., 0x12345678 becomes 0x78563412)
  * 
  * @param value The 32-bit value to invert
@@ -328,9 +338,10 @@ uint32_t invert_bytes(uint32_t value) {
 }
 
 //------------------------------------------------------------------------------
-/**@brief Get the used configurable parameter "mac address"
+/**
+ * @brief Get the low 32 bits of the MAC address
  *
- * @retval User configured extended pan id
+ * @retval Low 32 bits of the device MAC address
  */
 uint32_t zb_get_mac_addr_low (void)
 {
@@ -358,9 +369,10 @@ uint32_t zb_get_mac_addr_low (void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Get the used configurable parameter "mac address"
+/**
+ * @brief Get the used configurable parameter "mac address"
  *
- * @retval User configured extended pan id
+ * @retval High 32 bits of the device MAC address
  */
 uint32_t zb_get_mac_addr_high (void)
 {
@@ -388,7 +400,8 @@ uint32_t zb_get_mac_addr_high (void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Get the used configurable parameter "node identifier".
+/**
+ * @brief Get the used configurable parameter "node identifier".
  *        It gets stored in the buffer passed as argument
  *
  * @param  ni  Pointer to buffer where the node identifier will be stored.
@@ -422,10 +435,12 @@ uint32_t calculate_checksum(char* data, int size) {
     return checksum;
 }
 
-/** @brief Manages the configuration parameters stored in the NVS
- * 
- * @param None
-*/
+//------------------------------------------------------------------------------
+/**
+ * @brief This function is called periodically to manage the NVRAM operations
+ *        It checks if a flash write command has been received and if so, it updates
+ *        the zb_user_conf structure and writes the new values to NVRAM.
+ */
 void nvram_manager(void)
 {
     if((!g_b_flash_error) && (g_b_flash_write_cmd))
@@ -437,10 +452,11 @@ void nvram_manager(void)
     }     
 }
 
-/** @brief Manages requested resets (of only the ZBOSS stack or the MCU)
+/** 
+ * @brief Manages requested resets (of only the ZBOSS stack or the MCU)
  * 
  * @param None
-*/
+ */
 void zigbee_reset_manager(void)
 {
     // The flag g_b_reset_zigbee_cmd realices the reset of the zigbee stack
@@ -459,11 +475,12 @@ void zigbee_reset_manager(void)
             LOG_ERR("zb_bdb_reset_via_local_action failed, ret %d", ret);
         }
     }
-
+    // so far this flag is only set by the AT command NR
+    // but it could be set by other means in the future
     if (g_b_reset_cmd)
     {
         g_b_reset_cmd = false;
         LOG_WRN("Reset command received from TCU, rebooting...");
-        zb_reset(true);
+        sys_reboot(SYS_REBOOT_COLD);
     }
 }

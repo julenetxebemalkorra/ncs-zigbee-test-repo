@@ -9,6 +9,8 @@
 #define APS_UNENCRYPTED_PAYLOAD_MAX 82
 #define APS_PAYLOAD_MAX 255
 #define APS_OUTPUT_FRAME_BUFFER_SIZE 8
+#define SCHEDULING_CB_TIMEOUT_MS 50000  // Tiempo límite en milisegundos para enviar un frame APS
+#define SYSTEM_TICK_MS 1                // Tiempo de tick del sistema en milisegundos
 
 typedef struct {
     zb_addr_u dst_addr;

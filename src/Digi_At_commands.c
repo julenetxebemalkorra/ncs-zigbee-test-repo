@@ -3,21 +3,6 @@
  *
  */
 
-/** @file
- *
- * @brief Managment of the UART0, which is connected to the TCU.
- */
-
-//#include <zephyr/kernel.h>
-
-// UART async includes
-//#include <zephyr/device.h>
-//#include <zephyr/devicetree.h>
-//#include <zephyr/sys/ring_buffer.h>
-//#include <zephyr/drivers/gpio.h>
-//#include <zephyr/drivers/uart.h>
-//#include <string.h>
-
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -34,7 +19,98 @@ LOG_MODULE_REGISTER(Dig_AT_commands, LOG_LEVEL_DBG);
 
 static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 
-/**@brief This function initializes the Digi_At_commands firmware module
+/**
+ * @file Digi_At_commands.c
+ * @brief Management of Digi/XBee AT command interface over UART for Zigbee devices.
+ *
+ * This module implements a Digi/XBee-compatible AT command interface over UART,
+ * allowing external hosts to read and write Zigbee network and device parameters,
+ * as well as trigger actions (e.g., reset, apply changes) via AT commands.
+ *
+ * ## Features
+ * - Parses and validates AT command frames received from UART (TCU).
+ * - Supports read, write, and action AT commands for a set of Zigbee/XBee parameters.
+ * - Maintains an internal parameter structure (`xbee_parameters`) reflecting device/network state.
+ * - Replies to commands with "OK", "ERROR", or parameter values, emulating Digi/XBee behavior.
+ * - Converts between ASCII/hex for parameter transport.
+ * - Integrates with Zephyr logging and Zigbee stack for parameter access.
+ *
+ * ## Supported AT Commands
+ * - Read: VR, HV, SH, SL, JV, NJ, NW, ID, NI, CE, AI, CH, MY, EE, EO, KY, ZS, BD, NB
+ * - Write: JV, NJ, NW, ID, NI, CE, EE, EO, KY, ZS, BD, NB
+ * - Action: AC (apply changes), WR (write to flash), CN (leave command mode), NR (reset network)
+ *
+ * ## Parameter Management
+ * - Parameters are stored in `xbee_parameters` (struct xbee_parameters_t).
+ * - Default values are set in `digi_at_init_xbee_parameters()`.
+ * - Read commands fetch values from the struct and reply via UART.
+ * - Write commands validate and update struct fields, with limited accepted values for some.
+ * - Action commands may trigger global flags or system actions.
+ *
+ * @brief Command Processing Flow Diagram
+ *
+ * \dot
+ * digraph CommandProcessingFlow {
+ *   rankdir=LR;
+ *   UART_RX [label="UART RX (TCU)\nreceives frame"];
+ *   Analyze [label="digi_at_analyze_and_reply_to_command()"];
+ *   Validate [label="Validate prefix (\"AT\")\nand length"];
+ *   Uppercase [label="Convert command\nto uppercase"];
+ *   Determine [label="Determine command type:\nread, write, action"];
+ *   ReadCmd [label="digi_at_reply_read_command()"];
+ *   WriteCmd [label="digi_at_reply_write_command()"];
+ *   ActionCmd [label="digi_at_reply_action_command()"];
+ *   Reply [label="queue_zigbee_Message()"];
+ *   Status [label="Return status code"];
+ *
+ *   UART_RX -> Analyze;
+ *   Analyze -> Validate -> Uppercase -> Determine;
+ *   Determine -> ReadCmd [label="read"];
+ *   Determine -> WriteCmd [label="write"];
+ *   Determine -> ActionCmd [label="action"];
+ *   ReadCmd -> Reply;
+ *   WriteCmd -> Reply;
+ *   ActionCmd -> Reply;
+ *   Reply -> Status;
+ * }
+ * \enddot
+ *
+ * This diagram illustrates the flow of command processing from UART reception
+ * to command analysis, dispatch, reply, and status return.
+ * ## Command Processing Flow
+ * 1. UART RX (TCU) receives a frame and passes it to `digi_at_analyze_and_reply_to_command()`.
+ * 2. The function:
+ *    - Validates prefix ("AT") and length.
+ *    - Converts command to uppercase.
+ *    - Determines command type (read, write, action) by length and command code.
+ *    - Dispatches to:
+ *      - `digi_at_reply_read_command()` for read commands.
+ *      - `digi_at_reply_write_command()` for write commands.
+ *      - `digi_at_reply_action_command()` for action commands.
+ *    - Replies are sent via `queue_zigbee_Message()`.
+ *    - Returns status code indicating result and whether to stay/leave command mode.
+ *
+ * ## Helper Functions
+ * - `convert_hex_string_to_uint64()`: Converts ASCII hex string to uint64_t.
+ * - `ascii_to_hex()`: Converts ASCII hex string to binary array.
+ * - Parameter getters (e.g., `digi_at_get_parameter_id()`).
+ * - Parameter readers for buffer output (e.g., `digi_at_read_ni()`).
+ *
+ * ## Integration Notes
+ * - Relies on Zephyr kernel, logging, and Zigbee stack APIs.
+ * - Expects UART RX frames to be passed as byte arrays.
+ * - Replies are sent via `queue_zigbee_Message()`.
+ * - Parameter values may be mirrored to NVRAM or Zigbee stack as needed.
+ *
+ * ## Limitations
+ * - Only a subset of Digi/XBee AT commands are supported.
+ * - Some parameters are read-only or accept only specific values.
+ * - No concurrency protection on `xbee_parameters` (single-threaded context assumed).
+ */
+ 
+//------------------------------------------------------------------------------
+/**
+ * @brief This function initializes the Digi AT commands module
  *
  */
 void digi_at_init(void)
@@ -42,8 +118,11 @@ void digi_at_init(void)
     digi_at_init_xbee_parameters();
 }
 
-/**@brief This function initializes with default values the Xbee parameters
- * 
+//------------------------------------------------------------------------------
+/**
+ * @brief This function initializes with default values the Xbee parameters
+ *  * It is called at the beginning of the firmware, so it can be used to set
+ *  * the default values of the Xbee parameters.
  */
 void digi_at_init_xbee_parameters(void)
 {
@@ -53,22 +132,23 @@ void digi_at_init_xbee_parameters(void)
     xbee_parameters.at_sl = zb_get_mac_addr_low(); // Low part of the MAC address
     xbee_parameters.at_jv = HARDCODED_ATJV_VALUE;     // Node join verification
     xbee_parameters.at_nj = HARDCODED_ATNJ_VALUE;  // Node join time
-    xbee_parameters.at_nw = 10;    // Network watchdog
+    xbee_parameters.at_nw = HARDCODED_ATNW_VALUE;    // Network watchdog
     xbee_parameters.at_id = zb_conf_get_extended_pan_id();   // Extended pan id; It is user configurable, get it from NVRAM
-    xbee_parameters.at_ce = 0;     // Coordinator enabled
-    xbee_parameters.at_ai = 0xFF;  // Association indication
-    xbee_parameters.at_ch = 0;     // Operation channel
-    xbee_parameters.at_my = 0;     // Short address
-    xbee_parameters.at_ee = 1;     // Encryption enable
-    xbee_parameters.at_eo = 0;     // Encryption options
+    xbee_parameters.at_ce = HARDCODED_ATCE_VALUE;     // Coordinator enabled
+    xbee_parameters.at_ai = HARDCODED_ATAI_VALUE;  // Association indication
+    xbee_parameters.at_ch = INITIAL_ATCH_VALUE;     // Operation channel
+    xbee_parameters.at_my = INITIAL_ATMY_VALUE;     // Short address
+    xbee_parameters.at_ee = HARDCODED_ATEE_VALUE;     // Encryption enable
+    xbee_parameters.at_eo = HARDCODED_ATEO_VALUE;     // Encryption options
     zb_conf_get_network_link_key(&xbee_parameters.at_ky[0]); // Link Encryption Key; It is user configurable, get it from NVRAM
-    xbee_parameters.at_zs = 2;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
-    xbee_parameters.at_bd = 4;     // Xbee's UART baud rate (4 = 19200)
-    xbee_parameters.at_nb = 0;     // Xbee's UART parity (0 = None)
+    xbee_parameters.at_zs = HARDCODED_ATZS_VALUE;     // Xbee's Zigbee stack profile (2 = ZigBee-PRO)
+    xbee_parameters.at_bd = HARDCODED_ATBD_VALUE;     // Xbee's UART baud rate (4 = 19200)
+    xbee_parameters.at_nb = HARDCODED_ATNB_VALUE;     // Xbee's UART parity (0 = None)
     zb_conf_get_extended_node_identifier(&xbee_parameters.at_ni[0]);// Node identifier; It is user configurable, get it from NVRAM
 }
 
-/**@brief This function returns the value of the  ATID
+/**
+ * @brief This function returns the value of the  ATID
  *
  * @retval Value of ATID parameter [uint64_t]
  */
@@ -77,7 +157,8 @@ uint64_t digi_at_get_parameter_id(void)
     return(xbee_parameters.at_id);
 }
 
-/**@brief This function returns the value of the ATVR
+/**
+ * @brief This function returns the value of the ATVR
  *
  * @retval Value of ATVR parameter [uint16_t]
  */
@@ -86,8 +167,9 @@ uint16_t digi_at_get_parameter_vr(void)
     return(xbee_parameters.at_vr);
 }
 
-//------------------------------------------------------------------------------
-/**@brief Get the value of the ATNI parameter
+
+/**
+ * @brief Get the value of the ATNI parameter
  *        It gets stored in the buffer passed as argument
  *
  * @param  ni  Pointer to buffer where the node identifier will be stored.
@@ -104,7 +186,8 @@ void digi_at_get_parameter_ni(uint8_t *ni)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Get the value of the ATKY parameter
+/**
+ * @brief Get the value of the ATKY parameter
  *       It gets stored in the buffer passed as argument
  * 
  * @param  ky  Pointer to buffer where the key will be stored.
@@ -118,8 +201,9 @@ void digi_at_get_parameter_ky(uint8_t *ky)
     }
 }
 
-
-/**@brief This function sends an 'OK\r' string through the TCU UART
+//------------------------------------------------------------------------------
+/**
+ * @brief This function sends an 'OK' string through the TCU UART
  * That is the reply sent by Xbee module when an AT command is accepted
  */
 void digi_at_reply_ok(void)
@@ -128,7 +212,9 @@ void digi_at_reply_ok(void)
     queue_zigbee_Message(reply, 3);
 }
 
-/**@brief This function sends an 'ERROR\r' string through the TCU UART
+//------------------------------------------------------------------------------
+/**
+ * @brief This function sends an 'ERROR' string through the TCU UART
  * That is the reply sent by Xbee module when an AT command is not accepted
  */
 void digi_at_reply_error(void)
@@ -137,7 +223,9 @@ void digi_at_reply_error(void)
     queue_zigbee_Message(reply, 6);
 }
 
-/**@brief This function places the node identifier string into a buffer
+//------------------------------------------------------------------------------
+/**
+ * @brief This function places the node identifier string into a buffer
  * We have considered that the maximum size of the identifier is 32 characters
  */
 int8_t digi_at_read_ni(uint8_t* buffer)
@@ -167,7 +255,9 @@ int8_t digi_at_read_ni(uint8_t* buffer)
     }
 }
 
-/**@brief This function places the link key into a buffer
+//------------------------------------------------------------------------------
+/**
+ * @brief This function places the link key into a buffer
  * The link key has 16 bytes
  */
 int8_t digi_at_read_ky(uint8_t* buffer)
@@ -181,8 +271,9 @@ int8_t digi_at_read_ky(uint8_t* buffer)
     return(i+1);
 }
 
-
-/**@brief This function sends the reply to a read AT command through the TCU UART
+//------------------------------------------------------------------------------
+/**
+ * @brief This function sends the reply to a read AT command through the TCU UART
  *
  * @param  at_command  Enum value representing an AT command.
  */
@@ -277,7 +368,9 @@ void digi_at_reply_read_command(uint8_t at_command)
     }
 }
 
-/**@brief This function reacts to an action AT command and sends the reply through the TCU UART
+//------------------------------------------------------------------------------
+/**
+ * @brief This function reacts to an action AT command and sends the reply through the TCU UART
  *
  * @param  at_command  Enum value representing an AT command.
  *
@@ -307,12 +400,14 @@ void digi_at_reply_action_command(uint8_t at_command)
     }
 }
 
-/**@brief This function updates the at parameter structure with the new value
- *        sent with an AT write command.
+//------------------------------------------------------------------------------
+/**
+ * @brief Updates the xbee_parameters structure with a new value received from an AT write command.
  *        It also generates the "OK" or "ERROR" reply to the command
  *
  * @param  at_command  Enum value representing a write AT command.
- * @param  command_data  Data to be written
+ * @param  command_data_string  Data to be written
+ * @param  string_size  Size of the data to be written
  *
  * @retval True if the new value was accepted
  * @retval False if the new value was not accepted (out of range)
@@ -416,7 +511,9 @@ bool digi_at_reply_write_command(uint8_t at_command, const char *command_data_st
     return return_value;
 }
 
-/**@brief This function analizes a buffer containing the last frame
+//------------------------------------------------------------------------------
+/**
+ * @brief This function analizes a buffer containing the last frame
  *  received through the TCU uart. It decides if it contains a valid
  *  AT command, and the type of command (read, write, action).
  * 
@@ -663,7 +760,9 @@ int8_t digi_at_analyze_and_reply_to_command(uint8_t *input_data, uint16_t size_i
     }
 }
 
-/**@brief This auxiliary function converts an string containing a number in hexadecimal format
+//------------------------------------------------------------------------------
+/**
+ * @brief This auxiliary function converts an string containing a number in hexadecimal format
  *  in the numeric value
  * 
  * @param  hex_string  Pointer to buffer
@@ -713,6 +812,14 @@ bool convert_hex_string_to_uint64(const char *hex_string, uint8_t string_size, u
     return true;
 }
 
+//------------------------------------------------------------------------------
+/**
+ * @brief Converts an ASCII hex string to a binary array.
+ *
+ * @param ascii Pointer to the ASCII hex string (e.g., "1A2B3C").
+ * @param hex Pointer to the output binary array.
+ * @param hex_len Length of the output binary array (should be half the length of the ASCII string).
+ */
 void ascii_to_hex(const char *ascii, uint8_t *hex, size_t hex_len) {
     for (size_t i = 0; i < hex_len; i++) {
         uint8_t high_nibble = (uint8_t)(isdigit(ascii[i * 2]) ? ascii[i * 2] - '0' : tolower(ascii[i * 2]) - 'a' + 10);

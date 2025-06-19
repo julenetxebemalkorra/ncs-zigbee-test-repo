@@ -31,8 +31,58 @@ static uint64_t time_last_frame_received_from_coordinator_ms;
 
 LOG_MODULE_REGISTER(BDB, LOG_LEVEL_DBG);
 
-/**@brief Initializes local variables of the zigbee_bdb module.
+
+/**
+ * @brief Zigbee BDB Initialization Logic
  *
+ * This logic performs initialization of the Zigbee BDB module.
+ *
+ * @dot
+ * Graphviz dot diagram for Zigbee BDB logic
+ *
+ * digraph zigbee_bdb {
+ *   node [shape=box];
+ *   zigbee_bdb_init -> b_not_detected_coordinator_activity_since_boot [label="set true"];
+ *   zigbee_bdb_init -> b_coordinator_is_active [label="set false"];
+ *   zigbee_bdb_init -> time_last_frame_received_from_coordinator_ms [label="set 0"];
+ *
+ *   zboss_signal_handler -> signal_type;
+ *   zboss_signal_handler -> signal_status_code;
+ *   zboss_signal_handler -> LOG_WRN [label="if signal_type != CAN_SLEEP"];
+ *   zboss_signal_handler -> sys_reboot [label="if LEAVE && RET_OK && g_b_reset_mcu_after_leaving_network"];
+ *   zboss_signal_handler -> zigbee_default_signal_handler;
+ *   zboss_signal_handler -> zb_buf_free;
+ *
+ *   zigbee_bdb_coordinator_activity_detected -> b_not_detected_coordinator_activity_since_boot [label="set false"];
+ *   zigbee_bdb_coordinator_activity_detected -> b_coordinator_is_active [label="set true"];
+ *   zigbee_bdb_coordinator_activity_detected -> time_last_frame_received_from_coordinator_ms [label="set now"];
+ *
+ *   zigbee_bdb_network_watchdog -> zb_zdo_joined;
+ *   zigbee_bdb_network_watchdog -> b_coordinator_is_active [label="if joined"];
+ *   zigbee_bdb_network_watchdog -> b_coordinator_is_active [label="set false if timeout"];
+ *   zigbee_bdb_network_watchdog -> request_coordinator_ieee_address [label="if not active"];
+ *   zigbee_bdb_network_watchdog -> g_b_reset_zigbee_cmd [label="if attempts exceeded"];
+ *
+ *   request_coordinator_ieee_address -> zigbee_aps_get_output_frame_buffer_free_space;
+ *   request_coordinator_ieee_address -> enqueue_aps_frame [label="if free space"];
+ *   request_coordinator_ieee_address -> LOG_ERR [label="if no free space"];
+ * }
+ * @enddot
+ * Logic:
+ * 1. Initialize the BDB module by setting flags and timestamps.
+ * 2. Handle Zigbee stack events in zboss_signal_handler, including leave events and buffer management.
+ * 3. Detect coordinator activity with zigbee_bdb_coordinator_activity_detected, updating flags and timestamps.
+ * 4. Monitor the network with zigbee_bdb_network_watchdog, checking coordinator activity and sending IEEE address requests if necessary.
+ * 5. Request the coordinator's IEEE address with request_coordinator_ieee_address, adding it to the APS output frame queue if space is available.
+ * 6. If no coordinator activity is detected for a specified period, trigger a reset command to leave the network and start the steering process.
+ * 
+ */
+
+/** @brief Initializes the Zigbee BDB module.
+ *
+ * This function sets the initial state of the BDB module, indicating that no coordinator activity has been detected
+ * since boot, and that the coordinator is not currently active. It also initializes the timestamp for the last frame
+ * received from the coordinator.
  */
 void zigbee_bdb_init(void)
 {
@@ -42,7 +92,8 @@ void zigbee_bdb_init(void)
 }
 
 
-/**@brief Zigbee stack event handler.
+/**
+ * @brief Zigbee stack event handler.
  *
  * @param[in]   bufid   Reference to the Zigbee stack buffer used to pass signal.
  */
@@ -80,7 +131,8 @@ void zboss_signal_handler(zb_bufid_t bufid)
     }
 }
 
-/** @brief Resets the variables used for detecting coordinator activity.
+/** 
+ * @brief Resets the variables used for detecting coordinator activity.
  *
  */
 void zigbee_bdb_coordinator_activity_detected(void)
@@ -90,7 +142,8 @@ void zigbee_bdb_coordinator_activity_detected(void)
     time_last_frame_received_from_coordinator_ms = k_uptime_get();
 }
 
-/** @brief Evaluates the presence of the coordinator and resets the module if no coordinator activity is detected.
+/** 
+ * @brief Evaluates the presence of the coordinator and resets the module if no coordinator activity is detected.
  *
  */
 void zigbee_bdb_network_watchdog(void)
@@ -139,7 +192,8 @@ void zigbee_bdb_network_watchdog(void)
     }
 }
 
-/**@brief This function adds to the APS output frame queue a coordinator IEEE request address.
+/**
+ * @brief This function adds to the APS output frame queue a coordinator IEEE request address.
 *
 * @return The function returns a bool. TRUE if frame could be added to the queue.
 */

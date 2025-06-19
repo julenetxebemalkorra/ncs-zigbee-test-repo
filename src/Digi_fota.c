@@ -6,6 +6,7 @@
 /** @file
  *
  * @brief Manages a FUOTA (Firmware Upgrade Over-The-Air) client.
+ * 
  */
 
 #include <zephyr/kernel.h>
@@ -410,8 +411,113 @@ bool digi_fota_send_upgrade_end_request_cmd(void)
     return b_return;
 }
 
-/**@brief This function implements the state machine that handles the reception of the bin file during a FUOTA.
+/**
+ * @brief FUOTA state machine manager.
  *
+ * This function implements the state machine responsible for managing
+ * the Fragmented Upgrade Over The Air (FUOTA) process using Zigbee APS transport.
+ * It handles receiving the image notify, requesting firmware blocks, managing DFU,
+ * and finalizing or recovering from interrupted upgrades.
+ *
+ * The state machine transitions through several well-defined states and attempts
+ * retries on failure, switching back to the waiting state after timeouts or fatal errors.
+ *
+ * @note This function is expected to be called periodically in the main loop.
+ *
+ * @dot
+ * digraph FUOTAStateMachine {
+ *     // State nodes
+ *     node [shape=ellipse];
+ *     FUOTA_INIT_STATE_ST;
+ *     FUOTA_UPGRADE_WAS_INTERRUPTED_ST;
+ *     FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST;
+ *     FUOTA_IMAGE_NOTIFY_RECEIVED_ST;
+ *     FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST;
+ *     FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST;
+ *     FUOTA_NEXT_IMAGE_RESPONDED_ST;
+ *     FUOTA_INIT_DFU_TARGET;
+ *     FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST;
+ *     FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST;
+ *     FUOTA_IMAGE_BLOCK_RESPONDED_ST;
+ *     FUOTA_MAKE_AN_UPGRADE_END_REQUEST_ST;
+ *     FUOTA_WAITING_FOR_UPGRADE_END_RESPONSE_ST;
+ *     FUOTA_UPGRADE_END_RESPONDED_ST;
+ *
+ *     // Function nodes
+ *     node [shape=box];
+ *     "read_from_nvram_if_fota_was_interrupted()" [style=filled, fillcolor=lightgray];
+ *     "OTA_dfu_target_init_resume_previous_upgrade()" [style=filled, fillcolor=lightgray];
+ *     "set_in_nvram_fota_is_not_active()" [style=filled, fillcolor=lightgray];
+ *     "digi_fota_send_query_next_image_request_cmd()" [style=filled, fillcolor=lightgray];
+ *     "OTA_dfu_target_init()" [style=filled, fillcolor=lightgray];
+ *     "digi_fota_send_image_block_request_cmd()" [style=filled, fillcolor=lightgray];
+ *     "digi_fota_send_upgrade_end_request_cmd()" [style=filled, fillcolor=lightgray];
+ *     "dfu_target_mcuboot_done(true)" [style=filled, fillcolor=lightgray];
+ *     "dfu_target_mcuboot_schedule_update(0)" [style=filled, fillcolor=lightgray];
+ *
+ *     // Decision nodes
+ *     node [shape=diamond];
+ *     "FUOTA interrupted?" [style=filled, fillcolor=lightblue];
+ *     "file_offset > 0?" [style=filled, fillcolor=lightblue];
+ *     "attempt_counter < MAX_ATTEMPTS_NEXT_IMAGE_REQUEST?" [style=filled, fillcolor=lightblue];
+ *     "DFU init failed, attempts < MAX?" [style=filled, fillcolor=lightblue];
+ *     "Attempts < MAX_ATTEMPTS_IMAGE_BLOCK_REQUEST?" [style=filled, fillcolor=lightblue];
+ *     "file_offset < firmware_image.file_size?" [style=filled, fillcolor=lightblue];
+ *     "Attempts < MAX_ATTEMPTS_UPGRADE_END_REQUEST?" [style=filled, fillcolor=lightblue];
+ *     "dfu done ok?" [style=filled, fillcolor=lightblue];
+ *
+ *     // State transitions
+ *     node [shape=ellipse];
+ *     FUOTA_INIT_STATE_ST -> "read_from_nvram_if_fota_was_interrupted()";
+ *     "read_from_nvram_if_fota_was_interrupted()" -> "FUOTA interrupted?";
+ *     "FUOTA interrupted?" -> FUOTA_UPGRADE_WAS_INTERRUPTED_ST [label="true"];
+ *     "FUOTA interrupted?" -> FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST [label="false"];
+ *     FUOTA_UPGRADE_WAS_INTERRUPTED_ST -> "OTA_dfu_target_init_resume_previous_upgrade()";
+ *     "OTA_dfu_target_init_resume_previous_upgrade()" -> "file_offset > 0?";
+ *     "file_offset > 0?" -> FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST [label="true"];
+ *     "file_offset > 0?" -> "set_in_nvram_fota_is_not_active()" [label="false"];
+ *     "set_in_nvram_fota_is_not_active()" -> FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST;
+ *
+ *     FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST -> FUOTA_IMAGE_NOTIFY_RECEIVED_ST [label="Image Notify FUOTA message received"];
+ *     FUOTA_IMAGE_NOTIFY_RECEIVED_ST -> FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST;
+ *     FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST -> "digi_fota_send_query_next_image_request_cmd()";
+ *     "digi_fota_send_query_next_image_request_cmd()" -> FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST;
+ *     FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST -> "attempt_counter < MAX_ATTEMPTS_NEXT_IMAGE_REQUEST?" [label="not received"];
+ *     "attempt_counter < MAX_ATTEMPTS_NEXT_IMAGE_REQUEST?" -> FUOTA_MAKE_NEXT_IMAGE_REQUEST_ST [label="true"];
+ *     "attempt_counter < MAX_ATTEMPTS_NEXT_IMAGE_REQUEST?" -> FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST [label="false"];
+ *     FUOTA_WAITING_FOR_NEXT_IMAGE_RESPONSE_ST -> FUOTA_NEXT_IMAGE_RESPONDED_ST [label="received"];
+ *     FUOTA_NEXT_IMAGE_RESPONDED_ST -> FUOTA_INIT_DFU_TARGET;
+ *     FUOTA_INIT_DFU_TARGET -> "OTA_dfu_target_init()";
+ *     "OTA_dfu_target_init()" -> "DFU init failed, attempts < MAX?" [label="Fail"];
+ *     "DFU init failed, attempts < MAX?" -> FUOTA_INIT_DFU_TARGET [label="yes"];
+ *     "DFU init failed, attempts < MAX?" -> "set_in_nvram_fota_is_not_active()" [label="no"];
+ *     "set_in_nvram_fota_is_not_active()" -> FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST;
+ *     "OTA_dfu_target_init()" -> FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST [label="Success"];
+ *     FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST -> "digi_fota_send_image_block_request_cmd()";
+ *     "digi_fota_send_image_block_request_cmd()" -> FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST;
+ *     FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST -> "Attempts < MAX_ATTEMPTS_IMAGE_BLOCK_REQUEST?";
+ *     "Attempts < MAX_ATTEMPTS_IMAGE_BLOCK_REQUEST?" -> FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST [label="yes"];
+ *     "Attempts < MAX_ATTEMPTS_IMAGE_BLOCK_REQUEST?" -> FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST [label="no"];
+ *     FUOTA_WAITING_FOR_IMAGE_BLOCK_RESPONSE_ST -> FUOTA_IMAGE_BLOCK_RESPONDED_ST [label="Success"];
+ *     FUOTA_IMAGE_BLOCK_RESPONDED_ST -> "file_offset < firmware_image.file_size?";
+ *     "file_offset < firmware_image.file_size?" -> FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST [label="yes"];
+ *     "file_offset < firmware_image.file_size?" -> FUOTA_MAKE_AN_UPGRADE_END_REQUEST_ST [label="no"];
+ *     FUOTA_MAKE_AN_UPGRADE_END_REQUEST_ST -> "digi_fota_send_upgrade_end_request_cmd()";
+ *     "digi_fota_send_upgrade_end_request_cmd()" -> FUOTA_WAITING_FOR_UPGRADE_END_RESPONSE_ST [label="Success"];
+ *     FUOTA_WAITING_FOR_UPGRADE_END_RESPONSE_ST -> "Attempts < MAX_ATTEMPTS_UPGRADE_END_REQUEST?";
+ *     "Attempts < MAX_ATTEMPTS_UPGRADE_END_REQUEST?" -> FUOTA_MAKE_AN_UPGRADE_END_REQUEST_ST [label="yes"];
+ *     "Attempts < MAX_ATTEMPTS_UPGRADE_END_REQUEST?" -> FUOTA_WAITING_FOR_IMAGE_NOTIFY_ST [label="no"];
+ *     FUOTA_WAITING_FOR_UPGRADE_END_RESPONSE_ST -> FUOTA_UPGRADE_END_RESPONDED_ST [label="Success"];
+ *     FUOTA_UPGRADE_END_RESPONDED_ST -> "dfu_target_mcuboot_done(true)";
+ *     "dfu_target_mcuboot_done(true)" -> "dfu done ok?";
+ *     "dfu done ok?" -> FUOTA_INIT_STATE_ST [label="no"];
+ *     "dfu done ok?" -> "dfu_target_mcuboot_schedule_update(0)" [label="yes"];
+ *     "dfu_target_mcuboot_schedule_update(0)" -> sys_reboot;
+ * }
+ * @enddot
+ *
+ * @author Julen Etxeberria
+ * @date 2025-06-10
  */
 void digi_fota_manager(void)
 {
@@ -481,7 +587,7 @@ void digi_fota_manager(void)
             set_in_nvram_fota_is_active();
             break;
         case FUOTA_INIT_DFU_TARGET:
-            if ((time_now_ms - time_last_attempt_ms) > 2000) // Leave 2 seconds between attempts
+            if ((time_now_ms - time_last_attempt_ms) > DFU_INIT_ATTEMPT_DELAY_MS) // Leave 2 seconds between attempts
             {
                 time_last_attempt_ms = time_now_ms;
                 ret = OTA_dfu_target_init(firmware_image.file_size);
@@ -505,7 +611,7 @@ void digi_fota_manager(void)
             }
             break;
         case FUOTA_MAKE_NEW_IMAGE_BLOCK_REQUEST_ST:
-            if ((time_now_ms - time_last_state_transition_ms) > 10) // Artificial delay of 200 ms to avoid network congestion
+            if ((time_now_ms - time_last_state_transition_ms) > IMAGE_BLOCK_REQUEST_DELAY_MS) // Artificial delay of 200 ms to avoid network congestion
             {
                 if (digi_fota_send_image_block_request_cmd())
                 {

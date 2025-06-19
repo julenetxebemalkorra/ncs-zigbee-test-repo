@@ -11,8 +11,18 @@
 #define MINIMUM_SIZE_AT_COMMAND 4
 #define MAXIMUM_SIZE_AT_COMMAND 4 + 1 + SIZE_LINK_KEY + SIZE_LINK_KEY //Write command + blank + link key (two characters per byte)
 
-#define HARDCODED_ATJV_VALUE 1
-#define HARDCODED_ATNJ_VALUE 0xFF
+#define HARDCODED_ATJV_VALUE 1      // Coordinator join verification (0 = disabled, 1 = enabled) JV = true is compatible with the current firmware
+#define HARDCODED_ATNJ_VALUE 0xFF   // Node join time (0xFF = disabled, 0x00 = enabled) NJ = 0xFF is compatible with the current firmware
+#define HARDCODED_ATNW_VALUE 10     // Network watchdog (Valid range is [0, 0x64FF]) NW = 10 is compatible with the current firmware
+#define HARDCODED_ATCE_VALUE 0      // Coordinator enabled (0 = disabled, 1 = enabled) CE = false is compatible with the current firmware
+#define HARDCODED_ATAI_VALUE 0xFF   // Association indication (0xFF = disabled, 0x00 = enabled) AI = 0xFF is compatible with the current firmware
+#define INITIAL_ATCH_VALUE 0x0C     // Initial value for the operation channel (CH) (0x0C = 12) CH = 12 is compatible with the current firmware
+#define INITIAL_ATMY_VALUE 0x0000   // Initial value for the short address (MY) (0x0000 = 0) MY = 0 is compatible with the current firmware
+#define HARDCODED_ATEE_VALUE 1        // Default value for the encryption enable (EE) (0 = disabled, 1 = enabled) EE = true is compatible with the current firmware
+#define HARDCODED_ATEO_VALUE 0        // Default value for the encryption options (EO) (0 = disabled, 1 = enabled) EO = false is compatible with the current firmware
+#define HARDCODED_ATZS_VALUE 2      // Default value for the Zigbee stack profile (ZS) (2 = ZigBee-PRO) ZS = 2 is compatible with the current firmware
+#define HARDCODED_ATBD_VALUE 4      // Default value for the UART baud rate (BD) (4 = 19200 bps) BD = 4 is compatible with the current firmware
+#define HARDCODED_ATNB_VALUE 0      // Default value for the UART parity (NB) (0 = None) NB = 0 is compatible with the current firmware
 
 /* Enumerative with the supported Xbee AT commands used to read/write parameters */
 enum parameter_at_command_e{

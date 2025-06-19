@@ -8,6 +8,7 @@
  * @brief Managment of AT commands received through Zigbee.
  */
 
+
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
@@ -32,8 +33,66 @@ static uint8_t read_cmd_sequence_number;           // Read AT command sequence n
 static uint8_t read_cmd_reply_size;                // Number of bytes of reply
 static uint8_t read_cmd_reply[MAX_SIZE_AT_COMMAND_REPLY]; // Buffer containing the reply
 
-/**@brief This function initializes the Digi_wireless_at_commands firmware module
+/**
+ * @file Digi_wireless_at_commands.c
+ * @brief Handles Digi wireless AT commands received via Zigbee APS frames.
  *
+ * This module is responsible for:
+ *   - Detecting and parsing incoming Digi wireless AT commands (Ping and Read AT).
+ *   - Managing pending command states and their replies.
+ *   - Formatting and enqueuing appropriate APS reply frames.
+ *
+ * ## Overview
+ * The module maintains internal state for pending Ping and Read AT commands.
+ * When a supported command is detected in an incoming APS frame, it is marked as pending.
+ * The main application should periodically call `digi_wireless_read_at_command_manager()`
+ * to process and reply to any pending commands.
+ *
+ * ## State Machine
+ * The following diagram illustrates the high-level state transitions using Doxygen's dot graph format:
+ *
+ * @dot
+ * digraph DigiWirelessATCommands {
+ *   Idle [shape=ellipse, label="Idle"];
+ *   PendingPing [shape=box, label="Pending Ping"];
+ *   PendingReadAT [shape=box, label="Pending Read AT Cmd"];
+ *   SendPingReply [shape=box, label="Send Ping Reply"];
+ *   SendReadATReply [shape=box, label="Send Read AT Reply"];
+ *
+ *   Idle -> PendingPing [label="Ping Cmd"];
+ *   Idle -> PendingReadAT [label="Read AT Cmd"];
+ *   PendingPing -> SendPingReply [label="digi_wireless_read_at_command_manager()"];
+ *   PendingReadAT -> SendReadATReply [label="digi_wireless_read_at_command_manager()"];
+ *   SendPingReply -> Idle;
+ *   SendReadATReply -> Idle;
+ * }
+ * @enddot
+ *
+ *
+ * ## Key Functions
+ * - `is_a_ping_command()`: Detects and stores a pending Ping command.
+ * - `is_a_digi_read_at_command()`: Detects and stores a pending Read AT command.
+ * - `digi_wireless_read_at_command_manager()`: Checks for pending commands and triggers replies.
+ * - `digi_wireless_ping_reply()`: Formats and enqueues a Ping reply.
+ * - `digi_wireless_read_at_cmd_reply()`: Formats and enqueues a Read AT reply.
+ *
+ * ## Usage
+ * 1. Call `is_a_ping_command()` or `is_a_digi_read_at_command()` when an APS frame is received.
+ * 2. Periodically call `digi_wireless_read_at_command_manager()` in the main loop.
+ * 3. Replies are automatically enqueued for transmission.
+ *
+ * ## Notes
+ * - Only a subset of Digi AT commands are supported.
+ * - Command parsing is based on reverse-engineered frame formats.
+ * - All state is managed internally; no external synchronization is required.
+ */
+
+
+/**
+ * @brief This function initializes the Digi wireless AT commands module
+ *
+ * @details This function initializes the Digi wireless AT commands module by setting the initial values
+ *          for the pending command flags and read command.
  */
 void digi_wireless_at_init(void)
 {
@@ -42,7 +101,8 @@ void digi_wireless_at_init(void)
     read_cmd = NO_SUPPORTED_EXT_READ_AT_CMD;
 }
 
-/**@brief This function evaluates if the last received APS frame is a Digi's ping command
+/**
+ * @brief This function evaluates if the last received APS frame is a Digi's ping command
  *
  * @param[in]   input_data   Pointer to payload of received APS frame
  * @param[in]   size_of_input_data   Payload size
@@ -63,7 +123,8 @@ bool is_a_ping_command(uint8_t* input_data, int16_t size_of_input_data)
     return b_return;
 }
 
-/**@brief This function evaluates if the last received APS frame is a Digi's read AT command
+/**
+ * @brief This function evaluates if the last received APS frame is a Digi's read AT command
  *
  * @param[in]   input_data   Pointer to payload of received APS frame
  * @param[in]   size_of_input_data   Payload size
@@ -700,11 +761,11 @@ bool is_a_digi_read_at_command(uint8_t* input_data, int16_t size_of_input_data)
     return b_return;
 }
 
-/**@brief This function checks if there is a read AT command received through Zigbee pending to be replied, and, in that case
+/**
+ * @brief This function checks if there is a read AT command received through Zigbee pending to be replied, and, in that case
  *        schedules the function that will reply to that command.
  *
- * @retval True If the transmission of a reply to a read AT command has been scheduled
- * @retval False Otherwise
+ * @details This function should be called periodically by the main application to manage the pending read AT commands.
  */
 void digi_wireless_read_at_command_manager(void)
 {
@@ -720,7 +781,13 @@ void digi_wireless_read_at_command_manager(void)
     }
 }
 
-/**@brief This function places in the APS output frame queue the reply to a read AT command received through Zigbee.
+/**
+ * @brief This function places in the APS output frame queue the reply to a read AT command received through Zigbee.
+*
+* @details The reply is formatted according to the Digi AT command specification.
+*          The reply is sent to the coordinator with the appropriate cluster and endpoint.
+*
+* @retval True if the reply was successfully enqueued, false otherwise.
 *
 */
 bool digi_wireless_read_at_cmd_reply(void)
@@ -766,7 +833,12 @@ bool digi_wireless_read_at_cmd_reply(void)
     return b_return;
 }
 
-/**@brief This function places in the APS output frame queue the reply to a ping command received through Zigbee.
+/**
+* @brief This function places in the APS output frame queue the reply to a ping command received through Zigbee.
+*
+* @details The reply is formatted according to the Digi AT command specification.
+*          The reply is sent to the coordinator with the appropriate cluster and endpoint.
+* @retval True if the reply was successfully enqueued, false otherwise.
 *
 */
 bool digi_wireless_ping_reply(void)

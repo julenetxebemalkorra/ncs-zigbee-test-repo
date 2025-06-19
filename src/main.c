@@ -1,13 +1,26 @@
 /*
- * Copyright (c) 2024 IED
+ * Copyright (c) 2025 IED
  *
  */
 
-/** @file
+/**
+ * @file main.c
+ * @brief Main source file for the dual communication Nordic project.
  *
- * @brief C main source file.
+ *
+ * This firmware is designed for the Nordic nRF52840 platform and provides the following features:
+ *
+ * - Implements a Zigbee Router node using the ZBOSS stack, fully integrated with the Zephyr RTOS.
+ * - Provides an AT command interface over UART, supporting both command mode and transparent mode.
+ * - Supports wireless AT command reception via Zigbee APS frames, compatible with XBee/Digi style communication.
+ * - Enables Firmware Upgrade Over-The-Air (FUOTA) using a custom APS-based transport protocol.
+ * - Utilizes Zephyr's flash-backed settings subsystem for NVRAM configuration storage.
+ * 
+ * @author jetxeberria
+ * @date 2025
  */
 
+// TODO: Add only the necessary #include directives for this file
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
@@ -17,16 +30,6 @@
 #include <zb_nrf_platform.h>
 #include "zb_range_extender.h"
 #include "zb_mem_config_max.h" // This file has to be included after zboss_api.h
-
-// UART async includes
-#include <zephyr/device.h>
-#include <zephyr/devicetree.h>
-#include <zephyr/sys/ring_buffer.h>
-
-#include <zephyr/drivers/uart.h>
-#include <string.h>
-
-#include <nrfx_timer.h>
 
 #include "global_defines.h"
 #include "zigbee_configuration.h"
@@ -43,22 +46,6 @@
 #include "OTA_dfu_target.h"
 #include "system.h"
 
-#include <stdbool.h>
-
-#include <zboss_api_addons.h>
-#include "zb_config.h"
-#include "zb_address.h"
-#include "zboss_api_buf.h"
-#include "zb_types.h"
-#include "zboss_api_zgp.h"
-
-/* Device endpoint, used to receive ZCL commands. */
-#define APP_TEMPLATE_ENDPOINT               232
-
-/* Type of power sources available for the device.
- * For possible values see section 3.2.2.2.8 of ZCL specification.
- */
-#define TEMPLATE_INIT_BASIC_POWER_SOURCE    ZB_ZCL_BASIC_POWER_SOURCE_DC_SOURCE
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
@@ -82,10 +69,7 @@ static struct xbee_parameters_t xbee_parameters; // Xbee's parameters
 //------------------------------------------------------------------------------
 /**@brief This function prints the value of several Zigbee parameters to the console.
  *
- *
- * @details Information is printed only once, after the device has joined a Network
- *
- * @note Executed the in main loop
+ * @details Information is printed only once and if PRINT_ZIGBEE_INFO is true, after the device has joined a Network
  *
  */
 void diagnostic_zigbee_info()
@@ -133,20 +117,90 @@ void diagnostic_zigbee_info()
     }
 }
 
-// Custom logging function to print extended address and PAN ID
-void log_ext_address(zb_uint8_t *addr)
-{
-    LOG_INF("%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x", 
-        addr[7], addr[6], addr[5], addr[4], addr[3], addr[2], addr[1], addr[0]);
-}
 
-//------------------------------------------------------------------------------
-/**@brief Main function
+/**
  *
+ * @section main_diagram Main Logic Flow
+ *
+ * @dot
+ * digraph main_logic {
+ *   node [shape=box, fontname="Arial"];
+ *   Main [label="main()"];
+ *   DisplaySysInfo [label="display_system_information()"];
+ *   DisplayBootStatus [label="display_boot_status()"];
+ *   InitNVRAM [label="init_nvram()"];
+ *   CheckNVRAM [label="zb_nvram_check_usage()"];
+ *   WriteDefaults [label="zb_conf_write_to_nvram()"];
+ *   ReadNVRAM [label="zb_conf_read_from_nvram()"];
+ *   ZigbeeAPSInit [label="zigbee_aps_init()"];
+ *   DigiATInit [label="digi_at_init()"];
+ *   NodeDiscoveryInit [label="digi_node_discovery_init()"];
+ *   WirelessATInit [label="digi_wireless_at_init()"];
+ *   DigiFOTAInit [label="digi_fota_init()"];
+ *   ZigbeeBDBInit [label="zigbee_bdb_init()"];
+ *   WatchdogInit [label="watchdog_init()"];
+ *   UARTInit [label="tcu_uart_init()"];
+ *   TimerInit [label="timer1_init()"];
+ *   GPIOInit [label="gpio_init()"];
+ *   ZigbeeConfig [label="zigbee_configuration()"];
+ *   ZigbeeEnable [label="zigbee_enable()"];
+ *   SetDataIndCB [label="zb_af_set_data_indication()"];
+ *   SetUserDataTxCB [label="zb_aps_set_user_data_tx_cb()"];
+ *   ConfirmImage [label="confirm_image()"];
+ *   MainLoop [label="while(1)"];
+ *   FeedWatchdog [label="periodic_feed_of_main_loop_watchdog()"];
+ *   TogglePin [label="diagnostic_toogle_pin()"];
+ *   ZigbeeDiag [label="diagnostic_zigbee_info()"];
+ *   UARTTranspMgr [label="tcu_uart_transparent_mode_manager()"];
+ *   NodeDiscMgr [label="digi_node_discovery_request_manager()"];
+ *   WirelessATMgr [label="digi_wireless_read_at_command_manager()"];
+ *   DigiFOTAMgr [label="digi_fota_manager()"];
+ *   APSMgr [label="zigbee_aps_manager()"];
+ *   BDBWatchdog [label="zigbee_bdb_network_watchdog()"];
+ *   ZigbeeResetMgr [label="zigbee_reset_manager()"];
+ *   NVRAMMgr [label="nvram_manager()"];
+ *   UARTMgr [label="tcu_uart_manager()"];
+ *   Sleep [label="k_sleep(5ms)"];
+ *
+ *   Main -> DisplaySysInfo -> DisplayBootStatus -> InitNVRAM -> CheckNVRAM;
+ *   CheckNVRAM -> WriteDefaults [label="if unused"];
+ *   CheckNVRAM -> ReadNVRAM [label="if used"];
+ *   WriteDefaults -> ZigbeeAPSInit;
+ *   ReadNVRAM -> ZigbeeAPSInit;
+ *   ZigbeeAPSInit -> DigiATInit -> NodeDiscoveryInit -> WirelessATInit -> DigiFOTAInit -> ZigbeeBDBInit -> WatchdogInit -> UARTInit -> TimerInit -> GPIOInit;
+ *   GPIOInit -> ZigbeeConfig -> ZigbeeEnable -> SetDataIndCB -> SetUserDataTxCB -> ConfirmImage -> MainLoop;
+ *   MainLoop -> FeedWatchdog -> TogglePin -> ZigbeeDiag -> UARTTranspMgr -> NodeDiscMgr -> WirelessATMgr -> DigiFOTAMgr -> APSMgr -> BDBWatchdog -> ZigbeeResetMgr -> NVRAMMgr -> UARTMgr -> Sleep;
+ *   Sleep -> MainLoop [style=dotted];
+ * }
+ * @enddot
+ *
+ * @section description Description
+ * The main logic initializes system information and boot status, then sets up NVRAM.
+ * Depending on NVRAM usage, it writes default Zigbee parameters or reads existing ones.
+ * It then initializes all Zigbee, UART, watchdog, timer, and GPIO subsystems.
+ * After configuration, it enables Zigbee networking, sets up callbacks, and confirms firmware image.
+ * The main loop continuously:
+ *   - Feeds the watchdog
+ *   - Toggles a diagnostic pin
+ *   - Prints Zigbee diagnostic info after joining
+ *   - Manages UART transparent mode and node discovery
+ *   - Handles wireless AT commands and FOTA state machine
+ *   - Processes Zigbee APS output queue and BDB network watchdog
+ *   - Handles Zigbee and MCU reset requests
+ *   - Manages NVRAM and UART
+ *   - Sleeps briefly to allow log processing
+*
+ * @brief Main function of the firmware.
+ *
+ * Initializes system peripherals and enters the main execution loop.
+ * Handles Zigbee network join attempts, application state logic,
+ * and watchdog registration.
+ *
+ * @return int Should never return.
  */
 int main(void)
 {
-    int8_t ret = 0;
+    int8_t ret = 0; 
 
     display_system_information();
     display_boot_status();

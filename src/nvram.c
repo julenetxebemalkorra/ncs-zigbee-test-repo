@@ -102,7 +102,10 @@ int8_t init_nvram(void)
  * @param data A pointer to a buffer where the data will be stored.
  * @param len The size of the data to be read.
  * 
- * @return The function returns a uint8_t value. (You should describe what this return value represents)
+ * @return Number of bytes read. On success, it will be equal to the number of bytes requested
+ * to be read. When the return value is larger than the number of bytes requested to read this
+ * indicates not all bytes were read, and more data is available. On error, returns negative
+ * value of errno.h defined error codes.
  */
 
 int8_t read_nvram(uint16_t id, void *data, size_t len)
@@ -113,14 +116,16 @@ int8_t read_nvram(uint16_t id, void *data, size_t len)
 }
 
 /**
- * @brief This function writes the PAN_ID to non-volatile storage (NVRAM).
+ * @brief This function writes data to non-volatile storage (NVRAM).
  * 
  * @param id The ID of the data to be written.
- * @param panid A pointer to the buffer containing the PAN_ID to be written.
- * @param panid_size The size of the PAN_ID to be written.
+ * @param data A pointer to the buffer containing the data to be written.
+ * @param len The size of the data to be written.
  * 
  * 
- * @return The function returns a int value.
+ * @return Number of bytes written. On success, it will be equal to the number of bytes requested
+ * to be written. When a rewrite of the same data already stored is attempted, nothing is written
+ * to flash, thus 0 is returned. On error, returns negative value of errno.h defined error codes.
  */
 int8_t write_nvram(uint16_t id, void *data, size_t len)
 {

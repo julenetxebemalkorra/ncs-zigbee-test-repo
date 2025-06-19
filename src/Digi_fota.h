@@ -45,14 +45,17 @@
 #define FRAME_CONTROL_FIELD_CLUSTER_SPECIFIC_CLIENT_TO_SERVER 0x01
 #define FIELD_CONTROL_HW_VERSION_NO_PRESENT                   0x01
 
-#define MAX_NEXT_IMAGE_CMD_RESPONSE_TIME_MS    10000 // Maximum duration the client will wait for a response to this command
+#define MAX_NEXT_IMAGE_CMD_RESPONSE_TIME_MS     10000 // Maximum duration the client will wait for a response to this command
 #define MAX_IMAGE_BLOCK_CMD_RESPONSE_TIME_MS    5000 // Maximum duration the client will wait for a response to this command
-#define MAX_UPGRADE_CMD_RESPONSE_TIME_MS       10000 // Maximum duration the client will wait for a response to this command
+#define MAX_UPGRADE_CMD_RESPONSE_TIME_MS        10000 // Maximum duration the client will wait for a response to this command
 
 #define MAX_ATTEMPTS_DFU_INIT                3  // FUOTA process is canceled after 3 unsuccessful DFU initialization attempts
 #define MAX_ATTEMPTS_NEXT_IMAGE_REQUEST      3  // FUOTA process is canceled after 3 unanswered Next Image requests
-#define MAX_ATTEMPTS_IMAGE_BLOCK_REQUEST    10  // FUOTA process is canceled after 10 unanswered Image Block requests
+#define MAX_ATTEMPTS_IMAGE_BLOCK_REQUEST     10  // FUOTA process is canceled after 10 unanswered Image Block requests
 #define MAX_ATTEMPTS_UPGRADE_END_REQUEST     3  // FUOTA process is canceled after 3 unanswered Upgrade and End requests
+
+#define DFU_INIT_ATTEMPT_DELAY_MS           2000 // Delay between attempts to initialize the DFU target (2 seconds)
+#define IMAGE_BLOCK_REQUEST_DELAY_MS        200 // Delay between attempts to request the next image block (200 milliseconds)
 
 struct firmware_image_t {
     uint16_t manufacturer_code;

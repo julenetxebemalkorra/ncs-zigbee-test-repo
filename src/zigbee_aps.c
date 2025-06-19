@@ -8,6 +8,8 @@
  * @brief Generation and reception of APS frames.
  */
 
+
+
 #include <zephyr/logging/log.h>
 
 #include <zboss_api.h>
@@ -22,9 +24,6 @@
 #include "zigbee_bdb.h"
 #include "Tcu_Uart.h"
 
-#define SCHEDULING_CB_TIMEOUT_MS 50000 // Tiempo límite en milisegundos para enviar un frame APS
-#define SYSTEM_TICK_MS 1              // Tiempo de tick del sistema en milisegundos
-
 /* Local variables                                                            */
 static aps_output_frame_circular_buffer_t aps_output_frame_buffer;
 static bool b_scheduling_cb_pending = false;
@@ -33,19 +32,43 @@ static uint32_t scheduling_cb_timer = 0;
 LOG_MODULE_REGISTER(zigbee_aps, LOG_LEVEL_INF);
 
 /* Function definition                                                        */
-
-//------------------------------------------------------------------------------
-/**@brief Initialization of Zigbee_aps firmware module
+/**
+ * @brief Zigbee APS Handling Module
  *
+ * This module manages the generation and reception of APS frames in a Zigbee network.
  *
- */
+ * @dot
+ * digraph zigbee_aps_handling {
+ *    rankdir=LR;
+ *    node [shape=box];
+ *
+ *    "Application" -> "enqueue_aps_frame()" [label="Add APS frame to buffer"];
+ *    "enqueue_aps_frame()" -> "aps_output_frame_buffer" [label="Store frame"];
+ *
+ *    "zigbee_aps_manager()" -> "aps_output_frame_buffer" [label="Check for pending frames"];
+ *    "zigbee_aps_manager()" -> "zigbee_aps_frame_scheduling_cb2()" [label="Schedule transmission"];
+ *
+ *    "zigbee_aps_frame_scheduling_cb2()" -> "dequeue_aps_frame()" [label="Get next frame"];
+ *    "dequeue_aps_frame()" -> "aps_output_frame_buffer" [label="Remove frame"];
+ *
+ *    "zigbee_aps_frame_scheduling_cb2()" -> "zb_aps_send_user_payload()" [label="Send APS frame"];
+ *    "zb_aps_send_user_payload()" -> "Zigbee Stack" [label="Transmit"];
+ *
+ *    "Zigbee Stack" -> "zigbee_aps_user_data_tx_cb()" [label="Transmission complete callback"];
+ *    "zigbee_aps_user_data_tx_cb()" -> "zb_buf_free()" [label="Free buffer"];
+ *    "zigbee_aps_user_data_tx_cb()" -> "LOG_DBG/LOG_WRN/LOG_ERR" [label="Log status"];
+ * }
+ * @enddot
+ * This module handles the generation and reception of APS frames in a Zigbee network.
+ **/
 void zigbee_aps_init(void)
 {
     init_aps_output_frame_buffer();
 }
 
 //------------------------------------------------------------------------------
-/**@brief Initialization of aps output frame circular buffer.
+/**
+ * @brief Initialization of aps output frame circular buffer.
  *
  *
  */
@@ -57,11 +80,13 @@ void init_aps_output_frame_buffer(void)
     aps_output_frame_buffer.used_space = 0;
 }
 
-// -----------------------------------------------------------------------------
-/**@brief Function to get the free space of the aps output frame buffer.
- *
- * @return  The free space of the aps output frame buffer.
- */
+//------------------------------------------------------------------------------
+/** 
+* @brief callback function to be executed when the APS frame transmission is scheduled.
+*        It sets a flag to indicate that a scheduling callback is pending or received.
+*
+* @note This function is called by the Zigbee stack when an APS frame transmission is scheduled.
+*/
 void check_scheduling_cb_timeout(void)
 {
     if (b_scheduling_cb_pending && scheduling_cb_timer > 0)
@@ -76,7 +101,8 @@ void check_scheduling_cb_timeout(void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Callback function executed when APS frame transmission is completed.
+/**
+ * @brief Callback function executed when APS frame transmission is completed.
  *        The buffer is released.
  *        A log message showing APS, NWK and MAC counters is printed.
  *
@@ -133,7 +159,8 @@ void zigbee_aps_user_data_tx_cb(zb_bufid_t bufid)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Add new element to circular buffer used to store pending aps output frames.
+/**
+ * @brief Add new element to circular buffer used to store pending aps output frames.
  *
  * @param  element Pointer to struct containing new element to be added
  *
@@ -176,7 +203,8 @@ bool enqueue_aps_frame(aps_output_frame_t *element)
 }
 
 //------------------------------------------------------------------------------
-/**@brief extract element from circular buffer used to store pending aps output frames.
+/**
+ * @brief extract element from circular buffer used to store pending aps output frames.
  *
  * @param   element Pointer to struct where extracted element will be stored.
  *
@@ -211,7 +239,8 @@ bool dequeue_aps_frame(aps_output_frame_t *element)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Return the number of free positions on the aps output frame circular buffer.
+/**
+ * @brief Return the number of free positions on the aps output frame circular buffer.
  *
  * @retval Number of free positions on the aps output frame circular buffer.
  */
@@ -221,7 +250,8 @@ uint16_t zigbee_aps_get_output_frame_buffer_free_space(void)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Generation and scheduling on the first APS frame of the queue
+/**
+ * @brief Generation and scheduling on the first APS frame of the queue
  *
  *
  */
@@ -271,7 +301,8 @@ void zigbee_aps_frame_scheduling_cb(zb_uint8_t bufid)
 }
 
 //------------------------------------------------------------------------------
-/**@brief Management of APS layer. Generation of APS frames and scheduling of their transmission
+/**
+ * @brief Management of APS layer. Generation of APS frames and scheduling of their transmission
  *
  *
  */
@@ -298,11 +329,12 @@ void zigbee_aps_manager(void)
 }
 
 
-///@brief Callback function excuted when AF gets APS packet.
-///
-/// @param[in]   bufid   Reference to the Zigbee stack buffer containing the packet.
-///
-
+/**
+ * @brief Callback function executed when AF receives an APS packet.
+ *
+ * @param[in] bufid Reference to the Zigbee stack buffer containing the packet.
+ *
+ */
 zb_uint8_t data_indication_cb(zb_bufid_t bufid)
 {
     if(!bufid)

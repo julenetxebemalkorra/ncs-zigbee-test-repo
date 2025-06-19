@@ -7,12 +7,18 @@
 #define TCU_UART_H_
 
 /* Default tick to consider a modbus frame completed*/
-#define TICKS_TO_CONSIDER_FRAME_COMPLETED 10 // 10ms = approximately time for transmitting 20 chars at 19200
+#define TICKS_TO_CONSIDER_FRAME_COMPLETED 10    // 10ms = approximately time for transmitting 20 chars at 19200
+#define ENTER_CMD_MODE_SILENCE_MS 500           // 500ms silence before and after the "+++" sequence to enter in command mode
+#define LEAVE_CMD_MODE_SILENCE_MS 10000         // 10s silence to leave command mode automatically if no characters are received
+#define UART_TX_IDLE_THRESHOLD_MS 80            // 80ms threshold to consider the UART transmission idle
+
+
 
 
 #define MAXIMUM_SIZE_MODBUS_RTU_FRAME 256
 #define SIZE_TRANSMISSION_BUFFER MAXIMUM_SIZE_MODBUS_RTU_FRAME
 #define SIZE_OF_RX_FIFO_OF_NRF52840_UART 6
+
 
 /* States used to validate the "+++" sequence to enter in command mode        */
 enum
@@ -23,6 +29,13 @@ enum
     ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_THIRD_CHAR_ST,
     ENTER_CMD_MODE_SEQUENCE_WAITING_FOR_END_SILENCE_ST
 };
+
+typedef enum {
+    UART_RET_OK = 0,
+    UART_RET_ERR = -1,
+    UART_WDT_RET_ERR = -2,
+    UART_TASK_WDT_ADD_RET_ERR = -3,
+} uart_ret_t;
 
 /* Function prototypes                                                        */
 int8_t tcu_uart_init(void);
